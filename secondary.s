@@ -2,18 +2,56 @@
 .globl start
 
 start:
-	# Enter critical section
-	li $a0, 1
-	syscall
-
 	# Restore stack pointer
 	li $sp, 0x801FFFF0
+
+	# The following is adapted from the WarmBoot call
+
+	# Do something with the SR
+	mfc0 $t0, $12
+	and $t0, 0xFFFFFBFE
+	mtc0 $t0, $12
+
+	# Call "init_a0_b0_c0_vectors"
+	li $t1, 0x45
+	jal 0xA0
+
+	# Call "AdjustA0Table"
+	li $t1, 0x1C
+	jal 0xC0
+
+	# Call "InstallExceptionHandlers"
+	li $t1, 0x07
+	jal 0xC0
+
+	# Call "InstallDevices" with TTY=1 (DISABLE IN PRODUCTION!!!)
+	li $a0, 1
+	li $t1, 0x12
+	jal 0xC0
+
+	# Call "SysInitMemory"
+	li $a0, 0xA000E000
+	li $a1, 0x2000
+	li $t1, 0x08
+	jal 0xC0
+
+	# Call "InitDefInt" with priority=3
+	li $a0, 3
+	li $t1, 0x0C
+	jal 0xC0
+
+	# Call "EnqueueTimerAndVblankIrqs"
+	li $a0, 1
+	li $t1, 0x00
+	jal 0xC0
+
+	# End of code adapted
 
 	# Send start message using puts
 	la $a0, startmsg
 	jal puts
 
-	# Reset CD
+	# Reset CD, so we can re-init it later
 	li $a0, 0x1C
 	li $a1, 0
 	li $a2, 0
@@ -122,13 +160,47 @@ start_backdoor:
 	la $a1, p0
 	jal backdoor_cmd
 
-	# *** FALLTHROUGH ***
-	la $a0, donemsg
+	# Log message done
+	la $a0, backdoormsg
 	jal puts
 
-	#j 0xBFC00000
-	li $t1, 0xA0
-	jr $t1
+	# Initialize CD unit
+	li $t1, 0x54
+	jal 0xA0
+
+waitdoorfail:
+
+	# Wait for door open
+	la $a0, waitdooropenmsg
+	jal puts
+	la $a0, 0x10
+	jal wait_door_status
+
+	# Wait for door close
+	la $a0, waitdoorclosemsg
+	jal puts
+	la $a0, 0x00
+	jal wait_door_status
+
+	# Initialize CD unit
+	li $t1, 0x54
+	jal 0xA0
+
+	# Call chdir to update table path
+	la $a0, cdrompath
+	li $t1, 0x40
+	jal 0xB0
+
+	# If succeeded then try loading
+	bne $v0, 0, tryloadconfig
+	
+	# Else log error and retry
+	la $a0, chdirfail
+	jal puts
+	j waitdoorfail
+
+tryloadconfig:
+	la $a0, donemsg
 
 log_and_lock:
 	jal puts
@@ -312,6 +384,7 @@ _cd_read_next:
 	add $t1, $t1, 1
 	j _cd_read_next
 
+_cd_read_done:
 	jr $ra
 
 # Puts function
@@ -319,7 +392,31 @@ puts:
 	li $t1, 0x3E
 	j 0xA0
 
-_cd_read_done:
+wait_door_status:
+	# Save saved registers
+	sub $sp, 8
+	sw $a0, 0($sp)
+	sw $ra, 4($sp)
+
+	move $s0, $a0
+	move $s1, $ra
+
+_wait_door_status_loop:
+	la $a0, cd_reply
+	li $t1, 0xA6
+	jal 0xA0
+
+	# If failed for whatever reason, just retry
+	beq $v0, -1, _wait_door_status_loop
+
+	# Check if tray open
+	lw $a0, 0($sp)
+	and $v0, 0x10
+	bne $v0, $a0, _wait_door_status_loop
+
+	# If matches wanted, return
+	lw $ra, 4($sp)
+	add $sp, 8
 	jr $ra
 
 region_msg:
@@ -349,6 +446,21 @@ intfailmsg:
 replyfailmsg:
 	.asciiz "Inv.reply\n"
 
+stopfailmsg:
+	.asciiz "Stop fail\n"
+
+backdoormsg:
+	.asciiz "Backdoored!\n"
+
+waitdooropenmsg:
+	.asciiz "Wait door open\n"
+
+waitdoorclosemsg:
+	.asciiz "Wait door close\n"
+
+chdirfail:
+	.asciiz "Chdir failed\n"
+
 donemsg:
 	.asciiz "Done!\n"
 
@@ -375,3 +487,9 @@ p5usa:
 
 p5eur:
 	.asciiz "(Europe)"
+
+systemcnf:
+	.asciiz "cdrom:SYSTEM.CNF;1"
+
+cdrompath:
+	.asciiz "cdrom:"
