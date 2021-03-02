@@ -1,4 +1,6 @@
 
+# Thanks to whoever made https://devhints.io/makefile!
+
 AS=mips-linux-gnu-as
 ASFLAGS=-EL -march=r3000
 
@@ -28,7 +30,7 @@ entry.elf: entry.s
 
 # Secondary loader
 
-secondary.elf: secondary.s
+secondary.elf: secondary.s cdrom.s
 	$(AS) $(ASFLAGS) $^ -o $@
 
 secondary-linked.elf: secondary.ld secondary.elf

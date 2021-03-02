@@ -1,9 +1,14 @@
 .text
-.globl start
+.align 4
 
+.globl start
 start:
 	# Restore stack pointer
 	li $sp, 0x801FFFF0
+
+	# Enter critical section
+	li $a0, 1
+	syscall
 
 	# The following is adapted from the WarmBoot call
 
@@ -47,27 +52,13 @@ start:
 
 	# End of code adapted
 
+	# Exit critical section
+	li $a0, 2
+	syscall
+
 	# Send start message using puts
 	la $a0, startmsg
 	jal puts
-
-	# Reset CD, so we can re-init it later
-	li $a0, 0x1C
-	li $a1, 0
-	li $a2, 0
-	jal cd_command
-
-	# Wait for int
-	jal cd_wait_int
-	li $t0, 3
-	la $a0, ctrlresetfail
-	bne $t0, $v0, log_and_lock
-
-	# Busy loop until it resets
-	li $t0, 0x400000
-waitreset:
-	sub $t0, 1
-	bne $t0, $zero, waitreset
 
 	# Get region
 	li $a0, 0x19
@@ -82,6 +73,7 @@ waitreset:
 	bne $t0, $v0, log_and_lock
 
 	# Check reply. If failed it means it is a vC0 and too old
+	la $a0, cd_reply
 	jal cd_read_reply
 
 	# Check length
@@ -123,7 +115,7 @@ waitreset:
 start_backdoor:
 
 	# Save fifth message pointer
-	sw $t2, region_msg
+	sw $t2, region_p5
 
 	# Initial command, with no data
 	li $a0, 0x50
@@ -152,7 +144,7 @@ start_backdoor:
 
 	# Fifth
 	li $a0, 0x55
-	lw $a1, region_msg
+	lw $a1, region_p5
 	jal backdoor_cmd
 
 	# Final command, with no data either
@@ -163,10 +155,6 @@ start_backdoor:
 	# Log message done
 	la $a0, backdoormsg
 	jal puts
-
-	# Initialize CD unit
-	li $t1, 0x54
-	jal 0xA0
 
 waitdoorfail:
 
@@ -186,18 +174,15 @@ waitdoorfail:
 	li $t1, 0x54
 	jal 0xA0
 
-	# Call chdir to update table path
-	la $a0, cdrompath
-	li $t1, 0x40
-	jal 0xB0
-
 	# If succeeded then try loading
 	bne $v0, 0, tryloadconfig
 	
 	# Else log error and retry
-	la $a0, chdirfail
+	la $a0, cdinitfail
 	jal puts
 	j waitdoorfail
+
+	# Try calling 
 
 tryloadconfig:
 	la $a0, donemsg
@@ -240,6 +225,7 @@ backdoor_cmd:
 	bne $v0, $t1, log_and_lock
 
 	# Read reply
+	la $a0, cd_reply
 	jal cd_read_reply
 
 	# Check if reply is OK
@@ -247,11 +233,12 @@ backdoor_cmd:
 	li $t0, 2
 	bne $v0, $t0, log_and_lock
 
-	# TODO: returns 0x03 on the emulator but should be 0x11?
-	#lbu $t0, cd_reply+0
-	#li $t1, 0x11
-	#bne $t0, $t1, log_and_lock
+	# Check that there is an error flagged
+	lbu $t0, cd_reply+0
+	and $t0, 0x01
+	beq $t0, $zero, log_and_lock
 
+	# Check error code
 	lbu $t0, cd_reply+1
 	li $t1, 0x40
 	bne $t0, $t1, log_and_lock
@@ -259,132 +246,6 @@ backdoor_cmd:
 	# Return
 	lw $ra, 8($sp)
 	add $sp, $sp, 8
-	jr $ra
-
-# Execute CMD command, and waits for its execution
-# a0 = command
-# a1 = parameter pointer
-# a2 = parameter length
-#
-# t0 = CDROM base address
-# t1 = work register
-# t2 = literal "1"
-cd_command:
-	# Load CDROM I/O port and "1" constant
-	lui $t0, 0x1F80
-	li $t2, 1
-
-	# Set index to one
-	sb $t2, 0x1800($t0)
-
-	# Clear parameter FIFO
-	li $t1, 0x40
-	sb $t1, 0x1803($t0)
-
-cd_command_busy:
-	# Wait for busy bit to go low
-	lbu $t1, 0x1800($t0)
-	and $t1, $t1, 0x80
-	bne $t1, $zero, cd_command_busy
-
-	# Go to index 0
-	sb $zero, 0x1800($t0)
-
-cd_command_copy_next:
-	# If done, exit loop
-	beq $a2, $zero, cd_command_copy_done
-
-	# Load and increment
-	lbu $t1, 0($a1)
-	add $a1, 1
-
-	# Write to buffer
-	sb $t1, 0x1802($t0)
-
-	# Decrement byte count
-	sub $a2, 1
-
-	j cd_command_copy_next
-
-cd_command_copy_done:
-	# Go to index 1
-	sb $t2, 0x1800($t0)
-
-	# Disable interrupts (we'll poll)
-	sb $zero, 0x1802($t0)
-
-	# Acknowledge, if any
-	li $t1, 7
-	sb $t1, 0x1803($t0)
-
-	# Go back to index 0
-	sb $zero, 0x1800($t0)
-
-	# Start command
-	sb $a0, 0x1801($t0)
-
-	# Return
-	jr $ra
-
-# Reads reply from the CD
-# Returns int type on v0
-cd_wait_int:
-	# Load CDROM I/O port
-	lui $t0, 0x1F80
-
-_cd_wait_int_busy:
-	# Wait for busy bit to go low again
-	lbu $t1, 0x1800($t0)
-	and $t1, 0x80
-	bne $t1, $zero, _cd_wait_int_busy
-
-	# Go to index 1
-	li $t1, 1
-	sb $t1, 0x1800($t0)
-
-	# Wait for any interrupt to happen
-_cd_wait_int_int:
-	lbu $v0, 0x1803($t0)
-	and $v0, 0x7
-	beq $v0, $zero, _cd_wait_int_int
-
-	jr $ra
-
-# Reads reply from the CD
-# Returns length on v0
-#
-# v0 = length
-# t0 = CDROM base address
-# t1 = response pointer
-# t2 = work reg
-cd_read_reply:
-	# Load CDROM I/O port
-	lui $t0, 0x1F80
-
-	# Go to index 1
-	li $t1, 1
-	sb $t1, 0x1800($t0)
-
-	# Read reply now
-	li $v0, 0
-	la $t1, cd_reply
-
-_cd_read_next:
-	# If empty, finish
-	lbu $t2, 0x1800($t0)
-	and $t2, 0x20
-	beq $t2, $zero, _cd_read_done
-
-	# Read byte
-	lbu $t2, 0x1801($t0)
-	sb $t2, 0($t1)
-
-	# Increment counter
-	add $v0, $v0, 1
-	add $t1, $t1, 1
-	j _cd_read_next
-
-_cd_read_done:
 	jr $ra
 
 # Puts function
@@ -402,24 +263,31 @@ wait_door_status:
 	move $s1, $ra
 
 _wait_door_status_loop:
+	# Issue Getstat command
+	# We cannot issue the BIOS Cd commands yet because we haven't called CdInit
+	la $a0, 0x01
+	la $a2, 0
+	jal cd_command
+
+	# Always returns 3, no need to check
+	jal cd_wait_int
+
+	# Always returns one, no need to check either
 	la $a0, cd_reply
-	li $t1, 0xA6
-	jal 0xA0
+	jal cd_read_reply
 
-	# If failed for whatever reason, just retry
-	beq $v0, -1, _wait_door_status_loop
-
-	# Check if tray open
+	# Check if flag matches expected status, else keep trying
+	lb $t0, cd_reply+0
 	lw $a0, 0($sp)
-	and $v0, 0x10
-	bne $v0, $a0, _wait_door_status_loop
+	and $t0, 0x10
+	bne $t0, $a0, _wait_door_status_loop
 
 	# If matches wanted, return
 	lw $ra, 4($sp)
 	add $sp, 8
 	jr $ra
 
-region_msg:
+region_p5:
 	.word 0
 
 cd_reply:
@@ -458,8 +326,8 @@ waitdooropenmsg:
 waitdoorclosemsg:
 	.asciiz "Wait door close\n"
 
-chdirfail:
-	.asciiz "Chdir failed\n"
+cdinitfail:
+	.asciiz "CdInit failed\n"
 
 donemsg:
 	.asciiz "Done!\n"
