@@ -8,8 +8,7 @@ inline void cd_set_page(uint8_t page) {
 	CD_REGS[0] = page;
 }
 
-void cd_command(uint_fast8_t cmd, const void * params, uint_fast8_t params_len) {
-	const uint8_t * params_bytes = (const uint8_t *) params;
+void cd_command(uint_fast8_t cmd, const uint8_t * params, uint_fast8_t params_len) {
 
 	// Wait for previous command to finish, if any
 	while (CD_REGS[0] & 0x80);
@@ -22,8 +21,8 @@ void cd_command(uint_fast8_t cmd, const void * params, uint_fast8_t params_len) 
 
 	// Copy request
 	while (params_len != 0) {
-		CD_REGS[2] = *params_bytes;
-		params_bytes++;
+		CD_REGS[2] = *params;
+		params++;
 		params_len--;
 	}
 
@@ -43,7 +42,7 @@ void cd_command(uint_fast8_t cmd, const void * params, uint_fast8_t params_len) 
 	CD_REGS[1] = cmd;
 }
 
-uint_fast8_t cd_wait_int() {
+uint_fast8_t cd_wait_int(void) {
 
 	// Wait for command to finish, if any
 	while (CD_REGS[0] & 0x80);
@@ -61,7 +60,7 @@ uint_fast8_t cd_wait_int() {
 	return interrupt;
 }
 
-uint_fast8_t cd_read_reply(char * reply) {
+uint_fast8_t cd_read_reply(uint8_t * reply_buffer) {
 
 	// Switch to page 1
 	cd_set_page(1);
@@ -69,8 +68,8 @@ uint_fast8_t cd_read_reply(char * reply) {
 	// Read reply
 	uint_fast8_t len = 0;
 	while (CD_REGS[0] & 0x20) {
-		*reply = CD_REGS[1];
-		reply++;
+		*reply_buffer = CD_REGS[1];
+		reply_buffer++;
 		len++;
 	}
 

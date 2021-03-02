@@ -6,7 +6,7 @@
 #include "cdrom.h"
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
-static const uint32_t tty_enabled = 0;
+static const uint32_t tty_enabled = 1;
 
 static uint8_t cd_reply[16];
 
