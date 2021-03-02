@@ -2,8 +2,17 @@ MEMORY {
 	ram(wrx)	:ORIGIN = 0x800BC9C0, LENGTH = 0x4B0
 }
 SECTIONS {
-	.text : {
-		*(.test)
-	} > ram
+	.text :
+	{
+		*(.text)
+	} >ram
+	/DISCARD/ :
+	{
+		*(.MIPS.abiflags)
+		*(.pdr)
+		*(.gnu.attributes)
+		*(.comment)
+		*(.reginfo)
+	}
 }
 ENTRY (start)

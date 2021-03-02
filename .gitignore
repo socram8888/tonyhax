@@ -1,4 +1,5 @@
 *.elf
 *.bin
+*.o
 BESLES-03645EMFTG01
 ORCA-SPL

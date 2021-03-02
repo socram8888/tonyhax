@@ -1,6 +1,9 @@
 
 # Thanks to whoever made https://devhints.io/makefile!
 
+CC=mips-linux-gnu-gcc
+CFLAGS=-EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -O2
+
 AS=mips-linux-gnu-as
 ASFLAGS=-EL -march=r3000
 
@@ -8,21 +11,21 @@ LD=mips-linux-gnu-ld
 LDFLAGS=-EL
 
 OBJCOPY=mips-linux-gnu-objcopy
-OBJCOPYFLAGS=-O binary -j .text
+OBJCOPYFLAGS=-O binary
 
 .PHONY: clean
 
 all: ORCA-SPL BESLES-03645EMFTG01
 
 clean:
-	rm -f ORCA-SPL BESLES-03645EMFTG01 *.elf *.bin
+	rm -f ORCA-SPL BESLES-03645EMFTG01 *.elf *.bin *.o
 
 # Entry target
 
-entry.elf: entry.s
-	$(AS) $(ASFLAGS) $^ -o $@
+entry.o: entry.s
+	$(CC) $(CFLAGS) -c entry.s
 
-%-entry.elf: %.ld entry.elf
+%-entry.elf: %.ld entry.o
 	$(LD) $(LDFLAGS) -T $^ -o $@
 
 %-entry.bin: %-entry.elf
@@ -30,14 +33,20 @@ entry.elf: entry.s
 
 # Secondary loader
 
-secondary.elf: secondary.s cdrom.s
-	$(AS) $(ASFLAGS) $^ -o $@
+bios.o: bios.s bios.h
+	$(CC) $(CFLAGS) -c bios.s
 
-secondary-linked.elf: secondary.ld secondary.elf
-	$(LD) $(LDFLAGS) -T $^ -o $@
+cdrom.o: cdrom.c bios.h cdrom.h
+	$(CC) $(CFLAGS) -c cdrom.c
 
-secondary.bin: secondary-linked.elf
-	$(OBJCOPY) $(OBJCOPYFLAGS) secondary-linked.elf secondary.bin
+secondary.o: secondary.c bios.h cdrom.h
+	$(CC) $(CFLAGS) -c secondary.c
+
+secondary.elf: secondary.ld secondary.o bios.o cdrom.o
+	$(LD) $(LDFLAGS) -T secondary.ld secondary.o bios.o cdrom.o -o $@
+
+secondary.bin: secondary.elf
+	$(OBJCOPY) $(OBJCOPYFLAGS) secondary.elf secondary.bin
 
 ORCA-SPL: secondary-tpl.mcd secondary.bin
 	cp secondary-tpl.mcd ORCA-SPL
