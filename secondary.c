@@ -1,7 +1,7 @@
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
 #include "bios.h"
 #include "cdrom.h"
 
@@ -9,6 +9,9 @@
 static const uint32_t tty_enabled = 1;
 
 static uint8_t cd_reply[16];
+
+// Buffer right before this executable
+static uint8_t * data_buffer = (uint8_t *) 0x801FB800;
 
 void reinit_kernel() {
 	// Disable interrupts
@@ -31,6 +34,9 @@ void reinit_kernel() {
 	// Initialize kernel memory
 	SysInitMemory(0xA000E000, 0x2000);
 
+	// Enqueue syscall handler with priority 0
+	EnqueueSyscallHandler(0);
+
 	// Initialize default interrupt
 	InitDefInt(3);
 
@@ -45,17 +51,19 @@ void reinit_kernel() {
 
 bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
 	// Send command
-	cd_command(cmd, string, strlen(string));
+	cd_command(cmd, (const uint8_t *) string, strlen(string));
 
 	// Check if INT5, else fail
+	uint_fast8_t interrupt = cd_wait_int();
 	if (cd_wait_int() != 5) {
-		std_out_puts("Invalid INT\n");
+		printf("Invalid INT %X\n", interrupt);
 		return false;
 	}
 
 	// Check length
-	if (cd_read_reply(&cd_reply) != 2) {
-		std_out_puts("Invalid reply\n");
+	uint_fast8_t reply_len = cd_read_reply(cd_reply);
+	if (reply_len != 2) {
+		printf("Invalid len of %d\n", reply_len);
 		return false;
 	}
 
@@ -88,7 +96,7 @@ bool unlock_drive() {
 
 	// Read actual region text
 	// No need to bother adding the null terminator as the buffer at this point is all zeros
-	int replylen = cd_read_reply(&cd_reply);
+	cd_read_reply(cd_reply);
 
 	std_out_puts("Region: \"");
 	// +4 to skip the "for " at the beginning of the reply
@@ -123,6 +131,169 @@ bool unlock_drive() {
 	return true;
 }
 
+void wait_door_status(bool open) {
+	printf("Wait door %s\n", open ? "open" : "close");
+
+	uint8_t expected = open ? 0x10 : 0x00;
+	do {
+		// Issue Getstat command
+		// We cannot issue the BIOS CD commands yet because we haven't called CdInit
+		cd_command(CD_CMD_GETSTAT, NULL, 0);
+
+		// Always returns 3, no need to check
+		cd_wait_int();
+
+		// Always returns one, no need to check either
+		cd_read_reply(cd_reply);
+
+	} while ((cd_reply[0] & 0x10) != expected);
+}
+
+bool config_get_hex(const char * config, const char * wanted, uint32_t * value) {
+	uint32_t wanted_len = strlen(wanted);
+
+	while (true) {
+		// Check if first N characters match
+		if (strncmp(config, wanted, wanted_len) == 0) {
+			// Perfect, we're on the right line. Advance.
+			config += wanted_len;
+
+			// Keep parsing until we hit the end of line or the end of file
+			uint32_t parsed = 0;
+			while (*config != '\n' && *config != '\0') {
+				uint32_t digit = todigit(*config);
+				if (digit < 0x10) {
+					parsed = parsed << 4 | digit;
+				}
+				config++;
+			}
+
+			// Log
+			printf("%s = %x\n", wanted, parsed);
+			*value = parsed;
+			return true;
+
+		} else {
+			// No luck. Advance until next line.
+			config = strchr(config, '\n');
+			
+			// If this is the last line, abort.
+			if (config == NULL) {
+				printf("Missing %s\n", wanted);
+				return false;
+			}
+
+			// Advance to skip line feed.
+			config++;
+		}
+	}
+}
+
+bool config_get_string(const char * config, const char * wanted, char * value) {
+	uint32_t wanted_len = strlen(wanted);
+
+	while (true) {
+		// Check if first N characters match
+		if (strncmp(config, wanted, wanted_len) == 0) {
+			// Perfect, we're on the right line. Advance.
+			config += wanted_len;
+
+			// Advance until the start
+			while (1) {
+				// Skip spaces and equals
+				if (*config == ' ' || *config == '=') {
+					config++;
+				} else if (*config == '\0' || *config == '\n' || *config == '\r') {
+					printf("Corrupted %s\n", wanted);
+					return false;
+				} else {
+					break;
+				}
+			}
+
+			// Copy until space or end of file
+			char * valuecur = value;
+			while (*config != '\0' && *config != '\n' && *config != '\r' && *config != ' ') {
+				*valuecur = *config;
+				config++;
+				valuecur++;
+			}
+
+			// Null terminate
+			*valuecur = '\0';
+
+			// Log
+			printf("%s = %s\n", wanted, value);
+			return true;
+
+		} else {
+			// No luck. Advance until next line.
+			config = strchr(config, '\n');
+			
+			// If this is the last line, abort.
+			if (config == NULL) {
+				printf("Missing %s\n", wanted);
+				return false;
+			}
+
+			// Advance to skip line feed.
+			config++;
+		}
+	}
+}
+
+void try_boot_cd() {
+	wait_door_status(true);
+
+	wait_door_status(false);
+
+	std_out_puts("Initializing CD... ");
+	CdInit();
+	std_out_puts("success\n");
+
+	std_out_puts("Loading system config... ");
+	int32_t fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
+	if (fd == -1) {
+		std_out_puts("open error\n");
+		return;
+	}
+
+	int32_t read = FileRead(fd, data_buffer, 2048);
+	FileClose(fd);
+
+	if (read == -1) {
+		std_out_puts("read error\n");
+		return;
+	}
+
+	printf("read %d bytes\n", read);
+
+	// Null terminate
+	data_buffer[read] = '\0';
+
+	uint32_t tcb, event, stacktop;
+	char bootfile[32];
+	if (
+			!config_get_hex((char *) data_buffer, "TCB", &tcb) ||
+			!config_get_hex((char *) data_buffer, "EVENT", &event) ||
+			!config_get_hex((char *) data_buffer, "STACK", &stacktop) ||
+			!config_get_string((char *) data_buffer, "BOOT", bootfile)
+	) {
+		return;
+	}
+
+	std_out_puts("Configuring kernel... ");
+	SetConf(event, tcb, stacktop);
+	std_out_puts("success\n");
+
+	std_out_puts("Loading executable... ");
+	LoadExeFile(bootfile, data_buffer);
+	std_out_puts("success\n");
+
+	std_out_puts("Starting!\n");
+	DoExecute(data_buffer, 0, 0);
+}
+
 void main() {
 	// Tell the user we've successfully launched
 	std_out_puts("=== SECONDARY PROGRAM LOADER ===\n");
@@ -141,6 +312,10 @@ void main() {
 	}
 
 	std_out_puts("Unlocked!\n");
+
+	while (1) {
+		try_boot_cd();
+	}
 }
 
 void __attribute__((section(".start"))) start() {

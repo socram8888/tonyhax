@@ -53,7 +53,7 @@ uint_fast8_t cd_wait_int(void) {
 	// Wait until an interrupt happens (int != 0)
 	uint_fast8_t interrupt;
 	do {
-		interrupt = CD_REGS[0] & 0x07;
+		interrupt = CD_REGS[3] & 0x07;
 	} while (interrupt == 0);
 
 	// Return it

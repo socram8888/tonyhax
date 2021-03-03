@@ -2,6 +2,7 @@
 #pragma once
 #include <stdint.h>
 
+#define CD_CMD_GETSTAT 0x01
 #define CD_CMD_TEST 0x19
 #define CD_TEST_REGION 0x22
 

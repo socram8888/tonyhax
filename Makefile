@@ -2,7 +2,7 @@
 # Thanks to whoever made https://devhints.io/makefile!
 
 CC=mips-linux-gnu-gcc
-CFLAGS=-EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -O2
+CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -O2
 
 AS=mips-linux-gnu-as
 ASFLAGS=-EL -march=r3000
