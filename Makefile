@@ -39,11 +39,14 @@ bios.o: bios.s bios.h
 cdrom.o: cdrom.c bios.h cdrom.h
 	$(CC) $(CFLAGS) -c cdrom.c
 
+gpu.o: gpu.c bios.h gpu.h
+	$(CC) $(CFLAGS) -c gpu.c
+
 secondary.o: secondary.c bios.h cdrom.h
 	$(CC) $(CFLAGS) -c secondary.c
 
-secondary.elf: secondary.ld secondary.o bios.o cdrom.o
-	$(LD) $(LDFLAGS) -T secondary.ld secondary.o bios.o cdrom.o -o $@
+secondary.elf: secondary.ld secondary.o bios.o cdrom.o gpu.o
+	$(LD) $(LDFLAGS) -T secondary.ld secondary.o bios.o cdrom.o gpu.o -o $@
 
 secondary.bin: secondary.elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) secondary.elf secondary.bin

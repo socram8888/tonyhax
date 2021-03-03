@@ -4,6 +4,9 @@
 #include <stddef.h>
 #include "bios.h"
 #include "cdrom.h"
+#include "gpu.h"
+
+#define BGCOLOR 0x00C0FF
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
 static const uint32_t tty_enabled = 1;
@@ -294,7 +297,66 @@ void try_boot_cd() {
 	DoExecute(data_buffer, 0, 0);
 }
 
+void loadfont() {
+	// Font is 1bpp. We have to convert each character to 4bpp.
+	const uint8_t * rom_charset = (const uint8_t *) 0xBFC7F8DE;
+	uint16_t * short_buffer = (uint16_t *) data_buffer;
+
+	// Iterate through the 48x2 character table
+	for (uint_fast8_t tabley = 0; tabley < 2; tabley++) {
+		for (uint_fast8_t tablex = 0; tablex < 48; tablex++) {
+			uint16_t * bufferpos = short_buffer;
+
+			// Iterate through each line of the 8x15 character
+			for (uint_fast8_t chary = 0; chary < 15; chary++) {
+				uint_fast8_t char1bpp = *rom_charset;
+				rom_charset++;
+
+				// Iterate through each column of the character
+				for (uint_fast8_t bpos = 0; bpos < 8; bpos += 4) {
+					uint_fast16_t char4bpp = 0;
+
+					if (char1bpp & 0x80) {
+						char4bpp |= 0x1000;
+					}
+					if (char1bpp & 0x40) {
+						char4bpp |= 0x0100;
+					}
+					if (char1bpp & 0x20) {
+						char4bpp |= 0x0010;
+					}
+					if (char1bpp & 0x10) {
+						char4bpp |= 0x0001;
+					}
+
+					*bufferpos = char4bpp;
+					bufferpos++;
+					char1bpp = char1bpp << 4;
+				}
+			}
+
+			// At 4bpp, each character uses 8 * 4 / 16 = 2 shorts, so the texture width is set to 2.
+			GPU_dw(512 + tablex * 2, tabley * 15, 2, 15, short_buffer);
+		}
+	}
+
+	// Load CLUT
+	for (int i = 0; i < 16; i++) {
+		// Black
+		short_buffer[i] = 0x0000;
+	}
+
+	// Make 1 white
+	short_buffer[1] = 0x7FFF;
+
+	// Load the palette to Vram
+	GPU_dw(512, 30, 16, 1, short_buffer);
+}
+
 void main() {
+	// Turn off screen so the user knows we've successfully started.
+	gpu_display(false);
+
 	// Tell the user we've successfully launched
 	std_out_puts("=== SECONDARY PROGRAM LOADER ===\n");
 
@@ -302,6 +364,40 @@ void main() {
 
 	// Undo all possible fuckeries during exploiting
 	reinit_kernel();
+
+	gpu_reset();
+
+	// Clear entire VRAM
+	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
+
+	// Enable display
+	gpu_display(true);
+
+	// Load font
+	loadfont();
+
+	// Set drawing area
+	gpu_set_drawing_area(0, 0, 256, 240);
+
+	// Configure Texpage
+	// - Texture page to X=512 Y=0
+	// - Colors to 4bpp
+	// - Allow drawing to display area (fuck Vsync)
+	GPU_cw(0xE1000408);
+
+	// Draw text
+	struct gpu_tex_rect rect;
+	rect.x = 128;
+	rect.y = 120;
+	rect.width = 32;
+	rect.height = 15;
+	rect.clut_x = 512;
+	rect.clut_y = 30;
+	rect.tex_x = 0;
+	rect.tex_y = 0;
+	rect.semi_transp = 0;
+	rect.raw_tex = 1;
+	gpu_draw_tex_rect(&rect);
 
 	std_out_puts("success\n");
 

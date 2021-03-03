@@ -197,6 +197,65 @@ void DoExecute(uint8_t * headerbuf, uint32_t param1, uint32_t param2);
 void init_a0_b0_c0_vectors(void);
 
 /**
+ * Copies the width*height 16-bit half words to Vram at x, y coords.
+ *
+ * width*height MUST be an even number, or else it'll lock up.
+ *
+ * @param x Vram coord X
+ * @param y Vram coord Y
+ * @param width texture width, in 16-bit pixels
+ * @param height texture height, in lines
+ * @param src texture data
+ *
+ * Table A, call 0x46.
+ */
+void GPU_dw(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint16_t * src);
+
+/**
+ * Copies the width*height 16-bit half words to Vram at x, y coords using DMA.
+ *
+ * width*height MUST be a multiple of 32, or else it'll lock up.
+ *
+ * @param x Vram coord X
+ * @param y Vram coord Y
+ * @param width texture width, in 16-bit pixels
+ * @param height texture height, in lines
+ * @param src texture data
+ *
+ * Table A, call 0x47.
+ */
+void gpu_send_dma(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint16_t * src);
+
+/**
+ * Executes the given GPU GP1 command.
+ *
+ * @param gp1cmd the command
+ *
+ * Table A, call 0x48.
+ */
+void SendGP1Command(uint32_t gp1cmd);
+
+/**
+ * Synchronizes with the GPU and executes the given GPU GP0 command.
+ *
+ * @param gp0cmd the command
+ * @returns 0 if succeeded, or -1 otherwise.
+ *
+ * Table A, call 0x49.
+ */
+int GPU_cw(uint32_t gp0cmd);
+
+/**
+ * Synchronizes with the GPU and sends the buffer to the GPU.
+ *
+ * @param src command + parameter list
+ * @param num number of words in list
+ *
+ * Table A, call 0x4A.
+ */
+void GPU_cwp(uint32_t * src, uint32_t num);
+
+/**
  * Initializes the CD drive and filesystem
  *
  * Table A, call 0x54.

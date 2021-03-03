@@ -87,6 +87,31 @@ init_a0_b0_c0_vectors:
 	li $t1, 0x45
 	j 0xA0
 
+.global GPU_dw
+GPU_dw:
+	li $t1, 0x46
+	j 0xA0
+
+.global gpu_send_dma
+gpu_send_dma:
+	li $t1, 0x47
+	j 0xA0
+
+.global SendGP1Command
+SendGP1Command:
+	li $t1, 0x48
+	j 0xA0
+
+.global GPU_cw
+GPU_cw:
+	li $t1, 0x49
+	j 0xA0
+
+.global GPU_cwp
+GPU_cwp:
+	li $t1, 0x4A
+	j 0xA0
+
 .global SetConf
 SetConf:
 	li $t1, 0x9C
