@@ -1,0 +1,51 @@
+# Version: 2021.03.04.01
+
+# Force all text files to be LF
+* text=auto eol=lf
+
+# Project source files
+*.bat text eol=crlf
+*.c text diff=cpp
+*.conf text
+*.config text
+*.cmd text eol=crlf
+*.cs text diff=csharp
+*.csproj text diff=html
+*.css text
+*.diff text
+*.h text diff=cpp
+*.html text
+*.ino text diff=cpp
+*.java text diff=java
+*.js text
+*.json text
+*.md text
+*.properties text
+*.ps1 text
+*.py text diff=python
+*.scss text
+*.s text
+*.sql text
+*.sln text
+*.sh text eol=lf
+*.txt text
+*.xml text diff=html
+*.yml text
+.gitattributes text
+.gitignore text
+.htaccess text
+Dockerfile text
+
+# Images
+*.bmp binary
+*.jpg binary
+*.png binary
+*.svg text
+
+# Binaries
+*.dll binary
+*.dylib binary
+*.exe binary
+*.jnilib binary
+*.o library
+*.so binary
