@@ -45,4 +45,4 @@ fail:
 	b fail
 
 splname:
-	.asciiz "bu00:ORCA-SPL"
+	.asciiz "bu00:TONYHAX-SPL"

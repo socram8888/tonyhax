@@ -15,10 +15,10 @@ OBJCOPYFLAGS=-O binary
 
 .PHONY: clean
 
-all: ORCA-SPL BESLES-03645EMFTG01
+all: TONYHAX-SPL BESLES-02908TQAXG01 BESLES-03645EMFTG01
 
 clean:
-	rm -f ORCA-SPL BESLES-03645EMFTG01 *.elf *.bin *.o
+	rm -f TONYHAX-SPL BESLES-02908TQAXG01 BESLES-03645EMFTG01 *.elf *.bin *.o
 
 # Entry target
 
@@ -57,11 +57,17 @@ secondary.elf: secondary.ld secondary.o bios.o cdrom.o gpu.o str.o debugscreen.o
 secondary.bin: secondary.elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) secondary.elf secondary.bin
 
-ORCA-SPL: secondary-tpl.mcd secondary.bin
-	cp secondary-tpl.mcd ORCA-SPL
-	dd conv=notrunc if=secondary.bin of=ORCA-SPL bs=256 seek=1
+TONYHAX-SPL: secondary-tpl.mcd secondary.bin
+	cp secondary-tpl.mcd TONYHAX-SPL
+	dd conv=notrunc if=secondary.bin of=TONYHAX-SPL bs=256 seek=1
 
-# THPS3 PAL targets
+# THPS2 PAL target
+
+BESLES-02908TQAXG01: thps2-pal-tpl.mcd thps2-pal-entry.bin
+	cp thps2-pal-tpl.mcd BESLES-02908TQAXG01
+	dd conv=notrunc if=thps2-pal-entry.bin of=BESLES-02908TQAXG01 bs=1 seek=5072
+
+# THPS3 PAL target
 
 BESLES-03645EMFTG01: thps3-pal-tpl.mcd thps3-pal-entry.bin
 	cp thps3-pal-tpl.mcd BESLES-03645EMFTG01
