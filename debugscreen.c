@@ -69,10 +69,21 @@ void loadclut() {
 }
 
 void debug_init() {
+	bool pal = gpu_is_pal();
+
 	gpu_reset();
 
+	// Configure mode, keeping PAL flag
+	uint32_t mode = GPU_DISPLAY_H256 | GPU_DISPLAY_V240 | GPU_DISPLAY_15BPP;
+	if (pal) {
+		mode |= GPU_DISPLAY_PAL;
+	} else {
+		mode |= GPU_DISPLAY_NTSC;
+	}
+	gpu_display_mode(mode);
+
 	// Clear entire VRAM
-	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
+	gpu_fill_rectangle(0, 0, 1023, 511, 0x200000);
 
 	// Enable display
 	gpu_display(true);
@@ -81,8 +92,7 @@ void debug_init() {
 	loadfont();
 	loadclut();
 
-	// Set drawing area
-	gpu_set_drawing_area(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	gpu_flush_cache();
 }
 
 void debug_write(const char * str, ...) {
@@ -103,6 +113,18 @@ void debug_write(const char * str, ...) {
 	// - Colors to 4bpp
 	// - Allow drawing to display area (fuck Vsync)
 	GPU_cw(0xE1000408);
+
+	// Configure texture window
+	GPU_cw(0xE2000000);
+
+	// Set drawing area
+	gpu_set_drawing_area(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	// Configure drawing offset (none)
+	GPU_cw(0xE5000000);
+
+	// Disable drawing mask
+	GPU_cw(0xE6000000);
 
 	printf("Printing \"%s\"\n", formatted);
 	uint32_t x_pos = SCREEN_WIDTH / 2 - len * CHAR_WIDTH / 2;

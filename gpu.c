@@ -4,10 +4,21 @@
 
 #define GPU_GP1_RESET 0x00
 #define GPU_GP1_DISPLAY_ENABLE 0x03
+#define GPU_GP1_DISPLAY_MODE 0x08
 #define GPU_GP0_FILL_VRAM 0x02
+
+volatile uint32_t * GPU_STAT = (volatile uint32_t *) 0x1F801814;
+
+bool gpu_is_pal(void) {
+	return (*GPU_STAT & 8) != 0;
+}
 
 void gpu_reset(void) {
 	SendGP1Command(GPU_GP1_RESET << 24);
+}
+
+void gpu_display_mode(uint32_t mode) {
+	SendGP1Command(GPU_GP1_DISPLAY_MODE << 24 | mode);
 }
 
 void gpu_display(bool enable) {
@@ -57,4 +68,8 @@ void gpu_draw_tex_rect(const struct gpu_tex_rect * rect) {
 void gpu_set_drawing_area(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
 	GPU_cw(0xE3000000 | y << 10 | x);
 	GPU_cw(0xE4000000 | (y + height) << 10 | (x + width));
+}
+
+void gpu_flush_cache(void) {
+	GPU_cw(0x01000000);
 }
