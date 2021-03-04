@@ -5,6 +5,7 @@
 #include "bios.h"
 #include "cdrom.h"
 #include "gpu.h"
+#include "debugscreen.h"
 
 #define BGCOLOR 0x00C0FF
 
@@ -59,26 +60,26 @@ bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
 	// Check if INT5, else fail
 	uint_fast8_t interrupt = cd_wait_int();
 	if (cd_wait_int() != 5) {
-		printf("Invalid INT %X\n", interrupt);
+		debug_write("Bdoor INT %x", interrupt);
 		return false;
 	}
 
 	// Check length
 	uint_fast8_t reply_len = cd_read_reply(cd_reply);
 	if (reply_len != 2) {
-		printf("Invalid len of %d\n", reply_len);
+		debug_write("Bdoor reply len %x", reply_len);
 		return false;
 	}
 
 	// Check there is an error flagged
 	if (!(cd_reply[0] & 0x01)) {
-		std_out_puts("Invalid reply\n");
+		debug_write("Bdoor reply inv");
 		return false;
 	}
 
 	// Check error code
 	if (cd_reply[1] != 0x40) {
-		std_out_puts("Invalid reply\n");
+		debug_write("Bdoor reply inv");
 		return false;
 	}
 
@@ -93,7 +94,7 @@ bool unlock_drive() {
 
 	// Should succeed with 3
 	if (cd_wait_int() != 3) {
-		std_out_puts("Failed to read region\n");
+		debug_write("Region read fail");
 		return false;
 	}
 
@@ -101,19 +102,16 @@ bool unlock_drive() {
 	// No need to bother adding the null terminator as the buffer at this point is all zeros
 	cd_read_reply(cd_reply);
 
-	std_out_puts("Region: \"");
-	// +4 to skip the "for " at the beginning of the reply
-	std_out_puts((char *) (cd_reply + 4));
-	std_out_puts("\"\n");
-
 	// Compare which is the fifth string we have to send to the backdoor
 	const char * p5_localized;
 	if (strcmp((char *) cd_reply, "for Europe") == 0) {
+		debug_write("Unlock European");
 		p5_localized = "(Europe)";
 	} else if (strcmp((char *) cd_reply, "for U/C") == 0) {
+		debug_write("Unlock American");
 		p5_localized = "of America";
 	} else {
-		std_out_puts("Unsupported region\n");
+		debug_write("Unsupported region");
 		return false;
 	}
 
@@ -127,7 +125,6 @@ bool unlock_drive() {
 			!backdoor_cmd(0x55, p5_localized) ||
 			!backdoor_cmd(0x56, NULL)
 	) {
-		std_out_puts("Backdoor failed\n");
 		return false;
 	}
 
@@ -135,7 +132,7 @@ bool unlock_drive() {
 }
 
 void wait_door_status(bool open) {
-	printf("Wait door %s\n", open ? "open" : "close");
+	debug_write("Wait door %s", open ? "open" : "close");
 
 	uint8_t expected = open ? 0x10 : 0x00;
 	do {
@@ -182,7 +179,7 @@ bool config_get_hex(const char * config, const char * wanted, uint32_t * value) 
 			
 			// If this is the last line, abort.
 			if (config == NULL) {
-				printf("Missing %s\n", wanted);
+				debug_write("Missing %s", wanted);
 				return false;
 			}
 
@@ -207,7 +204,7 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 				if (*config == ' ' || *config == '=') {
 					config++;
 				} else if (*config == '\0' || *config == '\n' || *config == '\r') {
-					printf("Corrupted %s\n", wanted);
+					debug_write("Corrupted %s\n", wanted);
 					return false;
 				} else {
 					break;
@@ -250,11 +247,10 @@ void try_boot_cd() {
 
 	wait_door_status(false);
 
-	std_out_puts("Initializing CD... ");
+	debug_write("Init CD");
 	CdInit();
-	std_out_puts("success\n");
 
-	std_out_puts("Loading system config... ");
+	debug_write("Loading SYSTEM.CNF");
 	int32_t fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
 	if (fd == -1) {
 		std_out_puts("open error\n");
@@ -285,72 +281,15 @@ void try_boot_cd() {
 		return;
 	}
 
-	std_out_puts("Configuring kernel... ");
+	debug_write("Config kernel");
 	SetConf(event, tcb, stacktop);
-	std_out_puts("success\n");
 
-	std_out_puts("Loading executable... ");
+	debug_write("Load exec");
 	LoadExeFile(bootfile, data_buffer);
 	std_out_puts("success\n");
 
-	std_out_puts("Starting!\n");
+	debug_write("Starting");
 	DoExecute(data_buffer, 0, 0);
-}
-
-void loadfont() {
-	// Font is 1bpp. We have to convert each character to 4bpp.
-	const uint8_t * rom_charset = (const uint8_t *) 0xBFC7F8DE;
-	uint16_t * short_buffer = (uint16_t *) data_buffer;
-
-	// Iterate through the 48x2 character table
-	for (uint_fast8_t tabley = 0; tabley < 2; tabley++) {
-		for (uint_fast8_t tablex = 0; tablex < 48; tablex++) {
-			uint16_t * bufferpos = short_buffer;
-
-			// Iterate through each line of the 8x15 character
-			for (uint_fast8_t chary = 0; chary < 15; chary++) {
-				uint_fast8_t char1bpp = *rom_charset;
-				rom_charset++;
-
-				// Iterate through each column of the character
-				for (uint_fast8_t bpos = 0; bpos < 8; bpos += 4) {
-					uint_fast16_t char4bpp = 0;
-
-					if (char1bpp & 0x80) {
-						char4bpp |= 0x1000;
-					}
-					if (char1bpp & 0x40) {
-						char4bpp |= 0x0100;
-					}
-					if (char1bpp & 0x20) {
-						char4bpp |= 0x0010;
-					}
-					if (char1bpp & 0x10) {
-						char4bpp |= 0x0001;
-					}
-
-					*bufferpos = char4bpp;
-					bufferpos++;
-					char1bpp = char1bpp << 4;
-				}
-			}
-
-			// At 4bpp, each character uses 8 * 4 / 16 = 2 shorts, so the texture width is set to 2.
-			GPU_dw(512 + tablex * 2, tabley * 15, 2, 15, short_buffer);
-		}
-	}
-
-	// Load CLUT
-	for (int i = 0; i < 16; i++) {
-		// Black
-		short_buffer[i] = 0x0000;
-	}
-
-	// Make 1 white
-	short_buffer[1] = 0x7FFF;
-
-	// Load the palette to Vram
-	GPU_dw(512, 30, 16, 1, short_buffer);
 }
 
 void main() {
@@ -365,49 +304,14 @@ void main() {
 	// Undo all possible fuckeries during exploiting
 	reinit_kernel();
 
-	gpu_reset();
+	// Initialize debug screen
+	debug_init();
 
-	// Clear entire VRAM
-	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
-
-	// Enable display
-	gpu_display(true);
-
-	// Load font
-	loadfont();
-
-	// Set drawing area
-	gpu_set_drawing_area(0, 0, 256, 240);
-
-	// Configure Texpage
-	// - Texture page to X=512 Y=0
-	// - Colors to 4bpp
-	// - Allow drawing to display area (fuck Vsync)
-	GPU_cw(0xE1000408);
-
-	// Draw text
-	struct gpu_tex_rect rect;
-	rect.x = 128;
-	rect.y = 120;
-	rect.width = 32;
-	rect.height = 15;
-	rect.clut_x = 512;
-	rect.clut_y = 30;
-	rect.tex_x = 0;
-	rect.tex_y = 0;
-	rect.semi_transp = 0;
-	rect.raw_tex = 1;
-	gpu_draw_tex_rect(&rect);
-
-	std_out_puts("success\n");
-
-	std_out_puts("Unlocking drive...\n");
+	debug_write("Unlocking...");
 
 	if (!unlock_drive()) {
 		return;
 	}
-
-	std_out_puts("Unlocked!\n");
 
 	while (1) {
 		try_boot_cd();

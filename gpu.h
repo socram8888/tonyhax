@@ -5,8 +5,8 @@
 
 struct gpu_tex_rect {
 	uint32_t color;
-	uint16_t x;
-	uint16_t y;
+	uint16_t draw_x;
+	uint16_t draw_y;
 	uint16_t width;
 	uint16_t height;
 	uint16_t clut_x;

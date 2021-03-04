@@ -36,17 +36,23 @@ entry.o: entry.s
 bios.o: bios.s bios.h
 	$(CC) $(CFLAGS) -c bios.s
 
+str.o: str.c str.h
+	$(CC) $(CFLAGS) -c str.c
+
 cdrom.o: cdrom.c bios.h cdrom.h
 	$(CC) $(CFLAGS) -c cdrom.c
 
 gpu.o: gpu.c bios.h gpu.h
 	$(CC) $(CFLAGS) -c gpu.c
 
-secondary.o: secondary.c bios.h cdrom.h
+debugscreen.o: debugscreen.c debugscreen.h gpu.h bios.h str.h
+	$(CC) $(CFLAGS) -c debugscreen.c
+
+secondary.o: secondary.c bios.h cdrom.h debugscreen.h
 	$(CC) $(CFLAGS) -c secondary.c
 
-secondary.elf: secondary.ld secondary.o bios.o cdrom.o gpu.o
-	$(LD) $(LDFLAGS) -T secondary.ld secondary.o bios.o cdrom.o gpu.o -o $@
+secondary.elf: secondary.ld secondary.o bios.o cdrom.o gpu.o str.o debugscreen.o
+	$(LD) $(LDFLAGS) -T secondary.ld secondary.o bios.o cdrom.o gpu.o str.o debugscreen.o -o $@
 
 secondary.bin: secondary.elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) secondary.elf secondary.bin

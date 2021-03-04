@@ -47,7 +47,7 @@ void gpu_draw_tex_rect(const struct gpu_tex_rect * rect) {
 		buf[0] |= 0x02000000;
 	}
 
-	buf[1] = (uint32_t) rect->y << 16 | rect->x;
+	buf[1] = (uint32_t) rect->draw_y << 16 | rect->draw_x;
 	buf[2] = (uint32_t) rect->clut_y << 22 | (rect->clut_x / 16) << 16 | rect->tex_y << 8 | rect->tex_x;
 	buf[3] = (uint32_t) rect->height << 16 | rect->width;
 
