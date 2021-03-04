@@ -1,3 +1,4 @@
+*.bak
 *.elf
 *.bin
 *.o
