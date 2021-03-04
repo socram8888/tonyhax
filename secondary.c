@@ -10,7 +10,7 @@
 #define BGCOLOR 0x00C0FF
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
-static const uint32_t tty_enabled = 1;
+static const uint32_t tty_enabled = 0;
 
 static uint8_t cd_reply[16];
 
@@ -250,7 +250,7 @@ void try_boot_cd() {
 	debug_write("Init CD");
 	CdInit();
 
-	debug_write("Loading SYSTEM.CNF");
+	debug_write("Load SYSTEM.CNF");
 	int32_t fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
 	if (fd == -1) {
 		std_out_puts("open error\n");
