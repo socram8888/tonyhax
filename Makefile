@@ -13,12 +13,14 @@ LDFLAGS=-EL
 OBJCOPY=mips-linux-gnu-objcopy
 OBJCOPYFLAGS=-O binary
 
+SAVEFILES=BESLES-02908TNHXG01 BASLUS-01066TNHXG01 BESLES-03645TNHXG01
+
 .PHONY: clean
 
-all: TONYHAX-SPL BESLES-02908TQAXG01 BESLES-03645EMFTG01
+all: TONYHAX-SPL $(SAVEFILES)
 
 clean:
-	rm -f TONYHAX-SPL BESLES-02908TQAXG01 BESLES-03645EMFTG01 *.elf *.bin *.o
+	rm -f TONYHAX-SPL $(SAVEFILES) *.elf *.bin *.o
 
 # Entry target
 
@@ -63,12 +65,18 @@ TONYHAX-SPL: secondary-tpl.mcd secondary.bin
 
 # THPS2 PAL target
 
-BESLES-02908TQAXG01: thps2-pal-tpl.mcd thps2-pal-entry.bin
-	cp thps2-pal-tpl.mcd BESLES-02908TQAXG01
-	dd conv=notrunc if=thps2-pal-entry.bin of=BESLES-02908TQAXG01 bs=1 seek=5072
+BESLES-02908TNHXG01: thps2-pal-tpl.mcd thps2-pal-entry.bin
+	cp thps2-pal-tpl.mcd BESLES-02908TNHXG01
+	dd conv=notrunc if=thps2-pal-entry.bin of=BESLES-02908TNHXG01 bs=1 seek=5072
+
+# THPS2 NTSC-U target
+
+BASLUS-01066TNHXG01: thps2-usa-tpl.mcd thps2-usa-entry.bin
+	cp thps2-usa-tpl.mcd BASLUS-01066TNHXG01
+	dd conv=notrunc if=thps2-usa-entry.bin of=BASLUS-01066TNHXG01 bs=1 seek=5080
 
 # THPS3 PAL target
 
-BESLES-03645EMFTG01: thps3-pal-tpl.mcd thps3-pal-entry.bin
-	cp thps3-pal-tpl.mcd BESLES-03645EMFTG01
-	dd conv=notrunc if=thps3-pal-entry.bin of=BESLES-03645EMFTG01 bs=1 seek=4480
+BESLES-03645TNHXG01: thps3-pal-tpl.mcd thps3-pal-entry.bin
+	cp thps3-pal-tpl.mcd BESLES-03645TNHXG01
+	dd conv=notrunc if=thps3-pal-entry.bin of=BESLES-03645TNHXG01 bs=1 seek=4480
