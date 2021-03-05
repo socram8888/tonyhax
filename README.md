@@ -4,6 +4,15 @@ tonyhax
 
 Software backup loader exploit thing for the Sony PlayStation 1.
 
+Why?
+----
+
+The first question that might pop up on your mind regarding this project is "why the fuck didn't you just install a modchip?".
+
+The answer is simple: I didn't want to mod my mint, boxed PSone, but I didn't want to leave it rotting on a shelf either.
+
+Also, as an owner of a SCPH-102 console, these are a pain in the ass when it comes to chipping - in addition to the generic SCEx wobble check performed by the CD controller that is easily patchable, the boot menu on these also checks for the region string, which involve installing even more wires and a full sized Arduino Pro Mini or AtMega328 chip to patch the CPU BIOS to play out of region games. Not cool.
+
 How does this works?
 --------------------
 
