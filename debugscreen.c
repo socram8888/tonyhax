@@ -12,7 +12,7 @@
 #define CLUT_X 512
 #define CLUT_Y 30
 
-#define TEXT_START_Y (SCREEN_HEIGHT / 2 - CHAR_WIDTH)
+#define TEXT_START_Y (SCREEN_HEIGHT / 2 - CHAR_HEIGHT / 2)
 
 void loadfont() {
 	// Font is 1bpp. We have to convert each character to 4bpp.
@@ -82,8 +82,16 @@ void debug_init() {
 	}
 	gpu_display_mode(mode);
 
+	// Center image on screen
+	gpu_set_hrange(0x260, 0x260 + 256 * 10);
+	if (pal) {
+		gpu_set_vrange(0xA3 - 264 / 2, 0xA3 + 264 / 2);
+	} else {
+		gpu_set_vrange(0x88 - 224 / 2, 0x88 + 224 / 2);
+	}
+
 	// Clear entire VRAM
-	gpu_fill_rectangle(0, 0, 1023, 511, 0x200000);
+	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
 
 	// Enable display
 	gpu_display(true);
@@ -92,21 +100,8 @@ void debug_init() {
 	loadfont();
 	loadclut();
 
+	// Flush old textures
 	gpu_flush_cache();
-}
-
-void debug_write(const char * str, ...) {
-
-	va_list args;
-	va_start(args, str);
-
-	// For a render width of 256 this should be just 32 but let's be generous
-	char formatted[64];
-
-	int32_t len = mini_vsprintf(formatted, str, args);
-
-	// Clear text section
-	gpu_fill_rectangle(0, TEXT_START_Y, SCREEN_WIDTH, CHAR_HEIGHT, 0x000000);
 
 	// Configure Texpage
 	// - Texture page to X=512 Y=0
@@ -120,18 +115,15 @@ void debug_write(const char * str, ...) {
 	// Set drawing area
 	gpu_set_drawing_area(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	// Configure drawing offset (none)
-	GPU_cw(0xE5000000);
+	// Draw border
+	debug_text_at(20, 10, "tonyhax");
+	gpu_fill_rectangle(0, 30, SCREEN_WIDTH, 2, 0xFFFFFF);
+}
 
-	// Disable drawing mask
-	GPU_cw(0xE6000000);
-
-	printf("Printing \"%s\"\n", formatted);
-	uint32_t x_pos = SCREEN_WIDTH / 2 - len * CHAR_WIDTH / 2;
-
+void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) {
 	// Initialize constants of the rect
 	struct gpu_tex_rect rect;
-	rect.draw_y = TEXT_START_Y;
+	rect.draw_y = y_pos;
 	rect.width = CHAR_WIDTH;
 	rect.height = CHAR_HEIGHT;
 	rect.clut_x = CLUT_X;
@@ -139,8 +131,8 @@ void debug_write(const char * str, ...) {
 	rect.semi_transp = 0;
 	rect.raw_tex = 1;
 
-	for (int i = 0; i < len; i++) {
-		int tex_idx = formatted[i] - '!';
+	while (*text != 0) {
+		int tex_idx = *text - '!';
 		if (tex_idx >= 0 && tex_idx < 96) {
 			// Draw text
 			rect.draw_x = x_pos;
@@ -150,6 +142,22 @@ void debug_write(const char * str, ...) {
 			gpu_draw_tex_rect(&rect);
 		}
 
+		text++;
 		x_pos += CHAR_WIDTH;
 	}
+}
+
+void debug_write(const char * str, ...) {
+	va_list args;
+	va_start(args, str);
+
+	// For a render width of 256 this should be just 32 but let's be generous
+	char formatted[64];
+
+	int32_t len = mini_vsprintf(formatted, str, args);
+
+	// Clear text section
+	gpu_fill_rectangle(0, TEXT_START_Y, SCREEN_WIDTH, CHAR_HEIGHT, 0x000000);
+
+	debug_text_at(SCREEN_WIDTH / 2 - len * CHAR_WIDTH / 2, TEXT_START_Y, formatted);
 }

@@ -45,6 +45,10 @@ void gpu_fill_rectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
 
 void gpu_draw_tex_rect(const struct gpu_tex_rect * rect);
 
-void gpu_set_drawing_area(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+void gpu_set_drawing_area(uint_fast16_t x, uint_fast16_t y, uint_fast16_t width, uint_fast16_t height);
 
 void gpu_flush_cache(void);
+
+void gpu_set_hrange(uint_fast16_t x1, uint_fast16_t x2);
+
+void gpu_set_vrange(uint_fast16_t y1, uint_fast16_t y2);

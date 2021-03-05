@@ -2,10 +2,14 @@
 #include "gpu.h"
 #include "bios.h"
 
+#define GPU_GP0_FLUSH 0x01
+#define GPU_GP0_FILL_VRAM 0x02
+
 #define GPU_GP1_RESET 0x00
 #define GPU_GP1_DISPLAY_ENABLE 0x03
+#define GPU_GP1_H_RANGE 0x06
+#define GPU_GP1_V_RANGE 0x07
 #define GPU_GP1_DISPLAY_MODE 0x08
-#define GPU_GP0_FILL_VRAM 0x02
 
 volatile uint32_t * GPU_STAT = (volatile uint32_t *) 0x1F801814;
 
@@ -65,11 +69,19 @@ void gpu_draw_tex_rect(const struct gpu_tex_rect * rect) {
 	GPU_cwp(buf, 4);
 }
 
-void gpu_set_drawing_area(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
+void gpu_set_drawing_area(uint_fast16_t x, uint_fast16_t y, uint_fast16_t width, uint_fast16_t height) {
 	GPU_cw(0xE3000000 | y << 10 | x);
 	GPU_cw(0xE4000000 | (y + height) << 10 | (x + width));
 }
 
 void gpu_flush_cache(void) {
-	GPU_cw(0x01000000);
+	GPU_cw(GPU_GP0_FLUSH << 24);
+}
+
+void gpu_set_hrange(uint_fast16_t x1, uint_fast16_t x2) {
+	SendGP1Command(GPU_GP1_H_RANGE << 24 | x2 << 12 | x1);
+}
+
+void gpu_set_vrange(uint_fast16_t y1, uint_fast16_t y2) {
+	SendGP1Command(GPU_GP1_V_RANGE << 24 | y2 << 10 | y1);
 }
