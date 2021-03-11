@@ -302,7 +302,7 @@ void main() {
 	// Initialize debug screen
 	debug_init();
 
-	debug_write("Unlocking CD drive...");
+	debug_write("Unlocking CD drive");
 
 	if (!unlock_drive()) {
 		return;
