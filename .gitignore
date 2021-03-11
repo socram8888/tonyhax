@@ -2,6 +2,7 @@
 *.elf
 *.bin
 *.o
+orca.inc
 BES*
 BAS*
 TONYHAX-SPL

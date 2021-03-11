@@ -20,7 +20,7 @@ SAVEFILES=BESLES-02908TNHXG01 BASLUS-01066TNHXG01 BESLES-03645TNHXG01 BASLUS-014
 all: TONYHAX-SPL $(SAVEFILES)
 
 clean:
-	rm -f TONYHAX-SPL $(SAVEFILES) *.elf *.bin *.o
+	rm -f TONYHAX-SPL $(SAVEFILES) *.elf *.bin *.o orca.inc
 
 # Entry target
 
@@ -47,7 +47,10 @@ cdrom.o: cdrom.c bios.h cdrom.h
 gpu.o: gpu.c bios.h gpu.h
 	$(CC) $(CFLAGS) -c gpu.c
 
-debugscreen.o: debugscreen.c debugscreen.h gpu.h bios.h str.h
+orca.inc: orca.img
+	bash bin2h.sh ORCA_IMAGE orca.img orca.inc
+
+debugscreen.o: debugscreen.c debugscreen.h gpu.h bios.h str.h orca.inc
 	$(CC) $(CFLAGS) -c debugscreen.c
 
 secondary.o: secondary.c bios.h cdrom.h debugscreen.h
