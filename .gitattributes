@@ -1,4 +1,4 @@
-# Version: 2021.03.04.01
+# Version: 2021.03.11.01
 
 # Force all text files to be LF
 * text=auto eol=lf
@@ -43,9 +43,12 @@ Dockerfile text
 *.svg text
 
 # Binaries
+*.act binary
 *.dll binary
 *.dylib binary
+*.elf binary
 *.exe binary
+*.img binary
 *.jnilib binary
 *.o library
 *.so binary
