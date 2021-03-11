@@ -10,7 +10,7 @@
 #define CHAR_WIDTH 8
 #define FONT_X 512
 #define CLUT_X 512
-#define CLUT_Y 30
+#define CLUT_Y 6 * CHAR_HEIGHT
 
 // Orca loaded right next to the font
 #define ORCA_WIDTH 40
@@ -131,13 +131,16 @@ void debug_init() {
 	debug_text_at(20, 10, "tonyhax v1.0");
 	gpu_fill_rectangle(0, 30, SCREEN_WIDTH, 2, 0xFFFFFF);
 
+	// "orca.pet" website
+	debug_text_at(SCREEN_WIDTH - 8 * CHAR_WIDTH - 20, 10, "orca.pet");
+
 	// Draw orca
 	struct gpu_tex_rect orca_rect;
 	orca_rect.tex_x = 16 * CHAR_WIDTH;
 	orca_rect.tex_y = 0;
 	orca_rect.width = ORCA_WIDTH;
 	orca_rect.height = ORCA_HEIGHT;
-	orca_rect.draw_x = SCREEN_WIDTH - ORCA_WIDTH - 20;
+	orca_rect.draw_x = SCREEN_WIDTH - 8 * CHAR_WIDTH - 20 - ORCA_WIDTH - 5;
 	orca_rect.draw_y = 5;
 	orca_rect.clut_x = CLUT_X;
 	orca_rect.clut_y = CLUT_Y;
@@ -186,6 +189,9 @@ void debug_write(const char * str, ...) {
 	char formatted[64];
 
 	mini_vsprintf(formatted, str, args);
+
+	// Flush old textures
+	gpu_flush_cache();
 
 	// Scroll text up
 	for (int line = 1; line < log_lines; line++) {

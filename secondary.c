@@ -60,26 +60,26 @@ bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
 	// Check if INT5, else fail
 	uint_fast8_t interrupt = cd_wait_int();
 	if (cd_wait_int() != 5) {
-		debug_write("Bdoor INT %x", interrupt);
+		debug_write("Backdoor invalid INT %x", interrupt);
 		return false;
 	}
 
 	// Check length
 	uint_fast8_t reply_len = cd_read_reply(cd_reply);
 	if (reply_len != 2) {
-		debug_write("Bdoor reply len %x", reply_len);
+		debug_write("Backdoor invalid len = %x", reply_len);
 		return false;
 	}
 
 	// Check there is an error flagged
 	if (!(cd_reply[0] & 0x01)) {
-		debug_write("Bdoor reply inv");
+		debug_write("Backdoor reply invalid");
 		return false;
 	}
 
 	// Check error code
 	if (cd_reply[1] != 0x40) {
-		debug_write("Bdoor reply inv");
+		debug_write("Backdoor reply invalid");
 		return false;
 	}
 
@@ -103,17 +103,20 @@ bool unlock_drive() {
 	cd_read_reply(cd_reply);
 
 	// Compare which is the fifth string we have to send to the backdoor
+	const char * region_name;
 	const char * p5_localized;
 	if (strcmp((char *) cd_reply, "for Europe") == 0) {
-		debug_write("Unlock European");
+		region_name = "European";
 		p5_localized = "(Europe)";
 	} else if (strcmp((char *) cd_reply, "for U/C") == 0) {
-		debug_write("Unlock American");
+		region_name = "American";
 		p5_localized = "of America";
 	} else {
 		debug_write("Unsupported region");
 		return false;
 	}
+
+	debug_write("Drive region: %s", region_name);
 
 	// Note the kernel's implementation of strlen returns 0 for nulls.
 	if (
@@ -132,7 +135,7 @@ bool unlock_drive() {
 }
 
 void wait_door_status(bool open) {
-	debug_write("Wait door %s", open ? "open" : "close");
+	debug_write("Waiting for door %s", open ? "open" : "close");
 
 	uint8_t expected = open ? 0x10 : 0x00;
 	do {
@@ -247,13 +250,13 @@ void try_boot_cd() {
 
 	wait_door_status(false);
 
-	debug_write("Init CD");
+	debug_write("Initializing CD");
 	CdInit();
 
-	debug_write("Load SYSTEM.CNF");
+	debug_write("Loading SYSTEM.CNF");
 	int32_t fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
 	if (fd == -1) {
-		debug_write("open error");
+		debug_write("Open error");
 		return;
 	}
 
@@ -261,7 +264,7 @@ void try_boot_cd() {
 	FileClose(fd);
 
 	if (read == -1) {
-		debug_write("read error");
+		debug_write("Read error");
 		return;
 	}
 
@@ -279,10 +282,10 @@ void try_boot_cd() {
 		return;
 	}
 
-	debug_write("Config kernel");
+	debug_write("Configuring kernel");
 	SetConf(event, tcb, stacktop);
 
-	debug_write("Load exec");
+	debug_write("Loading executable");
 	LoadExeFile(bootfile, data_buffer);
 
 	debug_write("Starting");
@@ -299,11 +302,13 @@ void main() {
 	// Initialize debug screen
 	debug_init();
 
-	debug_write("Unlocking...");
+	debug_write("Unlocking CD drive...");
 
 	if (!unlock_drive()) {
 		return;
 	}
+
+	debug_write("Unlocked successfully!");
 
 	while (1) {
 		try_boot_cd();
