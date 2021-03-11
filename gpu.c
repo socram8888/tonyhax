@@ -4,6 +4,7 @@
 
 #define GPU_GP0_FLUSH 0x01
 #define GPU_GP0_FILL_VRAM 0x02
+#define GPU_GP0_VRAM_TO_VRAM 0x80
 
 #define GPU_GP1_RESET 0x00
 #define GPU_GP1_DISPLAY_ENABLE 0x03
@@ -14,7 +15,7 @@
 volatile uint32_t * GPU_STAT = (volatile uint32_t *) 0x1F801814;
 
 bool gpu_is_pal(void) {
-	return (*GPU_STAT & 8) != 0;
+	return (*GPU_STAT & (1 << 20)) != 0;
 }
 
 void gpu_reset(void) {
@@ -43,6 +44,15 @@ void gpu_fill_rectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
 	buf[1] = (uint32_t) y << 16 | x;
 	buf[2] = (uint32_t) height << 16 | width;
 	GPU_cwp(buf, 3);
+}
+
+void gpu_copy_rectangle(uint16_t src_x, uint16_t src_y, uint16_t dest_x, uint16_t dest_y, uint16_t width, uint16_t height) {
+	uint32_t buf[4];
+	buf[0] = GPU_GP0_VRAM_TO_VRAM << 24;
+	buf[1] = (uint32_t) src_y << 16 | src_x;
+	buf[2] = (uint32_t) dest_y << 16 | dest_x;
+	buf[3] = (uint32_t) height << 16 | width;
+	GPU_cwp(buf, 4);
 }
 
 void gpu_draw_tex_rect(const struct gpu_tex_rect * rect) {

@@ -169,7 +169,7 @@ bool config_get_hex(const char * config, const char * wanted, uint32_t * value) 
 			}
 
 			// Log
-			printf("%s = %x\n", wanted, parsed);
+			debug_write("%s = %x", wanted, parsed);
 			*value = parsed;
 			return true;
 
@@ -204,7 +204,7 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 				if (*config == ' ' || *config == '=') {
 					config++;
 				} else if (*config == '\0' || *config == '\n' || *config == '\r') {
-					debug_write("Corrupted %s\n", wanted);
+					debug_write("Corrupted %s", wanted);
 					return false;
 				} else {
 					break;
@@ -223,7 +223,7 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 			*valuecur = '\0';
 
 			// Log
-			printf("%s = %s\n", wanted, value);
+			debug_write("%s = %s", wanted, value);
 			return true;
 
 		} else {
@@ -232,7 +232,7 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 			
 			// If this is the last line, abort.
 			if (config == NULL) {
-				printf("Missing %s\n", wanted);
+				debug_write("Missing %s", wanted);
 				return false;
 			}
 
@@ -253,7 +253,7 @@ void try_boot_cd() {
 	debug_write("Load SYSTEM.CNF");
 	int32_t fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
 	if (fd == -1) {
-		std_out_puts("open error\n");
+		debug_write("open error");
 		return;
 	}
 
@@ -261,11 +261,9 @@ void try_boot_cd() {
 	FileClose(fd);
 
 	if (read == -1) {
-		std_out_puts("read error\n");
+		debug_write("read error");
 		return;
 	}
-
-	printf("read %d bytes\n", read);
 
 	// Null terminate
 	data_buffer[read] = '\0';
@@ -286,7 +284,6 @@ void try_boot_cd() {
 
 	debug_write("Load exec");
 	LoadExeFile(bootfile, data_buffer);
-	std_out_puts("success\n");
 
 	debug_write("Starting");
 	DoExecute(data_buffer, 0, 0);
@@ -295,11 +292,6 @@ void try_boot_cd() {
 void main() {
 	// Turn off screen so the user knows we've successfully started.
 	gpu_display(false);
-
-	// Tell the user we've successfully launched
-	std_out_puts("=== SECONDARY PROGRAM LOADER ===\n");
-
-	std_out_puts("Reinitializing kernel... ");
 
 	// Undo all possible fuckeries during exploiting
 	reinit_kernel();

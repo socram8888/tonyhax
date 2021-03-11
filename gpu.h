@@ -43,6 +43,8 @@ void gpu_display_mode(uint32_t mode);
 
 void gpu_fill_rectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t rgb);
 
+void gpu_copy_rectangle(uint16_t src_x, uint16_t src_y, uint16_t dest_x, uint16_t dest_y, uint16_t width, uint16_t height);
+
 void gpu_draw_tex_rect(const struct gpu_tex_rect * rect);
 
 void gpu_set_drawing_area(uint_fast16_t x, uint_fast16_t y, uint_fast16_t width, uint_fast16_t height);

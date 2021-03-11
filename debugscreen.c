@@ -4,7 +4,7 @@
 #include "bios.h"
 #include "str.h"
 
-#define SCREEN_WIDTH 256
+#define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 #define CHAR_HEIGHT 15
 #define CHAR_WIDTH 8
@@ -12,7 +12,11 @@
 #define CLUT_X 512
 #define CLUT_Y 30
 
-#define TEXT_START_Y (SCREEN_HEIGHT / 2 - CHAR_HEIGHT / 2)
+#define LOG_MARGIN 10
+#define LOG_START_Y 35
+#define LOG_LINE_HEIGHT 16
+
+static uint_fast8_t log_lines;
 
 void loadfont() {
 	// Font is 1bpp. We have to convert each character to 4bpp.
@@ -74,20 +78,26 @@ void debug_init() {
 	gpu_reset();
 
 	// Configure mode, keeping PAL flag
-	uint32_t mode = GPU_DISPLAY_H256 | GPU_DISPLAY_V240 | GPU_DISPLAY_15BPP;
+	uint32_t mode = GPU_DISPLAY_H320 | GPU_DISPLAY_V240 | GPU_DISPLAY_15BPP;
 	if (pal) {
 		mode |= GPU_DISPLAY_PAL;
+
+		log_lines = 13;
 	} else {
 		mode |= GPU_DISPLAY_NTSC;
+
+		log_lines = 12;
 	}
 	gpu_display_mode(mode);
 
 	// Center image on screen
-	gpu_set_hrange(0x260, 0x260 + 256 * 10);
+	// Values from THPS2 NTSC and PAL during FMVs
 	if (pal) {
-		gpu_set_vrange(0xA3 - 264 / 2, 0xA3 + 264 / 2);
+		gpu_set_hrange(624, 3260);
+		gpu_set_vrange(37, 292);
 	} else {
-		gpu_set_vrange(0x88 - 224 / 2, 0x88 + 224 / 2);
+		gpu_set_hrange(600, 3160);
+		gpu_set_vrange(16, 256);
 	}
 
 	// Clear entire VRAM
@@ -113,10 +123,10 @@ void debug_init() {
 	GPU_cw(0xE2000000);
 
 	// Set drawing area
-	gpu_set_drawing_area(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	gpu_set_drawing_area(0, 0, 256, 256);
 
 	// Draw border
-	debug_text_at(20, 10, "tonyhax");
+	debug_text_at(20, 10, "tonyhax v1.0");
 	gpu_fill_rectangle(0, 30, SCREEN_WIDTH, 2, 0xFFFFFF);
 }
 
@@ -134,6 +144,11 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 	while (*text != 0) {
 		int tex_idx = *text - '!';
 		if (tex_idx >= 0 && tex_idx < 96) {
+			// Font has a yen symbol where the \ should be
+			if (tex_idx == '\\' - '!') {
+				tex_idx = 95;
+			}
+
 			// Draw text
 			rect.draw_x = x_pos;
 			rect.tex_x = (tex_idx % 16) * CHAR_WIDTH;
@@ -151,13 +166,31 @@ void debug_write(const char * str, ...) {
 	va_list args;
 	va_start(args, str);
 
-	// For a render width of 256 this should be just 32 but let's be generous
+	// For a render width of 320 this should be just 40 but let's be generous
 	char formatted[64];
 
-	int32_t len = mini_vsprintf(formatted, str, args);
+	mini_vsprintf(formatted, str, args);
 
-	// Clear text section
-	gpu_fill_rectangle(0, TEXT_START_Y, SCREEN_WIDTH, CHAR_HEIGHT, 0x000000);
+	// Scroll text up
+	for (int line = 1; line < log_lines; line++) {
+		gpu_copy_rectangle(
+				/* source */
+				LOG_MARGIN,
+				LOG_START_Y + LOG_LINE_HEIGHT * line,
+				
+				/* destination */
+				LOG_MARGIN,
+				LOG_START_Y + LOG_LINE_HEIGHT * (line - 1),
+				
+				/* size */
+				SCREEN_WIDTH - LOG_MARGIN,
+				LOG_LINE_HEIGHT
+		);
+	}
 
-	debug_text_at(SCREEN_WIDTH / 2 - len * CHAR_WIDTH / 2, TEXT_START_Y, formatted);
+	// Clear last line
+	gpu_fill_rectangle(0, LOG_START_Y + (log_lines - 1) * LOG_LINE_HEIGHT, SCREEN_WIDTH, CHAR_HEIGHT, 0x000000);
+
+	// Draw text on last line
+	debug_text_at(LOG_MARGIN, LOG_START_Y + (log_lines - 1) * LOG_LINE_HEIGHT, formatted);
 }
