@@ -13,7 +13,7 @@ LDFLAGS=-EL
 OBJCOPY=mips-linux-gnu-objcopy
 OBJCOPYFLAGS=-O binary
 
-SAVEFILES=BESLES-02908TNHXG01 BASLUS-01066TNHXG01 BESLES-03645TNHXG01 BASLUS-01419TNHXG01
+SAVEFILES=BESLES-02908TNHXG01 BASLUS-01066TNHXG01 BESLES-03645TNHXG01 BASLUS-01419TNHXG01 BASLUS-01485TNHXG01
 
 .PHONY: clean
 
@@ -85,3 +85,8 @@ BESLES-03645TNHXG01: thps3-pal-tpl.mcd thps3-pal-entry.bin
 BASLUS-01419TNHXG01: thps3-usa-tpl.mcd thps3-usa-entry.bin
 	cp thps3-usa-tpl.mcd BASLUS-01419TNHXG01
 	dd conv=notrunc if=thps3-usa-entry.bin of=BASLUS-01419TNHXG01 bs=1 seek=4484
+
+# THPS4 NTSC-U target
+BASLUS-01485TNHXG01: thps4-usa-tpl.mcd thps4-usa-entry.bin
+	cp thps4-usa-tpl.mcd BASLUS-01485TNHXG01
+	dd conv=notrunc if=thps4-usa-entry.bin of=BASLUS-01485TNHXG01 bs=1 seek=5132
