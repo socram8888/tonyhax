@@ -134,8 +134,8 @@ bool unlock_drive() {
 	return true;
 }
 
-void wait_door_status(bool open) {
-	debug_write("Waiting for door %s", open ? "open" : "close");
+void wait_lid_status(bool open) {
+	debug_write("Waiting for lid %s", open ? "open" : "close");
 
 	uint8_t expected = open ? 0x10 : 0x00;
 	do {
@@ -246,9 +246,9 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 }
 
 void try_boot_cd() {
-	wait_door_status(true);
+	wait_lid_status(true);
 
-	wait_door_status(false);
+	wait_lid_status(false);
 
 	debug_write("Initializing CD");
 	CdInit();
