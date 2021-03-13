@@ -20,6 +20,7 @@ SAVEFILES= \
 	BASLUS-01419TNHXG01 \
 	BASLUS-01485TNHXG01 \
 	BESLES-01376 \
+	BESLES-02618 \
 	BESLES-02908TNHXG01 \
 	BESLES-02909TNHXG01 \
 	BESLES-02910TNHXG01 \
@@ -108,6 +109,10 @@ BASLUS-01485TNHXG01: thps4-us-tpl.mcd entry.bin
 BESLES-01376: brunswick1-eu-tpl.mcd entry.bin
 	cp brunswick1-eu-tpl.mcd BESLES-01376
 	dd conv=notrunc if=entry.bin of=BESLES-01376 bs=1 seek=1888
+
+BESLES-02618: brunswick2-eu-tpl.mcd entry.bin
+	cp brunswick2-eu-tpl.mcd BESLES-02618
+	dd conv=notrunc if=entry.bin of=BESLES-02618 bs=1 seek=2144
 
 # THPS2 PAL-EU target
 BESLES-02908TNHXG01: thps2-eu-tpl.mcd entry.bin
