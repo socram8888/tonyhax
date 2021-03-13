@@ -22,6 +22,7 @@ SAVEFILES= \
 	BESLES-01376 \
 	BESLES-02908TNHXG01 \
 	BESLES-02909TNHXG01 \
+	BESLES-02910TNHXG01 \
 	BESLES-03645TNHXG01 \
 	BESLES-03954TNHXG01 \
 	TONYHAX-SPL
@@ -74,52 +75,57 @@ TONYHAX-SPL: secondary-tpl.mcd secondary.bin
 	cp secondary-tpl.mcd TONYHAX-SPL
 	dd conv=notrunc if=secondary.bin of=TONYHAX-SPL bs=256 seek=1
 
-# Brunswick Circuit Pro Bowling NTSC-U target
-BASLUS-00571: brunswick1-usa-tpl.mcd entry.bin
-	cp brunswick1-usa-tpl.mcd BASLUS-00571
+# Brunswick Circuit Pro Bowling NTSC-US target
+BASLUS-00571: brunswick1-us-tpl.mcd entry.bin
+	cp brunswick1-us-tpl.mcd BASLUS-00571
 	dd conv=notrunc if=entry.bin of=BASLUS-00571 bs=1 seek=1888
 
-# Brunswick Circuit Pro Bowling 2 NTSC-U target
-BASLUS-00856: brunswick2-usa-tpl.mcd entry.bin
-	cp brunswick2-usa-tpl.mcd BASLUS-00856
+# Brunswick Circuit Pro Bowling 2 NTSC-US target
+BASLUS-00856: brunswick2-us-tpl.mcd entry.bin
+	cp brunswick2-us-tpl.mcd BASLUS-00856
 	dd conv=notrunc if=entry.bin of=BASLUS-00856 bs=1 seek=2144
 
-# THPS2 NTSC-U target
-BASLUS-01066TNHXG01: thps2-usa-tpl.mcd entry.bin
-	cp thps2-usa-tpl.mcd BASLUS-01066TNHXG01
+# THPS2 NTSC-US target
+BASLUS-01066TNHXG01: thps2-us-tpl.mcd entry.bin
+	cp thps2-us-tpl.mcd BASLUS-01066TNHXG01
 	dd conv=notrunc if=entry.bin of=BASLUS-01066TNHXG01 bs=1 seek=5080
 
-# THPS3 NTSC-U target
-BASLUS-01419TNHXG01: thps3-usa-tpl.mcd entry.bin
-	cp thps3-usa-tpl.mcd BASLUS-01419TNHXG01
+# THPS3 NTSC-US target
+BASLUS-01419TNHXG01: thps3-us-tpl.mcd entry.bin
+	cp thps3-us-tpl.mcd BASLUS-01419TNHXG01
 	dd conv=notrunc if=entry.bin of=BASLUS-01419TNHXG01 bs=1 seek=4484
 
-# THPS4 NTSC-U target
-BASLUS-01485TNHXG01: thps4-usa-tpl.mcd entry.bin
-	cp thps4-usa-tpl.mcd BASLUS-01485TNHXG01
+# THPS4 NTSC-US target
+BASLUS-01485TNHXG01: thps4-us-tpl.mcd entry.bin
+	cp thps4-us-tpl.mcd BASLUS-01485TNHXG01
 	dd conv=notrunc if=entry.bin of=BASLUS-01485TNHXG01 bs=1 seek=5132
 
-# Brunswick Circuit Pro Bowling PAL-E target
-BESLES-01376: brunswick1-eur-tpl.mcd entry.bin
-	cp brunswick1-eur-tpl.mcd BESLES-01376
+# Brunswick Circuit Pro Bowling PAL-EU target
+BESLES-01376: brunswick1-eu-tpl.mcd entry.bin
+	cp brunswick1-eu-tpl.mcd BESLES-01376
 	dd conv=notrunc if=entry.bin of=BESLES-01376 bs=1 seek=1888
 
-# THPS2 PAL-E target
-BESLES-02908TNHXG01: thps2-eur-tpl.mcd entry.bin
-	cp thps2-eur-tpl.mcd BESLES-02908TNHXG01
+# THPS2 PAL-EU target
+BESLES-02908TNHXG01: thps2-eu-tpl.mcd entry.bin
+	cp thps2-eu-tpl.mcd BESLES-02908TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-02908TNHXG01 bs=1 seek=5072
 
-# THPS2 PAL-FRA target
-BESLES-02909TNHXG01: thps2-fra-tpl.mcd entry.bin
-	cp thps2-fra-tpl.mcd BESLES-02909TNHXG01
+# THPS2 PAL-FR target
+BESLES-02909TNHXG01: thps2-fr-tpl.mcd entry.bin
+	cp thps2-fr-tpl.mcd BESLES-02909TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-02909TNHXG01 bs=1 seek=5072
 
-# THPS3 PAL-E target
-BESLES-03645TNHXG01: thps3-eur-tpl.mcd entry.bin
-	cp thps3-eur-tpl.mcd BESLES-03645TNHXG01
+# THPS2 PAL-DE target
+BESLES-02910TNHXG01: thps2-de-tpl.mcd entry.bin
+	cp thps2-de-tpl.mcd BESLES-02910TNHXG01
+	dd conv=notrunc if=entry.bin of=BESLES-02910TNHXG01 bs=1 seek=5072
+
+# THPS3 PAL-EU target
+BESLES-03645TNHXG01: thps3-eu-tpl.mcd entry.bin
+	cp thps3-eu-tpl.mcd BESLES-03645TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-03645TNHXG01 bs=1 seek=4480
 
-# THPS4 PAL-E target
-BESLES-03954TNHXG01: thps4-eur-tpl.mcd entry.bin
-	cp thps4-eur-tpl.mcd BESLES-03954TNHXG01
+# THPS4 PAL-EU target
+BESLES-03954TNHXG01: thps4-eu-tpl.mcd entry.bin
+	cp thps4-eu-tpl.mcd BESLES-03954TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-03954TNHXG01 bs=1 seek=5124
