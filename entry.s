@@ -4,6 +4,10 @@
 LOAD_ADDR = 0x801FC000
 
 start:
+	# Call EnterCriticalSection
+	li $a0, 1
+	syscall
+
 	# Restore stack pointer
 	li $sp, 0x801FFFF0
 
@@ -14,10 +18,17 @@ realstart:
 	# Save real start address in $s2
 	move $s2, $ra
 
+	# Load B table address
+	li $s0, 0xB0
+
+	# Call InitCard(0)
+	li $t1, 0x4A
+	li $a0, 0
+	jalr $s0
+
 	# Call StartCard
-	li $v0, 0xB0
 	li $t1, 0x4B
-	jalr $v0
+	jalr $s0
 
 	# Load A table address
 	li $s0, 0xA0

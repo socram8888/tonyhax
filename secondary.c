@@ -18,9 +18,6 @@ static uint8_t cd_reply[16];
 static uint8_t * data_buffer = (uint8_t *) 0x801FB800;
 
 void reinit_kernel() {
-	// Disable interrupts
-	EnterCriticalSection();
-
 	// The following is adapted from the WarmBoot call
 
 	// Restore A, B and C tables
