@@ -25,6 +25,7 @@ SAVEFILES= \
 	BESLES-02910TNHXG01 \
 	BESLES-03645TNHXG01 \
 	BESLES-03646TNHXG01 \
+	BESLES-03647TNHXG01 \
 	BESLES-03954TNHXG01 \
 	BESLES-03956TNHXG01 \
 	TONYHAX-SPL
@@ -131,6 +132,11 @@ BESLES-03645TNHXG01: thps3-eu-tpl.mcd entry.bin
 BESLES-03646TNHXG01: thps3-fr-tpl.mcd entry.bin
 	cp thps3-fr-tpl.mcd BESLES-03646TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-03646TNHXG01 bs=1 seek=4480
+
+# THPS3 PAL-DE target
+BESLES-03647TNHXG01: thps3-de-tpl.mcd entry.bin
+	cp thps3-de-tpl.mcd BESLES-03647TNHXG01
+	dd conv=notrunc if=entry.bin of=BESLES-03647TNHXG01 bs=1 seek=4480
 
 # THPS4 PAL-EU target
 BESLES-03954TNHXG01: thps4-eu-tpl.mcd entry.bin
