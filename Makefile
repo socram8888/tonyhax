@@ -30,7 +30,7 @@ SAVEFILES= \
 all: $(SAVEFILES)
 
 clean:
-	rm -f $(SAVEFILES) *.elf *.bin *.o orca.inc
+	rm -f $(SAVEFILES) entry.elf entry.bin secondary.elf secondary.bin *.o orca.inc
 
 # Entry target
 
@@ -99,21 +99,21 @@ BASLUS-01485TNHXG01: thps4-usa-tpl.mcd entry.bin
 	dd conv=notrunc if=entry.bin of=BASLUS-01485TNHXG01 bs=1 seek=5132
 
 # Brunswick Circuit Pro Bowling PAL-E target
-BESLES-01376: brunswick1-pal-tpl.mcd entry.bin
-	cp brunswick1-pal-tpl.mcd BESLES-01376
+BESLES-01376: brunswick1-eur-tpl.mcd entry.bin
+	cp brunswick1-eur-tpl.mcd BESLES-01376
 	dd conv=notrunc if=entry.bin of=BESLES-01376 bs=1 seek=1888
 
 # THPS2 PAL-E target
-BESLES-02908TNHXG01: thps2-pal-tpl.mcd entry.bin
-	cp thps2-pal-tpl.mcd BESLES-02908TNHXG01
+BESLES-02908TNHXG01: thps2-eur-tpl.mcd entry.bin
+	cp thps2-eur-tpl.mcd BESLES-02908TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-02908TNHXG01 bs=1 seek=5072
 
 # THPS3 PAL-E target
-BESLES-03645TNHXG01: thps3-pal-tpl.mcd entry.bin
-	cp thps3-pal-tpl.mcd BESLES-03645TNHXG01
+BESLES-03645TNHXG01: thps3-eur-tpl.mcd entry.bin
+	cp thps3-eur-tpl.mcd BESLES-03645TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-03645TNHXG01 bs=1 seek=4480
 
 # THPS4 PAL-E target
-BESLES-03954TNHXG01: thps4-pal-tpl.mcd entry.bin
-	cp thps4-pal-tpl.mcd BESLES-03954TNHXG01
+BESLES-03954TNHXG01: thps4-eur-tpl.mcd entry.bin
+	cp thps4-eur-tpl.mcd BESLES-03954TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-03954TNHXG01 bs=1 seek=5124
