@@ -26,6 +26,7 @@ SAVEFILES= \
 	BESLES-03645TNHXG01 \
 	BESLES-03646TNHXG01 \
 	BESLES-03954TNHXG01 \
+	BESLES-03956TNHXG01 \
 	TONYHAX-SPL
 
 .PHONY: clean
@@ -135,3 +136,8 @@ BESLES-03646TNHXG01: thps3-fr-tpl.mcd entry.bin
 BESLES-03954TNHXG01: thps4-eu-tpl.mcd entry.bin
 	cp thps4-eu-tpl.mcd BESLES-03954TNHXG01
 	dd conv=notrunc if=entry.bin of=BESLES-03954TNHXG01 bs=1 seek=5124
+
+# THPS4 PAL-FR target
+BESLES-03956TNHXG01: thps4-fr-tpl.mcd entry.bin
+	cp thps4-fr-tpl.mcd BESLES-03956TNHXG01
+	dd conv=notrunc if=entry.bin of=BESLES-03956TNHXG01 bs=1 seek=5124
