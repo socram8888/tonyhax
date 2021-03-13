@@ -7,12 +7,19 @@ start:
 	# Restore stack pointer
 	li $sp, 0x801FFFF0
 
+	# Call ourselves to get the current program counter in $ra
+	bal realstart
+
+realstart:
+	# Save real start address in $s2
+	move $s2, $ra
+
 	# Load table address
 	li $s0, 0xA0
 
 	# Call FileOpen
 	li $t1, 0x00
-	la $a0, splname
+	addi $a0, $s2, (splname - realstart)
 	li $a1, 0b00000001
 	jalr $s0
 
@@ -42,7 +49,22 @@ start:
 	jr $s0
 
 fail:
-	b fail
+	# Display a red screen using GPU_cwp
+	addi $a0, $s2, (redscreen - realstart)
+	li $a1, 3
+	li $t1, 0x4A
+	jalr $s0
+
+lock:
+	b lock
 
 splname:
 	.asciiz "bu00:TONYHAX-SPL"
+
+redscreen:
+	# Fill screen with red
+	.word 0x020000FF
+	# Start X and Y = 0
+	.word 0x00000000
+	# Width of 1024, height of 512
+	.word 0x01FF03FF

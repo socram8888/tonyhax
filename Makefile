@@ -24,14 +24,11 @@ clean:
 
 # Entry target
 
-entry.o: entry.s
-	$(CC) $(CFLAGS) -c entry.s
+entry.elf: entry.s
+	$(AS) $(ASFLAGS) entry.s -o entry.elf
 
-%-entry.elf: %.ld entry.o
-	$(LD) $(LDFLAGS) -T $^ -o $@
-
-%-entry.bin: %-entry.elf
-	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
+entry.bin: entry.elf
+	$(OBJCOPY) $(OBJCOPYFLAGS) -j .text entry.elf entry.bin
 
 # Secondary loader
 
@@ -67,26 +64,26 @@ TONYHAX-SPL: secondary-tpl.mcd secondary.bin
 	dd conv=notrunc if=secondary.bin of=TONYHAX-SPL bs=256 seek=1
 
 # THPS2 PAL target
-BESLES-02908TNHXG01: thps2-pal-tpl.mcd thps2-pal-entry.bin
+BESLES-02908TNHXG01: thps2-pal-tpl.mcd entry.bin
 	cp thps2-pal-tpl.mcd BESLES-02908TNHXG01
-	dd conv=notrunc if=thps2-pal-entry.bin of=BESLES-02908TNHXG01 bs=1 seek=5072
+	dd conv=notrunc if=entry.bin of=BESLES-02908TNHXG01 bs=1 seek=5072
 
 # THPS2 NTSC-U target
-BASLUS-01066TNHXG01: thps2-usa-tpl.mcd thps2-usa-entry.bin
+BASLUS-01066TNHXG01: thps2-usa-tpl.mcd entry.bin
 	cp thps2-usa-tpl.mcd BASLUS-01066TNHXG01
-	dd conv=notrunc if=thps2-usa-entry.bin of=BASLUS-01066TNHXG01 bs=1 seek=5080
+	dd conv=notrunc if=entry.bin of=BASLUS-01066TNHXG01 bs=1 seek=5080
 
 # THPS3 PAL target
-BESLES-03645TNHXG01: thps3-pal-tpl.mcd thps3-pal-entry.bin
+BESLES-03645TNHXG01: thps3-pal-tpl.mcd entry.bin
 	cp thps3-pal-tpl.mcd BESLES-03645TNHXG01
-	dd conv=notrunc if=thps3-pal-entry.bin of=BESLES-03645TNHXG01 bs=1 seek=4480
+	dd conv=notrunc if=entry.bin of=BESLES-03645TNHXG01 bs=1 seek=4480
 
 # THPS3 NTSC-U target
-BASLUS-01419TNHXG01: thps3-usa-tpl.mcd thps3-usa-entry.bin
+BASLUS-01419TNHXG01: thps3-usa-tpl.mcd entry.bin
 	cp thps3-usa-tpl.mcd BASLUS-01419TNHXG01
-	dd conv=notrunc if=thps3-usa-entry.bin of=BASLUS-01419TNHXG01 bs=1 seek=4484
+	dd conv=notrunc if=entry.bin of=BASLUS-01419TNHXG01 bs=1 seek=4484
 
 # THPS4 NTSC-U target
-BASLUS-01485TNHXG01: thps4-usa-tpl.mcd thps4-usa-entry.bin
+BASLUS-01485TNHXG01: thps4-usa-tpl.mcd entry.bin
 	cp thps4-usa-tpl.mcd BASLUS-01485TNHXG01
-	dd conv=notrunc if=thps4-usa-entry.bin of=BASLUS-01485TNHXG01 bs=1 seek=5132
+	dd conv=notrunc if=entry.bin of=BASLUS-01485TNHXG01 bs=1 seek=5132
