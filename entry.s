@@ -14,7 +14,12 @@ realstart:
 	# Save real start address in $s2
 	move $s2, $ra
 
-	# Load table address
+	# Call StartCard
+	li $v0, 0xB0
+	li $t1, 0x4B
+	jalr $v0
+
+	# Load A table address
 	li $s0, 0xA0
 
 	# Call FileOpen
