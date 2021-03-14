@@ -118,6 +118,9 @@ bool unlock_drive() {
 	} else if (strcmp((char *) cd_reply, "for U/C") == 0) {
 		region_name = "American";
 		p5_localized = "of America";
+	} else if (strcmp((char *) cd_reply, "for NETNA") == 0) {
+		region_name = "NetYaroze";
+		p5_localized = "World wide";
 	} else {
 		debug_write("Unsupported region");
 		return false;
@@ -142,8 +145,6 @@ bool unlock_drive() {
 }
 
 void wait_lid_status(bool open) {
-	debug_write("Waiting for lid %s", open ? "open" : "close");
-
 	uint8_t expected = open ? 0x10 : 0x00;
 	do {
 		// Issue Getstat command
@@ -253,8 +254,8 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 }
 
 void try_boot_cd() {
+	debug_write("Swap CD now");
 	wait_lid_status(true);
-
 	wait_lid_status(false);
 
 	debug_write("Initializing CD");
