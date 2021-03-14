@@ -110,6 +110,7 @@ BESLES-01376: brunswick1-eu-tpl.mcd entry.bin
 	cp brunswick1-eu-tpl.mcd BESLES-01376
 	dd conv=notrunc if=entry.bin of=BESLES-01376 bs=1 seek=1888
 
+# Brunswick Circuit Pro Bowling 2 PAL-EU target
 BESLES-02618: brunswick2-eu-tpl.mcd entry.bin
 	cp brunswick2-eu-tpl.mcd BESLES-02618
 	dd conv=notrunc if=entry.bin of=BESLES-02618 bs=1 seek=2144
