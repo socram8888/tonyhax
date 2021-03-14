@@ -12,7 +12,7 @@
 #define GPU_GP1_V_RANGE 0x07
 #define GPU_GP1_DISPLAY_MODE 0x08
 
-volatile uint32_t * GPU_STAT = (volatile uint32_t *) 0x1F801814;
+volatile uint32_t * const GPU_STAT = (volatile uint32_t *) 0x1F801814;
 
 bool gpu_is_pal(void) {
 	return (*GPU_STAT & (1 << 20)) != 0;
