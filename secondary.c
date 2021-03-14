@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 #include "bios.h"
 #include "cdrom.h"
 #include "gpu.h"
@@ -22,6 +23,12 @@ void reinit_kernel() {
 	EnterCriticalSection();
 
 	// The following is adapted from the WarmBoot call
+
+	// Restore part of the kernel memory
+	memcpy((uint8_t *) 0xA0000500, (const uint8_t *) 0xBFC10000, 0x8BF0);
+
+	// Restore call tables
+	memcpy((uint8_t *)      0x200, (const uint8_t *) 0xBFC04300, 0x300);
 
 	// Restore A, B and C tables
 	init_a0_b0_c0_vectors();
