@@ -42,11 +42,6 @@ todigit:
 	li $t1, 0x0A
 	j 0xA0
 
-.global strcmp
-strcmp:
-	li $t1, 0x17
-	j 0xA0
-
 .global strncmp
 strncmp:
 	li $t1, 0x18

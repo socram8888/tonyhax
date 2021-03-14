@@ -11,12 +11,10 @@
 #define BGCOLOR 0x00C0FF
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
-static const uint32_t tty_enabled = 0;
-
-static uint8_t cd_reply[16];
+const uint32_t tty_enabled = 0;
 
 // Buffer right before this executable
-static uint8_t * data_buffer = (uint8_t *) 0x801FB800;
+uint8_t * const data_buffer = (uint8_t *) 0x801FB800;
 
 // Kernel developer
 const char * const KERNEL_AUTHOR = (const char *) 0xBFC0012C;
@@ -76,6 +74,8 @@ void reinit_kernel() {
 }
 
 bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
+	uint8_t cd_reply[16];
+
 	// Send command
 	cd_command(cmd, (const uint8_t *) string, strlen(string));
 
@@ -109,6 +109,7 @@ bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
 }
 
 bool unlock_drive() {
+	uint8_t cd_reply[16];
 
 	// Run "GetRegion" test
 	uint8_t test = CD_TEST_REGION;
@@ -120,24 +121,25 @@ bool unlock_drive() {
 		return false;
 	}
 
-	// Read actual region text
-	// No need to bother adding the null terminator as the buffer at this point is all zeros
-	cd_read_reply(cd_reply);
+	// Read actual region text and null terminate it
+	int len = cd_read_reply(cd_reply);
+	cd_reply[len] = 0;
 
 	// Compare which is the fifth string we have to send to the backdoor
 	const char * region_name;
 	const char * p5_localized;
-	if (strcmp((char *) cd_reply, "for Europe") == 0) {
+	if (strncmp((char *) cd_reply, "for Europe", sizeof(cd_reply)) == 0) {
 		region_name = "European";
 		p5_localized = "(Europe)";
-	} else if (strcmp((char *) cd_reply, "for U/C") == 0) {
+	} else if (strncmp((char *) cd_reply, "for U/C", sizeof(cd_reply)) == 0) {
 		region_name = "American";
 		p5_localized = "of America";
-	} else if (strcmp((char *) cd_reply, "for NETNA") == 0) {
+	} else if (strncmp((char *) cd_reply, "for NETNA", sizeof(cd_reply)) == 0) {
 		region_name = "NetYaroze";
 		p5_localized = "World wide";
 	} else {
-		debug_write("Unsupported region");
+		// +4 to skip past "for "
+		debug_write("Unsup. region: %s", (char *) (cd_reply + 4));
 		return false;
 	}
 
@@ -160,6 +162,8 @@ bool unlock_drive() {
 }
 
 void wait_lid_status(bool open) {
+	uint8_t cd_reply[16];
+
 	uint8_t expected = open ? 0x10 : 0x00;
 	do {
 		// Issue Getstat command
