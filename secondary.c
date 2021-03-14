@@ -18,17 +18,32 @@ static uint8_t cd_reply[16];
 // Buffer right before this executable
 static uint8_t * data_buffer = (uint8_t *) 0x801FB800;
 
+// Kernel developer
+const char * const KERNEL_AUTHOR = (const char *) 0xBFC0012C;
+
 void reinit_kernel() {
 	// Disable interrupts
 	EnterCriticalSection();
 
 	// The following is adapted from the WarmBoot call
 
-	// Restore part of the kernel memory
-	memcpy((uint8_t *) 0xA0000500, (const uint8_t *) 0xBFC10000, 0x8BF0);
+	/*
+	 * Check if a PS1 by testing the developer credit string.
+	 *
+	 * PS1 have in this field one of the following:
+	 *  - CEX-3000 KT-3  by K.S
+	 *  - CEX-3000/1001/1002 by K.S
+	 *  - CEX-3000/1001/1002 by K.S
+	 *
+	 * PS2 have "PS compatible mode by M.T"
+	 */
+	if (strncmp(KERNEL_AUTHOR, "CEX-", 4) == 0) {
+		// Restore part of the kernel memory
+		memcpy((uint8_t *) 0xA0000500, (const uint8_t *) 0xBFC10000, 0x8BF0);
 
-	// Restore call tables
-	memcpy((uint8_t *)      0x200, (const uint8_t *) 0xBFC04300, 0x300);
+		// Restore call tables
+		memcpy((uint8_t *)      0x200, (const uint8_t *) 0xBFC04300, 0x300);
+	}
 
 	// Restore A, B and C tables
 	init_a0_b0_c0_vectors();
