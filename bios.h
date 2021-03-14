@@ -129,6 +129,17 @@ int32_t strcmp(const char * a, const char * b);
 int32_t strncmp(const char * a, const char * b, uint32_t maxlen);
 
 /**
+ * Copies a null-terminated string.
+ *
+ * Table A, call 0x19.
+ *
+ * @param dst destination buffer
+ * @param src source string
+ * @returns destination buffer
+ */
+char * strcpy(char * dst, const char * src);
+
+/**
  * Calculates the length of a string.
  *
  * Table A, call 0x1B.
@@ -272,6 +283,13 @@ void CdInit(void);
  * Table A, call 0x9C.
  */
 void SetConf(uint32_t evcb, uint32_t tcb, uint32_t stacktop);
+
+/**
+ * Loads and executes the main program executable.
+ *
+ * Table A, call 0xA0.
+ */
+void __attribute__((noreturn)) WarmBoot();
 
 /*
  * C-FUNCTIONS
