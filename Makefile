@@ -32,6 +32,9 @@ SAVEFILES= \
 	BESLES-03956TNHXG01 \
 	TONYHAX-SPL
 
+SPL_HEADERS := $(wildcard *.h) orca.inc
+SPL_OBJECTS := $(patsubst %.c, %.o, $(wildcard *.c)) bios.o
+
 .PHONY: clean
 
 all: $(SAVEFILES)
@@ -48,30 +51,15 @@ entry.bin: entry.elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) -j .text entry.elf entry.bin
 
 # Secondary loader
-
-bios.o: bios.s bios.h
-	$(CC) $(CFLAGS) -c bios.s
-
-str.o: str.c str.h
-	$(CC) $(CFLAGS) -c str.c
-
-cdrom.o: cdrom.c bios.h cdrom.h
-	$(CC) $(CFLAGS) -c cdrom.c
-
-gpu.o: gpu.c bios.h gpu.h
-	$(CC) $(CFLAGS) -c gpu.c
+	
+%.o: %.c $(SPL_HEADERS)
+	$(CC) $(CFLAGS) -c $<
 
 orca.inc: orca.img
 	bash bin2h.sh ORCA_IMAGE orca.img orca.inc
 
-debugscreen.o: debugscreen.c debugscreen.h gpu.h bios.h str.h orca.inc
-	$(CC) $(CFLAGS) -c debugscreen.c
-
-secondary.o: secondary.c bios.h cdrom.h debugscreen.h
-	$(CC) $(CFLAGS) -c secondary.c
-
-secondary.elf: secondary.ld secondary.o bios.o cdrom.o gpu.o str.o debugscreen.o
-	$(LD) $(LDFLAGS) -T secondary.ld secondary.o bios.o cdrom.o gpu.o str.o debugscreen.o -o $@
+secondary.elf: secondary.ld $(SPL_OBJECTS)
+	$(LD) $(LDFLAGS) -T secondary.ld $(SPL_OBJECTS) -o $@
 
 secondary.bin: secondary.elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) secondary.elf secondary.bin
