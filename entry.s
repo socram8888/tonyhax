@@ -9,7 +9,7 @@ start:
 	syscall
 
 	# Restore stack pointer
-	li $sp, 0x801FFFF0
+	li $sp, 0x801FFF00
 
 	# Call ourselves to get the current program counter in $ra
 	bal realstart
