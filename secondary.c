@@ -8,8 +8,6 @@
 #include "gpu.h"
 #include "debugscreen.h"
 
-#define BGCOLOR 0x00C0FF
-
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
 const uint32_t tty_enabled = 0;
 
