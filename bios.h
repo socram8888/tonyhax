@@ -150,25 +150,6 @@ uint32_t strlen(const char * str);
 char * strchr(const char * haystack, int needle);
 
 /**
- * Write string to TTY.
- *
- * Table A, call 0x3E.
- *
- * @param txt text to display.
- */
-void std_out_puts(const char * txt);
-
-/**
- * Prints a formatted string to standard output.
- *
- * Table A, call 0x3F.
- *
- * @param txt text to display.
- * @returns garbage.
- */
-int printf(const char * txt, ...);
-
-/**
  * Loads an executable to main memory.
  *
  * @param filename executable path

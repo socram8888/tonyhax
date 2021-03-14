@@ -37,6 +37,11 @@ FileClose:
 	li $t1, 0x04
 	j 0xA0
 
+.global todigit
+todigit:
+	li $t1, 0x0A
+	j 0xA0
+
 .global strcmp
 strcmp:
 	li $t1, 0x17
@@ -47,11 +52,6 @@ strncmp:
 	li $t1, 0x18
 	j 0xA0
 
-.global todigit
-todigit:
-	li $t1, 0x0A
-	j 0xA0
-
 .global strlen
 strlen:
 	li $t1, 0x1B
@@ -60,16 +60,6 @@ strlen:
 .global strchr
 strchr:
 	li $t1, 0x1E
-	j 0xA0
-
-.global std_out_puts
-std_out_puts:
-	li $t1, 0x3E
-	j 0xA0
-
-.global printf
-printf:
-	li $t1, 0x3F
 	j 0xA0
 
 .global LoadExeFile
@@ -112,14 +102,14 @@ GPU_cwp:
 	li $t1, 0x4A
 	j 0xA0
 
-.global SetConf
-SetConf:
-	li $t1, 0x9C
-	j 0xA0
-
 .global CdInit
 CdInit:
 	li $t1, 0x54
+	j 0xA0
+
+.global SetConf
+SetConf:
+	li $t1, 0x9C
 	j 0xA0
 
 ###############
