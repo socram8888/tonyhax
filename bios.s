@@ -47,11 +47,6 @@ strncmp:
 	li $t1, 0x18
 	j 0xA0
 
-.global strcpy
-strcpy:
-	li $t1, 0x19
-	j 0xA0
-
 .global todigit
 todigit:
 	li $t1, 0x0A
@@ -125,11 +120,6 @@ SetConf:
 .global CdInit
 CdInit:
 	li $t1, 0x54
-	j 0xA0
-
-.global WarmBoot
-WarmBoot:
-	li $t1, 0xA0
 	j 0xA0
 
 ###############
