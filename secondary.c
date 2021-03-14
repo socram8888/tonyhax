@@ -82,14 +82,14 @@ bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
 	// Check if INT5, else fail
 	uint_fast8_t interrupt = cd_wait_int();
 	if (cd_wait_int() != 5) {
-		debug_write("Backdoor invalid INT %x", interrupt);
+		debug_write("Bdoor invalid INT %x", interrupt);
 		return false;
 	}
 
 	// Check length
 	uint_fast8_t reply_len = cd_read_reply(cd_reply);
 	if (reply_len != 2) {
-		debug_write("Backdoor invalid len = %x", reply_len);
+		debug_write("Bdoor invalid len %x", reply_len);
 		return false;
 	}
 
