@@ -71,7 +71,11 @@ void decompressfont() {
 void debug_init() {
 	bool pal = gpu_is_pal();
 
+	// Restore to sane defaults
 	gpu_reset();
+
+	// Enable display
+	gpu_display_enable();
 
 	// Configure mode, keeping PAL flag
 	uint32_t mode = GPU_DISPLAY_H320 | GPU_DISPLAY_V240 | GPU_DISPLAY_15BPP;
@@ -98,9 +102,6 @@ void debug_init() {
 
 	// Clear entire VRAM
 	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
-
-	// Enable display
-	gpu_display(true);
 
 	// Load font
 	decompressfont();

@@ -318,9 +318,6 @@ void try_boot_cd() {
 }
 
 void main() {
-	// Turn off screen so the user knows we've successfully started.
-	gpu_display(false);
-
 	// Undo all possible fuckeries during exploiting
 	reinit_kernel();
 

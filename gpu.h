@@ -37,7 +37,9 @@ void gpu_reset(void);
 
 bool gpu_is_pal(void);
 
-void gpu_display(bool enable);
+void gpu_display_enable(void);
+
+void gpu_display_disable(void);
 
 void gpu_display_mode(uint32_t mode);
 

@@ -26,12 +26,12 @@ void gpu_display_mode(uint32_t mode) {
 	SendGP1Command(GPU_GP1_DISPLAY_MODE << 24 | mode);
 }
 
-void gpu_display(bool enable) {
-	if (enable) {
-		SendGP1Command(GPU_GP1_DISPLAY_ENABLE << 24 | 0);
-	} else {
-		SendGP1Command(GPU_GP1_DISPLAY_ENABLE << 24 | 1);
-	}
+void gpu_display_enable(void) {
+	SendGP1Command(GPU_GP1_DISPLAY_ENABLE << 24 | 0);
+}
+
+void gpu_display_disable(void) {
+	SendGP1Command(GPU_GP1_DISPLAY_ENABLE << 24 | 1);
 }
 
 void gpu_fill_rectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t rgb) {
