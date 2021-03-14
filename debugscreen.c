@@ -99,9 +99,6 @@ void debug_init() {
 	// Clear entire VRAM
 	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
 
-	// Enable display
-	gpu_display(true);
-
 	// Load font
 	decompressfont();
 
