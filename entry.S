@@ -1,13 +1,9 @@
 .text
-.globl start
+.globl __start
 
 LOAD_ADDR = 0x801FC000
 
-start:
-	# Call EnterCriticalSection
-	li $a0, 1
-	syscall
-
+__start:
 	# Restore stack pointer
 	li $sp, 0x801FFF00
 
@@ -17,6 +13,8 @@ start:
 realstart:
 	# Save real start address in $s2
 	move $s2, $ra
+
+#ifdef MCINIT
 
 	# Load B table address
 	li $s0, 0xB0
@@ -30,12 +28,18 @@ realstart:
 	li $t1, 0x4B
 	jalr $s0
 
+#endif
+
 	# Load A table address
 	li $s0, 0xA0
+
+#ifdef MCINIT
 
 	# Call _bu_init
 	li $t1, 0x55
 	jalr $s0
+
+#endif
 
 	# Call FileOpen
 	li $t1, 0x00
