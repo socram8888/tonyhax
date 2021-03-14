@@ -128,7 +128,7 @@ void debug_init() {
 	gpu_set_drawing_area(0, 0, 320, 256);
 
 	// Draw border
-	debug_text_at(20, 10, "tonyhax v1.0");
+	debug_text_at(20, 10, "tonyhax v1.1");
 	gpu_fill_rectangle(0, 30, SCREEN_WIDTH, 2, 0xFFFFFF);
 
 	// "orca.pet" website
