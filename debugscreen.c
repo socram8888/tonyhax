@@ -74,9 +74,6 @@ void debug_init() {
 	// Restore to sane defaults
 	gpu_reset();
 
-	// Enable display
-	gpu_display_enable();
-
 	// Configure mode, keeping PAL flag
 	uint32_t mode = GPU_DISPLAY_H320 | GPU_DISPLAY_V240 | GPU_DISPLAY_15BPP;
 	if (pal) {
@@ -102,6 +99,9 @@ void debug_init() {
 
 	// Clear entire VRAM
 	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
+
+	// Enable display
+	gpu_display_enable();
 
 	// Load font
 	decompressfont();
