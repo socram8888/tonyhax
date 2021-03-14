@@ -33,6 +33,10 @@ realstart:
 	# Load A table address
 	li $s0, 0xA0
 
+	# Call _bu_init
+	li $t1, 0x55
+	jalr $s0
+
 	# Call FileOpen
 	li $t1, 0x00
 	addi $a0, $s2, (splname - realstart)
