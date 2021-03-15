@@ -27,17 +27,19 @@ SAVEFILES= \
 	BESLES-03954TNHXG01 \
 	BESLES-03955TNHXG01 \
 	BESLES-03956TNHXG01 \
-	TONYHAX-SPL
+	BESLEM-99999TONYHAX
+
+MCS_FILES=$(patsubst %, %.mcs, $(SAVEFILES))
 
 SPL_HEADERS := $(wildcard *.h) orca.inc
 SPL_OBJECTS := $(patsubst %.c, %.o, $(wildcard *.c)) bios.o
 
 .PHONY: clean
 
-all: $(SAVEFILES)
+all: $(SAVEFILES) $(MCS_FILES)
 
 clean:
-	rm -f $(SAVEFILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc
+	rm -f BES* BAS* entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc
 
 # Entry target
 
@@ -49,6 +51,9 @@ entry-full.elf: entry.S
 
 entry-%.bin: entry-%.elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) -j .text $< $@
+
+%.mcs: %
+	python3 bin2mcs.py $<
 
 # Secondary loader
 
@@ -67,9 +72,9 @@ secondary.elf: secondary.ld $(SPL_OBJECTS)
 secondary.bin: secondary.elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) secondary.elf secondary.bin
 
-TONYHAX-SPL: secondary-tpl.mcd secondary.bin
-	cp secondary-tpl.mcd TONYHAX-SPL
-	dd conv=notrunc if=secondary.bin of=TONYHAX-SPL bs=256 seek=1
+BESLEM-99999TONYHAX: secondary-tpl.mcd secondary.bin
+	cp secondary-tpl.mcd BESLEM-99999TONYHAX
+	dd conv=notrunc if=secondary.bin of=BESLEM-99999TONYHAX bs=256 seek=1
 
 # Brunswick Circuit Pro Bowling NTSC-US target
 BASLUS-00571: brunswick1-us-tpl.mcd entry-full.bin

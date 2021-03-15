@@ -83,7 +83,7 @@ lock:
 	b lock
 
 splname:
-	.asciiz "bu00:TONYHAX-SPL"
+	.asciiz "bu00:BESLEM-99999TONYHAX"
 
 redscreen:
 	# Fill screen with red
