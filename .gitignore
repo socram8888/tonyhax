@@ -5,4 +5,5 @@
 orca.inc
 BES*
 BAS*
-TONYHAX-SPL
+*.mcs
+!*-tpl.mcs
