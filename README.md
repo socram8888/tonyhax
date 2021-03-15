@@ -12,7 +12,7 @@ When installing:
 
 | Game                            | Region | Code       | MCS file          | Raw file            |
 |---------------------------------|--------|------------|-------------------|---------------------|
-| tonyhax SPL **required**        | -      | -          | tonyhax.mcs       | BESLES-99999TONYHAX |
+| tonyhax SPL **required**        | -      | -          | tonyhax.mcs       | BESLEM-99999TONYHAX |
 | Brunswick Circuit Pro Bowling   | NTSC-U | SLUS-00571 | brunswick1-us.mcs | BASLUS-00571        |
 | Brunswick Circuit Pro Bowling   | PAL-E  | SLES-01376 | brunswick1-eu.mcs | BESLES-01376        |
 | Brunswick Circuit Pro Bowling 2 | NTSC-U | SLUS-00856 | brunswick2-us.mcs | BASLUS-00856        |
