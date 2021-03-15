@@ -36,6 +36,7 @@ RAW_FILES = \
 	BESLEM-99999TONYHAX
 
 PACKAGE_FILE = tonyhax-$(TONYHAX_VERSION).zip
+PACKAGE_CONTENTS = $(MCS_FILES) $(RAW_FILES) README.md LICENSE
 
 .PHONY: clean
 
@@ -47,9 +48,9 @@ $(RAW_FILES): $(MCS_FILES)
 clean:
 	$(RM) BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc save-files.zip
 
-$(PACKAGE_FILE): $(MCS_FILES) $(RAW_FILES)
+$(PACKAGE_FILE): $(PACKAGE_CONTENTS)
 	$(RM) $(PACKAGE_FILE)
-	zip -9 $(PACKAGE_FILE) README.md LICENSE $(MCS_FILES) $(RAW_FILES)
+	zip -9 $(PACKAGE_FILE) $(PACKAGE_CONTENTS)
 
 # Entry target
 
