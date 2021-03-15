@@ -7,3 +7,4 @@ BES*
 BAS*
 *.mcs
 !*-tpl.mcs
+*.zip

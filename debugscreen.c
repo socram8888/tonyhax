@@ -23,6 +23,9 @@
 #define LOG_START_Y 35
 #define LOG_LINE_HEIGHT 16
 
+#define _STRINGIFY(x) #x
+#define STRINGIFY(x) _STRINGIFY(x)
+
 static uint_fast8_t log_lines;
 
 // Grayscale
@@ -129,7 +132,7 @@ void debug_init() {
 	gpu_set_drawing_area(0, 0, 320, 256);
 
 	// Draw border
-	debug_text_at(20, 10, "tonyhax v1.1");
+	debug_text_at(20, 10, "tonyhax " STRINGIFY(TONYHAX_VERSION));
 	gpu_fill_rectangle(0, 30, SCREEN_WIDTH, 2, 0xFFFFFF);
 
 	// "orca.pet" website

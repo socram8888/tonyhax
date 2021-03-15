@@ -1,8 +1,10 @@
 
 # Thanks to whoever made https://devhints.io/makefile!
 
+TONYHAX_VERSION=v1.1.1
+
 CC=mips-linux-gnu-gcc
-CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -O2
+CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -DTONYHAX_VERSION=$(TONYHAX_VERSION) -O2
 
 LD=mips-linux-gnu-ld
 LDFLAGS=-EL
@@ -33,15 +35,21 @@ RAW_FILES = \
 	BESLES-03956TNHXG01 \
 	BESLEM-99999TONYHAX
 
+PACKAGE_FILE = tonyhax-$(TONYHAX_VERSION).zip
+
 .PHONY: clean
 
-all: $(MCS_FILES) $(RAW_FILES)
+all: $(MCS_FILES) $(RAW_FILES) $(PACKAGE_FILE)
 
 $(RAW_FILES): $(MCS_FILES)
 	bash mcs2raw.sh $(MCS_FILES)
 
 clean:
-	rm -f BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc
+	$(RM) BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc save-files.zip
+
+$(PACKAGE_FILE): $(MCS_FILES) $(RAW_FILES)
+	$(RM) $(PACKAGE_FILE)
+	zip -9 $(PACKAGE_FILE) README.md LICENSE $(MCS_FILES) $(RAW_FILES)
 
 # Entry target
 
