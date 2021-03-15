@@ -6,7 +6,9 @@ Software backup loader exploit thing for the Sony PlayStation 1.
 
 For installing on a memory card, you'd need **both** the generic tonyhax SPL save the game-specific save.
 
-If installing using a memory card editor (such as [OrionSoft's PS1 Memory Card Manager](http://onorisoft.free.fr/retro.htm?psx/psx.htm), Dexdrive, etc...), consider using the MCS file. If installing it directly using uLaunchELF, you'll need to use the raw file.
+When installing:
+ * If you are using any sort of visual memory card editor (such as [OrionSoft's PS1 Memory Card Manager](http://onorisoft.free.fr/retro.htm?psx/psx.htm), Dexdrive, etc...), consider using the MCS file.
+ * If you are copying it using a PS2 console and uLaunchELF, you'll need to use the raw file. **The name is important - do not rename them**.
 
 | Game                            | Region | Code       | MCS file          | Raw file            |
 |---------------------------------|--------|------------|-------------------|---------------------|
