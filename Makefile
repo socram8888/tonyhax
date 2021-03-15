@@ -10,17 +10,38 @@ LDFLAGS=-EL
 OBJCOPY=mips-linux-gnu-objcopy
 OBJCOPYFLAGS=-O binary
 
-SAVEFILES=$(patsubst %-tpl.mcs, %.mcs, $(wildcard *-tpl.mcs))
-
 SPL_HEADERS := $(wildcard *.h) orca.inc
 SPL_OBJECTS := $(patsubst %.c, %.o, $(wildcard *.c)) bios.o
 
+MCS_FILES := $(patsubst %-tpl.mcs, %.mcs, $(wildcard *-tpl.mcs))
+RAW_FILES = \
+	BASLUS-00571 \
+	BASLUS-00856 \
+	BASLUS-01066TNHXG01 \
+	BASLUS-01419TNHXG01 \
+	BASLUS-01485TNHXG01 \
+	BESLES-01376 \
+	BESLES-02618 \
+	BESLES-02908TNHXG01 \
+	BESLES-02909TNHXG01 \
+	BESLES-02910TNHXG01 \
+	BESLES-03645TNHXG01 \
+	BESLES-03646TNHXG01 \
+	BESLES-03647TNHXG01 \
+	BESLES-03954TNHXG01 \
+	BESLES-03955TNHXG01 \
+	BESLES-03956TNHXG01 \
+	BESLEM-99999TONYHAX
+
 .PHONY: clean
 
-all: $(SAVEFILES) $(MCS_FILES)
+all: $(MCS_FILES) $(RAW_FILES)
+
+$(RAW_FILES): $(MCS_FILES)
+	bash mcs2raw.sh $(MCS_FILES)
 
 clean:
-	rm -f BES* BAS* entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc
+	rm -f BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc
 
 # Entry target
 
