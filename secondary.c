@@ -91,7 +91,7 @@ bool test_integrity() {
 	uint32_t calc_value = cdb_hash(&__ROM_START__, &__ROM_END__ - &__ROM_START__);
 
 	bool ok = correct_value == calc_value;
-	debug_write("Integrity check %s", ok ? "succeed" : "failed");
+	debug_write("Integrity check %sed", ok ? "pass" : "fail");
 
 	return ok;
 }
