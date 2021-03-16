@@ -12,6 +12,16 @@ __start:
 	# Restore stack pointer
 	li $sp, 0x801FFF00
 
+#ifdef MCINIT
+
+	# Disable interrupts
+	mfc0 $t0, $12
+	li $t1, 0xFFFFFBFE
+	and $t0, $t1
+	mtc0 $t0, $12
+
+#endif
+
 	# Call ourselves to get the current program counter in $ra
 	bal realstart
 
