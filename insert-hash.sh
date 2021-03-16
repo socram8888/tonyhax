@@ -24,7 +24,6 @@ start_addr=$(( 0x${start_addr} ))
 
 cbdhash=5381
 while read byte; do
-	printf "%08X %08X %s\n" $start_addr $cbdhash $byte
 	start_addr=$(( ${start_addr} + 1 ))
 	cbdhash=$(( ($cbdhash * 33 ^ $byte) & 0xFFFFFFFF ))
 done <<< $(dd if="$mcs_file" bs=1 count=$rom_len skip=384 | od -v -An -tu1 -w1)
