@@ -126,13 +126,13 @@ bool unlock_drive() {
 	// Compare which is the fifth string we have to send to the backdoor
 	const char * region_name;
 	const char * p5_localized;
-	if (strncmp((char *) cd_reply, "for Europe", sizeof(cd_reply)) == 0) {
+	if (strcmp((char *) cd_reply, "for Europe") == 0) {
 		region_name = "European";
 		p5_localized = "(Europe)";
-	} else if (strncmp((char *) cd_reply, "for U/C", sizeof(cd_reply)) == 0) {
+	} else if (strcmp((char *) cd_reply, "for U/C") == 0) {
 		region_name = "American";
 		p5_localized = "of America";
-	} else if (strncmp((char *) cd_reply, "for NETNA", sizeof(cd_reply)) == 0) {
+	} else if (strcmp((char *) cd_reply, "for NETNA") == 0) {
 		region_name = "NetYaroze";
 		p5_localized = "World wide";
 	} else {

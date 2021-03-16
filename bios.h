@@ -106,6 +106,17 @@ void FileClose(int32_t fd);
 uint32_t todigit(char c);
 
 /**
+ * Compares two strings.
+ *
+ * Table A, call 0x17.
+ *
+ * @param a first string
+ * @param b second string
+ * @returns zero if they are equal, or the difference between the first different byte.
+ */
+int32_t strcmp(const char * a, const char * b);
+
+/**
  * Compares two strings with a length limit.
  *
  * Table A, call 0x18.
