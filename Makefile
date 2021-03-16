@@ -4,10 +4,10 @@
 TONYHAX_VERSION=v1.1.2
 
 CC=mips-linux-gnu-gcc
-CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -DTONYHAX_VERSION=$(TONYHAX_VERSION) -O1
+CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -O1 -DTONYHAX_VERSION=$(TONYHAX_VERSION)
 
 LD=mips-linux-gnu-ld
-LDFLAGS=-EL
+LDFLAGS=-EL --gc-sections
 
 OBJCOPY=mips-linux-gnu-objcopy
 OBJCOPYFLAGS=-O binary
@@ -46,7 +46,7 @@ $(RAW_FILES): $(MCS_FILES)
 	bash mcs2raw.sh $(MCS_FILES)
 
 clean:
-	$(RM) BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc save-files.zip
+	$(RM) BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc save-files.zip tonyhax-*.zip
 
 $(PACKAGE_FILE): $(PACKAGE_CONTENTS)
 	$(RM) $(PACKAGE_FILE)
