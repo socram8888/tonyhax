@@ -3,7 +3,7 @@
 #include "bios.h"
 #include <stddef.h>
 
-volatile uint8_t * CD_REGS = (volatile uint8_t *) 0x1F801800;
+volatile uint8_t * const CD_REGS = (volatile uint8_t *) 0x1F801800;
 
 inline void cd_set_page(uint8_t page) {
 	CD_REGS[0] = page;
