@@ -1,6 +1,7 @@
 
 #include "cdrom.h"
 #include "bios.h"
+#include <stddef.h>
 
 volatile uint8_t * CD_REGS = (volatile uint8_t *) 0x1F801800;
 
@@ -75,4 +76,19 @@ uint_fast8_t cd_read_reply(uint8_t * reply_buffer) {
 
 	// Return length
 	return len;
+}
+
+bool cd_reset() {
+	// Issue a reset
+	cd_command(CD_CMD_RESET, NULL, 0);
+
+	// Should succeed with 3
+	if (cd_wait_int() != 3) {
+		return false;
+	}
+
+	// Need to wait for some cycles before it springs back to life
+	for (int i = 0; i < 0x400000; i++);
+
+	return true;
 }

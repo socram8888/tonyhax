@@ -1,9 +1,11 @@
 
 #pragma once
 #include <stdint.h>
+#include <stdbool.h>
 
 #define CD_CMD_GETSTAT 0x01
 #define CD_CMD_TEST 0x19
+#define CD_CMD_RESET 0x1C
 #define CD_TEST_REGION 0x22
 
 /**
@@ -29,3 +31,10 @@ uint_fast8_t cd_wait_int(void);
  * @returns reply length
  */
 uint_fast8_t cd_read_reply(uint8_t * reply_buffer);
+
+/**
+ * Resets the drive.
+ *
+ * @returns true if succeded, or false otherwise.
+ */
+bool cd_reset(void);
