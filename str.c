@@ -1,6 +1,6 @@
 
 #include "str.h"
-#include <stdint.h>
+#include <stddef.h>
 
 int mini_vsprintf(char * str, const char * format, va_list args) {
 	char * pos = str;
@@ -92,4 +92,31 @@ end:
 	*pos = '\0';
 
 	return pos - str;
+}
+
+int memcmp(const void * ptr1, const void * ptr2, uint32_t num) {
+	const uint8_t * bytes1 = (const uint8_t *) ptr1;
+	const uint8_t * bytes2 = (const uint8_t *) ptr2;
+	int diff = 0;
+
+	for (uint32_t i = 0; i < num && diff == 0; i++) {
+		diff = bytes1[i] - bytes2[i];
+	}
+
+	return diff;
+}
+
+void * memmem(const void * haystack, uint32_t haystacklen, const void * needle, uint32_t needlelen) {
+	const uint8_t * haystackbytes = (const uint8_t *) haystack;
+	const uint8_t * needlebytes = (const uint8_t *) needle;
+
+	while (haystacklen >= needlelen) {
+		if (memcmp(haystackbytes, needlebytes, needlelen) == 0) {
+			return (void *) haystackbytes;
+		}
+		haystacklen--;
+		haystackbytes++;
+	}
+
+	return NULL;
 }
