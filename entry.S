@@ -3,6 +3,11 @@
 
 LOAD_ADDR = 0x801FC000
 
+# s0 = A table address
+# s1 = file descriptor
+# s2 = realstart physical address
+# s3 = B table address (on MCINIT only)
+
 __start:
 	# Restore stack pointer
 	li $sp, 0x801FFF00
@@ -14,32 +19,36 @@ realstart:
 	# Save real start address in $s2
 	move $s2, $ra
 
-#ifdef MCINIT
-
-	# Load B table address
-	li $s0, 0xB0
-
-	# Call InitCard(0)
-	li $t1, 0x4A
-	li $a0, 0
-	jalr $s0
-
-	# Call StartCard
-	li $t1, 0x4B
-	jalr $s0
-
-#endif
-
 	# Load A table address
 	li $s0, 0xA0
 
 #ifdef MCINIT
+
+	# Paint purple
+	li $a0, 0xFF00FF
+	bal paintscr
+
+	# Load B table address
+	li $s3, 0xB0
+
+	# Call InitCard(0)
+	li $t1, 0x4A
+	li $a0, 0
+	jalr $s3
+
+	# Call StartCard
+	li $t1, 0x4B
+	jalr $s3
 
 	# Call _bu_init
 	li $t1, 0x55
 	jalr $s0
 
 #endif
+
+	# Paint blue
+	li $a0, 0xFF0000
+	bal paintscr
 
 	# Call FileOpen
 	li $t1, 0x00
@@ -68,26 +77,44 @@ realstart:
 	move $a0, $s1
 	jalr $s0
 
+	# Paint green
+	li $a0, 0x00FF00
+	bal paintscr
+
 	# Jump to it!
 	li $s0, LOAD_ADDR+0x100
 	jr $s0
 
 fail:
-	# Display a red screen using GPU_cwp
-	addi $a0, $s2, (redscreen - realstart)
-	li $a1, 3
-	li $t1, 0x4A
-	jalr $s0
+	# Red
+	li $a0, 0x0000FF
+	bal paintscr
 
 lock:
 	b lock
+
+paintscr:
+	# Add command byte to a0
+	li $t0, 0x02000000
+	or $t0, $a0
+
+	# Calculate effective address
+	addi $a0, $s2, (redscreen - realstart)
+
+	# Store color with command on buffer
+	sw $t0, 0($a0)
+
+	# Tail call GPU_cwp to paint the entire screen
+	li $a1, 3
+	li $t1, 0x4A
+	jr $s0
 
 splname:
 	.asciiz "bu00:BESLEM-99999TONYHAX"
 
 redscreen:
-	# Fill screen with red
-	.word 0x020000FF
+	# Space for color and command
+	.word 0
 	# Start X and Y = 0
 	.word 0x00000000
 	# Width of 1024, height of 512
