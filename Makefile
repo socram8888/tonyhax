@@ -87,6 +87,7 @@ secondary.bin: secondary.elf
 tonyhax.mcs: tonyhax-tpl.mcs secondary.bin
 	cp tonyhax-tpl.mcs tonyhax.mcs
 	dd conv=notrunc if=secondary.bin of=tonyhax.mcs bs=384 seek=1
+	bash insert-hash.sh secondary.elf tonyhax.mcs
 
 # Brunswick Circuit Pro Bowling NTSC-US target
 brunswick1-us.mcs: brunswick1-us-tpl.mcs entry-full.bin

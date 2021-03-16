@@ -2,6 +2,8 @@ MEMORY {
 	ram(wrx)	:ORIGIN = 0x801FC100, LENGTH = 0x1F00
 }
 SECTIONS {
+	. = 0x801FC100;
+	PROVIDE(__ROM_START__ = .);
 	.text :
 	{
 		*(.start)
@@ -11,6 +13,7 @@ SECTIONS {
 	{
 		*(.rodata .rodata.*)
 	} >ram
+	PROVIDE(__ROM_END__ = .);
 	.data :
 	{
 		*(.data .data.*)

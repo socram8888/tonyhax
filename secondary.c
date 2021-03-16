@@ -7,9 +7,13 @@
 #include "cdrom.h"
 #include "gpu.h"
 #include "debugscreen.h"
+#include "hash.h"
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
 const uint32_t tty_enabled = 0;
+
+// Loading address of tonyhax, provided by the secondary.ld linker script
+extern uint8_t __ROM_START__, __ROM_END__;
 
 // Buffer right before this executable
 uint8_t * const data_buffer = (uint8_t *) 0x801FB800;
@@ -72,6 +76,21 @@ void reinit_kernel() {
 
 	// Re-enable interrupts
 	ExitCriticalSection();
+}
+
+bool test_integrity() {
+	/*
+	 * The integrity consists of cdb hash inside the title frame after the title name,
+	 * at offset 0x4C.
+	 * This hash is calculated over all the read-only payload.
+	 */
+	uint32_t correct_value = *((uint32_t * ) (&__ROM_START__ - 0x100 + 0x4C));
+	uint32_t calc_value = cdb_hash(&__ROM_START__, &__ROM_END__ - &__ROM_START__);
+
+	bool ok = correct_value == calc_value;
+	debug_write("Integrity check %s", ok ? "succeed" : "failed");
+
+	return ok;
 }
 
 bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
@@ -326,6 +345,10 @@ void main() {
 
 	// Initialize debug screen
 	debug_init();
+
+	if (!test_integrity()) {
+		return;
+	}
 
 	debug_write("Unlocking CD drive");
 
