@@ -21,6 +21,9 @@ uint8_t * const data_buffer = (uint8_t *) 0x801FB800;
 // Kernel developer
 const char * const KERNEL_AUTHOR = (const char *) 0xBFC0012C;
 
+// Version string
+const char * const VERSION_STRING = (const char *) 0xBFC7FF32;
+
 void reinit_kernel() {
 	// Disable interrupts
 	EnterCriticalSection();
@@ -91,6 +94,22 @@ bool test_integrity() {
 	debug_write("Integrity check %s", ok ? "succeed" : "failed");
 
 	return ok;
+}
+
+void log_bios_version() {
+	/*
+	 * "System ROM Version 4.5 05/25/00 A"
+	 * By adding 11 we get to Version, which we'll compare as a shortcut
+	 */
+	const char * version;
+
+	if (strncmp(VERSION_STRING + 11, "Version", 7) == 0) {
+		version = VERSION_STRING + 19;
+	} else {
+		version = "1.0 or older";
+	}
+
+	debug_write("BIOS: v%s", version);
 }
 
 bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
@@ -349,6 +368,8 @@ void main() {
 	if (!test_integrity()) {
 		return;
 	}
+
+	log_bios_version();
 
 	debug_write("Unlocking CD drive");
 
