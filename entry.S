@@ -67,7 +67,7 @@ realstart:
 	jalr $s0
 
 	# Die if failed
-	beq $v0, -1, fail
+	blt $v0, 0, fail
 
 	# Save file handle to s1
 	move $s1, $v0
