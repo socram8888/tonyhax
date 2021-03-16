@@ -37,6 +37,9 @@ void reinit_kernel() {
 		// Restore part of the kernel memory
 		memcpy((uint8_t *) 0xA0000500, (const uint8_t *) 0xBFC10000, 0x8BF0);
 
+		// Call it to restore everything that it needs to
+		((void (*)(void)) 0xA0000500)();
+
 		// Restore call tables
 		memcpy((uint8_t *)      0x200, (const uint8_t *) 0xBFC04300, 0x300);
 	}
