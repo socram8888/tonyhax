@@ -168,3 +168,8 @@ thps4-de.mcs: thps4-de-tpl.mcs entry-quick.bin
 thps4-fr.mcs: thps4-fr-tpl.mcs entry-quick.bin
 	cp thps4-fr-tpl.mcs thps4-fr.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps4-fr.mcs bs=1 seek=5252
+
+# Sports Superbike II EU target
+ss2-eu.mcs: ss2-eu-tpl.mcs entry-full.bin
+	cp ss2-eu-tpl.mcs ss2-eu.mcs
+	dd conv=notrunc if=entry-full.bin of=ss2-eu.mcs bs=1 seek=824
