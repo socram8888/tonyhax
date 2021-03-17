@@ -27,6 +27,7 @@ RAW_FILES = \
 	BESLES-02908TNHXG01 \
 	BESLES-02909TNHXG01 \
 	BESLES-02910TNHXG01 \
+	BESLES-03057SSBv1 \
 	BESLES-03645TNHXG01 \
 	BESLES-03646TNHXG01 \
 	BESLES-03647TNHXG01 \
@@ -169,6 +170,11 @@ thps4-de.mcs: thps4-de-tpl.mcs entry-quick.bin
 thps4-fr.mcs: thps4-fr-tpl.mcs entry-quick.bin
 	cp thps4-fr-tpl.mcs thps4-fr.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps4-fr.mcs bs=1 seek=5252
+
+# Sports Superbike EU target
+superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
+	cp superbike1-eu-tpl.mcs superbike1-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=superbike1-eu.mcs bs=1 seek=1888
 
 # Sports Superbike II EU target
 superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-quick.bin
