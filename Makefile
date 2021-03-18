@@ -97,65 +97,81 @@ brunswick1-us.mcs: brunswick1-us-tpl.mcs entry-full.bin
 	cp brunswick1-us-tpl.mcs brunswick1-us.mcs
 	dd conv=notrunc if=entry-full.bin of=brunswick1-us.mcs bs=1 seek=2016
 
-# Brunswick Circuit Pro Bowling 2 NTSC-US target
-brunswick2-us.mcs: brunswick2-us-tpl.mcs entry-full.bin
-	cp brunswick2-us-tpl.mcs brunswick2-us.mcs
-	dd conv=notrunc if=entry-full.bin of=brunswick2-us.mcs bs=1 seek=2272
-
-# THPS2 NTSC-US target
-thps2-us.mcs: thps2-us-tpl.mcs entry-quick.bin
-	cp thps2-us-tpl.mcs thps2-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=thps2-us.mcs bs=1 seek=5208
-
-# THPS3 NTSC-US target
-thps3-us.mcs: thps3-us-tpl.mcs entry-quick.bin
-	cp thps3-us-tpl.mcs thps3-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=thps3-us.mcs bs=1 seek=4612
-
-# THPS4 NTSC-US target
-thps4-us.mcs: thps4-us-tpl.mcs entry-quick.bin
-	cp thps4-us-tpl.mcs thps4-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=thps4-us.mcs bs=1 seek=5260
-
 # Brunswick Circuit Pro Bowling PAL-EU target
 brunswick1-eu.mcs: brunswick1-eu-tpl.mcs entry-full.bin
 	cp brunswick1-eu-tpl.mcs brunswick1-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=brunswick1-eu.mcs bs=1 seek=2016
+
+# Brunswick Circuit Pro Bowling 2 NTSC-US target
+brunswick2-us.mcs: brunswick2-us-tpl.mcs entry-full.bin
+	cp brunswick2-us-tpl.mcs brunswick2-us.mcs
+	dd conv=notrunc if=entry-full.bin of=brunswick2-us.mcs bs=1 seek=2272
 
 # Brunswick Circuit Pro Bowling 2 PAL-EU target
 brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 	cp brunswick2-eu-tpl.mcs brunswick2-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
 
+# Cool Boarders 4 PAL-EU target
+# MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
+coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
+	cp coolbrd4-us-tpl.mcs coolbrd4-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=coolbrd4-us.mcs bs=1 seek=7024
+
+# Sports Superbike PAL-EU target
+superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
+	cp superbike1-eu-tpl.mcs superbike1-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=superbike1-eu.mcs bs=1 seek=1888
+
+# Sports Superbike 2 PAL-EU target
+superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-quick.bin
+	cp superbike2-eu-tpl.mcs superbike2-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=superbike2-eu.mcs bs=1 seek=824
+
+# THPS2 NTSC-US target
+thps2-us.mcs: thps2-us-tpl.mcs entry-quick.bin
+	cp thps2-us-tpl.mcs thps2-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=thps2-us.mcs bs=1 seek=5208
+
 # THPS2 PAL-EU target
 thps2-eu.mcs: thps2-eu-tpl.mcs entry-quick.bin
 	cp thps2-eu-tpl.mcs thps2-eu.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps2-eu.mcs bs=1 seek=5200
-
-# THPS2 PAL-FR target
-thps2-fr.mcs: thps2-fr-tpl.mcs entry-quick.bin
-	cp thps2-fr-tpl.mcs thps2-fr.mcs
-	dd conv=notrunc if=entry-quick.bin of=thps2-fr.mcs bs=1 seek=5200
 
 # THPS2 PAL-DE target
 thps2-de.mcs: thps2-de-tpl.mcs entry-quick.bin
 	cp thps2-de-tpl.mcs thps2-de.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps2-de.mcs bs=1 seek=5200
 
+# THPS2 PAL-FR target
+thps2-fr.mcs: thps2-fr-tpl.mcs entry-quick.bin
+	cp thps2-fr-tpl.mcs thps2-fr.mcs
+	dd conv=notrunc if=entry-quick.bin of=thps2-fr.mcs bs=1 seek=5200
+
+# THPS3 NTSC-US target
+thps3-us.mcs: thps3-us-tpl.mcs entry-quick.bin
+	cp thps3-us-tpl.mcs thps3-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=thps3-us.mcs bs=1 seek=4612
+
 # THPS3 PAL-EU target
 thps3-eu.mcs: thps3-eu-tpl.mcs entry-quick.bin
 	cp thps3-eu-tpl.mcs thps3-eu.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps3-eu.mcs bs=1 seek=4608
+
+# THPS3 PAL-DE target
+thps3-de.mcs: thps3-de-tpl.mcs entry-quick.bin
+	cp thps3-de-tpl.mcs thps3-de.mcs
+	dd conv=notrunc if=entry-quick.bin of=thps3-de.mcs bs=1 seek=4608
 
 # THPS3 PAL-FR target
 thps3-fr.mcs: thps3-fr-tpl.mcs entry-quick.bin
 	cp thps3-fr-tpl.mcs thps3-fr.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps3-fr.mcs bs=1 seek=4608
 
-# THPS3 PAL-DE target
-thps3-de.mcs: thps3-de-tpl.mcs entry-quick.bin
-	cp thps3-de-tpl.mcs thps3-de.mcs
-	dd conv=notrunc if=entry-quick.bin of=thps3-de.mcs bs=1 seek=4608
+# THPS4 NTSC-US target
+thps4-us.mcs: thps4-us-tpl.mcs entry-quick.bin
+	cp thps4-us-tpl.mcs thps4-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=thps4-us.mcs bs=1 seek=5260
 
 # THPS4 PAL-EU target
 thps4-eu.mcs: thps4-eu-tpl.mcs entry-quick.bin
@@ -171,19 +187,3 @@ thps4-de.mcs: thps4-de-tpl.mcs entry-quick.bin
 thps4-fr.mcs: thps4-fr-tpl.mcs entry-quick.bin
 	cp thps4-fr-tpl.mcs thps4-fr.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps4-fr.mcs bs=1 seek=5252
-
-# Sports Superbike EU target
-superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
-	cp superbike1-eu-tpl.mcs superbike1-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=superbike1-eu.mcs bs=1 seek=1888
-
-# Sports Superbike II EU target
-superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-quick.bin
-	cp superbike2-eu-tpl.mcs superbike2-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=superbike2-eu.mcs bs=1 seek=824
-
-# Sports Superbike EU target
-# MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
-coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
-	cp coolbrd4-us-tpl.mcs coolbrd4-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=coolbrd4-us.mcs bs=1 seek=7024
