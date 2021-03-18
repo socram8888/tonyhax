@@ -184,6 +184,6 @@ superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-quick.bin
 
 # Sports Superbike EU target
 # MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
-coolboarders4-us.mcs: coolboarders4-us-tpl.mcs entry-quick.bin
-	cp coolboarders4-us-tpl.mcs coolboarders4-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=coolboarders4-us.mcs bs=1 seek=7024
+coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
+	cp coolbrd4-us-tpl.mcs coolbrd4-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=coolbrd4-us.mcs bs=1 seek=7024
