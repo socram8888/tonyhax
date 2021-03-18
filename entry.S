@@ -119,9 +119,6 @@ paintscr:
 	li $t1, 0x4A
 	jr $s0
 
-splname:
-	.asciiz "bu00:BESLEM-99999TONYHAX"
-
 redscreen:
 	# Space for color and command
 	.word 0
@@ -129,3 +126,6 @@ redscreen:
 	.word 0x00000000
 	# Width of 1024, height of 512
 	.word 0x01FF03FF
+
+splname:
+	.asciiz "bu00:BESLEM-99999TONYHAX"
