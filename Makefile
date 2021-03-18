@@ -17,6 +17,7 @@ SPL_OBJECTS := $(patsubst %.c, %.o, $(wildcard *.c)) bios.o
 
 MCS_FILES := $(patsubst %-tpl.mcs, %.mcs, $(wildcard *-tpl.mcs))
 RAW_FILES = \
+	BASCUS-9455916 \
 	BASLUS-00571 \
 	BASLUS-00856 \
 	BASLUS-01066TNHXG01 \
@@ -180,3 +181,9 @@ superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
 superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-quick.bin
 	cp superbike2-eu-tpl.mcs superbike2-eu.mcs
 	dd conv=notrunc if=entry-quick.bin of=superbike2-eu.mcs bs=1 seek=824
+
+# Sports Superbike EU target
+# MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
+coolboarders4-us.mcs: coolboarders4-us-tpl.mcs entry-quick.bin
+	cp coolboarders4-us-tpl.mcs coolboarders4-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=coolboarders4-us.mcs bs=1 seek=7024
