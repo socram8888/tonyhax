@@ -1,7 +1,7 @@
 
 # Thanks to whoever made https://devhints.io/makefile!
 
-TONYHAX_VERSION=v1.1.2
+TONYHAX_VERSION=v1.2
 
 CC=mips-linux-gnu-gcc
 CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mfp32 -nostdlib -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -O1 -DTONYHAX_VERSION=$(TONYHAX_VERSION)
@@ -114,16 +114,16 @@ brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
 
 # Cool Boarders 4 NTSC-US target
-# MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
 coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
 	cp coolbrd4-us-tpl.mcs coolbrd4-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=coolbrd4-us.mcs bs=1 seek=7024
+	dd conv=notrunc if=entry-quick.bin of=coolbrd4-us.mcs bs=1 seek=3116
+	bash fix-cb4-checksum.sh coolbrd4-us.mcs
 
 # Cool Boarders 4 PAL-EU target
-# MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
 coolbrd4-eu.mcs: coolbrd4-eu-tpl.mcs entry-quick.bin
 	cp coolbrd4-eu-tpl.mcs coolbrd4-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=coolbrd4-eu.mcs bs=1 seek=7024
+	dd conv=notrunc if=entry-quick.bin of=coolbrd4-eu.mcs bs=1 seek=3116
+	bash fix-cb4-checksum.sh coolbrd4-eu.mcs
 
 # Sports Superbike PAL-EU target
 superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
