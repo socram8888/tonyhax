@@ -194,3 +194,8 @@ thps4-de.mcs: thps4-de-tpl.mcs entry-quick.bin
 thps4-fr.mcs: thps4-fr-tpl.mcs entry-quick.bin
 	cp thps4-fr-tpl.mcs thps4-fr.mcs
 	dd conv=notrunc if=entry-quick.bin of=thps4-fr.mcs bs=1 seek=5252
+
+# XS Moto NTSC-US target
+xsmoto-us.mcs: xsmoto-us-tpl.mcs entry-quick.bin
+	cp xsmoto-us-tpl.mcs xsmoto-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=xsmoto-us.mcs bs=1 seek=1760
