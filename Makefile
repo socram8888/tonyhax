@@ -23,6 +23,7 @@ RAW_FILES = \
 	BASLUS-01066TNHXG01 \
 	BASLUS-01419TNHXG01 \
 	BASLUS-01485TNHXG01 \
+	BESCES-0228316 \
 	BESLES-01376 \
 	BESLES-02618 \
 	BESLES-02908TNHXG01 \
@@ -112,11 +113,17 @@ brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 	cp brunswick2-eu-tpl.mcs brunswick2-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
 
-# Cool Boarders 4 PAL-EU target
+# Cool Boarders 4 NTSC-US target
 # MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
 coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
 	cp coolbrd4-us-tpl.mcs coolbrd4-us.mcs
 	dd conv=notrunc if=entry-quick.bin of=coolbrd4-us.mcs bs=1 seek=7024
+
+# Cool Boarders 4 PAL-EU target
+# MAX PAYLOAD ON THIS ONE IS JUST 266 BYTES
+coolbrd4-eu.mcs: coolbrd4-eu-tpl.mcs entry-quick.bin
+	cp coolbrd4-eu-tpl.mcs coolbrd4-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=coolbrd4-eu.mcs bs=1 seek=7024
 
 # Sports Superbike PAL-EU target
 superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
