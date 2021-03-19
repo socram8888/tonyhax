@@ -131,9 +131,9 @@ coolbrd4-eu.mcs: coolbrd4-eu-tpl.mcs entry-quick.bin
 # redump.org lists two versions of this game: with and without EDC
 # This was tested with the non-EDC version (hash b077862d2c6e1b8060c2eae2fe82e708b228de7c)
 # Not sure if it works on the EDC one
-crash2-eu.mcs: crash2-eu-tpl.mcs entry-quick.bin
+crash2-eu.mcs: crash2-eu-tpl.mcs entry-full.bin
 	cp crash2-eu-tpl.mcs crash2-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=crash2-eu.mcs bs=1 seek=432
+	dd conv=notrunc if=entry-full.bin of=crash2-eu.mcs bs=1 seek=432
 	bash fix-crash2-checksum.sh crash2-eu.mcs
 
 # Sports Superbike PAL-EU target
