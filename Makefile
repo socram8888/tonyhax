@@ -24,6 +24,7 @@ RAW_FILES = \
 	BASLUS-01419TNHXG01 \
 	BASLUS-01485TNHXG01 \
 	BASLUS-01506XSMOTOv1 \
+	BESCES-0096700765150 \
 	BESCES-0228316 \
 	BESLES-01376 \
 	BESLES-02618 \
@@ -125,6 +126,12 @@ coolbrd4-eu.mcs: coolbrd4-eu-tpl.mcs entry-quick.bin
 	cp coolbrd4-eu-tpl.mcs coolbrd4-eu.mcs
 	dd conv=notrunc if=entry-quick.bin of=coolbrd4-eu.mcs bs=1 seek=3116
 	bash fix-cb4-checksum.sh coolbrd4-eu.mcs
+
+# Crash Bandicoot 2 PAL-EU target
+crash2-eu.mcs: crash2-eu-tpl.mcs entry-quick.bin
+	cp crash2-eu-tpl.mcs crash2-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=crash2-eu.mcs bs=1 seek=432
+	bash fix-crash2-checksum.sh crash2-eu.mcs
 
 # Sports Superbike PAL-EU target
 superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin

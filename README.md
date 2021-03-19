@@ -19,6 +19,7 @@ When installing:
 | Brunswick Circuit Pro Bowling 2 | PAL-E  | SLES-02618 | brunswick2-eu.mcs | BESLES-02618         |
 | Cool Boarders 4                 | NTSC-U | SCUS-94559 | coolbrd4-us.mcs   | BASCUS-9455916       |
 | Cool Boarders 4                 | PAL-E  | SCES-02283 | coolbrd4-eu.mcs   | BESCES-0228316       |
+| Crash Bandicoot 2               | PAL-E  | SCES-00967 | crash2-eu.mcs     | BESCES-0096700765150 |
 | Sports Superbike                | PAL-E  | SLES-03057 | superbike1-eu.mcs | BESLES-03057SSBv1    |
 | Sports Superbike 2              | PAL-E  | SLES-03827 | superbike2-eu.mcs | BESLES-03827SSII     |
 | Tony Hawk's Pro Skater 2        | NTSC-U | SLUS-01066 | thps2-us.mcs      | BASLUS-01066TNHXG01  |
