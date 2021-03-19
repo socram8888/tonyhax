@@ -4,7 +4,7 @@
 TONYHAX_VERSION=v1.2
 
 CC=mips-linux-gnu-gcc
-CFLAGS=-Wall -Wextra -Wno-main -EL -march=mips1 -mabi=32 -mfp32 -nostdlib -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -O1 -DTONYHAX_VERSION=$(TONYHAX_VERSION)
+CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mabi=32 -mfp32 -nostdlib -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -O1 -DTONYHAX_VERSION=$(TONYHAX_VERSION)
 
 LD=mips-linux-gnu-ld
 LDFLAGS=-EL --gc-sections
