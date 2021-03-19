@@ -17,6 +17,7 @@ SPL_OBJECTS := $(patsubst %.c, %.o, $(wildcard *.c)) bios.o
 
 MCS_FILES := $(patsubst %-tpl.mcs, %.mcs, $(wildcard *-tpl.mcs))
 RAW_FILES = \
+	BASCUS-9415400047975 \
 	BASCUS-9455916 \
 	BASLUS-00571 \
 	BASLUS-00856 \
@@ -128,6 +129,12 @@ coolbrd4-eu.mcs: coolbrd4-eu-tpl.mcs entry-quick.bin
 	dd conv=notrunc if=entry-quick.bin of=coolbrd4-eu.mcs bs=1 seek=3116
 	bash fix-cb4-checksum.sh coolbrd4-eu.mcs
 
+# Crash Bandicoot 2 NTSC-US target
+crash2-us.mcs: crash2-us-tpl.mcs entry-full.bin
+	cp crash2-us-tpl.mcs crash2-us.mcs
+	dd conv=notrunc if=entry-full.bin of=crash2-us.mcs bs=1 seek=688
+	bash fix-crash2-checksum.sh crash2-us.mcs us
+
 # Crash Bandicoot 2 PAL-EU target
 # redump.org lists two versions of this game: with and without EDC
 # This was tested with the non-EDC version (hash b077862d2c6e1b8060c2eae2fe82e708b228de7c)
@@ -135,7 +142,7 @@ coolbrd4-eu.mcs: coolbrd4-eu-tpl.mcs entry-quick.bin
 crash2-eu.mcs: crash2-eu-tpl.mcs entry-full.bin
 	cp crash2-eu-tpl.mcs crash2-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=crash2-eu.mcs bs=1 seek=432
-	bash fix-crash2-checksum.sh crash2-eu.mcs
+	bash fix-crash2-checksum.sh crash2-eu.mcs eu
 
 # Sports Superbike PAL-EU target
 superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
