@@ -39,6 +39,7 @@ RAW_FILES = \
 	BESLES-03954TNHXG01 \
 	BESLES-03955TNHXG01 \
 	BESLES-03956TNHXG01 \
+	BESLES-04095XSMOTO \
 	BESLEM-99999TONYHAX
 
 PACKAGE_FILE = tonyhax-$(TONYHAX_VERSION).zip
@@ -210,3 +211,8 @@ thps4-fr.mcs: thps4-fr-tpl.mcs entry-quick.bin
 xsmoto-us.mcs: xsmoto-us-tpl.mcs entry-quick.bin
 	cp xsmoto-us-tpl.mcs xsmoto-us.mcs
 	dd conv=notrunc if=entry-quick.bin of=xsmoto-us.mcs bs=1 seek=1760
+
+# XS Moto PAL-EU target
+xsmoto-eu.mcs: xsmoto-eu-tpl.mcs entry-quick.bin
+	cp xsmoto-eu-tpl.mcs xsmoto-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=xsmoto-eu.mcs bs=1 seek=1760
