@@ -322,40 +322,55 @@ void try_boot_cd() {
 	debug_write("Initializing CD");
 	CdInit();
 
+	// Defaults if no SYSTEM.CNF file exists
+	uint32_t tcb = 4;
+	uint32_t event = 16;
+	uint32_t stacktop = 0x801FFF00;
+	const char * bootfile = "cdrom:PSX.EXE;1";
+
+	char bootfilebuf[32];
 	debug_write("Loading SYSTEM.CNF");
-	int32_t fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
-	if (fd == -1) {
-		debug_write("Open error %x", GetLastError());
-		return;
-	}
+	int32_t cfg_fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
+	if (cfg_fd > 0) {
+		int32_t read = FileRead(cfg_fd, data_buffer, 2048);
+		FileClose(cfg_fd);
 
-	int32_t read = FileRead(fd, data_buffer, 2048);
-	FileClose(fd);
+		if (read == -1) {
+			debug_write("Read error %x", GetLastError());
+			return;
+		}
 
-	if (read == -1) {
-		debug_write("Read error %x", GetLastError());
-		return;
-	}
+		// Null terminate
+		data_buffer[read] = '\0';
 
-	// Null terminate
-	data_buffer[read] = '\0';
+		if (
+				!config_get_hex((char *) data_buffer, "TCB", &tcb) ||
+				!config_get_hex((char *) data_buffer, "EVENT", &event) ||
+				!config_get_hex((char *) data_buffer, "STACK", &stacktop) ||
+				!config_get_string((char *) data_buffer, "BOOT", bootfilebuf)
+		) {
+			return;
+		}
 
-	uint32_t tcb, event, stacktop;
-	char bootfile[32];
-	if (
-			!config_get_hex((char *) data_buffer, "TCB", &tcb) ||
-			!config_get_hex((char *) data_buffer, "EVENT", &event) ||
-			!config_get_hex((char *) data_buffer, "STACK", &stacktop) ||
-			!config_get_string((char *) data_buffer, "BOOT", bootfile)
-	) {
-		return;
+		bootfile = bootfilebuf;
+	} else {
+		uint32_t errorCode = GetLastError();
+		if (errorCode != FILEERR_NOT_FOUND) {
+			debug_write("Open error %x", GetLastError());
+			return;
+		}
+
+		debug_write("Not found. Using PSX.EXE");
 	}
 
 	debug_write("Configuring kernel");
 	SetConf(event, tcb, stacktop);
 
 	debug_write("Loading executable");
-	LoadExeFile(bootfile, data_buffer);
+	if (!LoadExeFile(bootfile, data_buffer)) {
+		debug_write("Loading failed");
+		return;
+	}
 
 	debug_write("Starting");
 	DoExecute(data_buffer, 0, 0);

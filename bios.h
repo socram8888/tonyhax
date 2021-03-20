@@ -56,6 +56,61 @@ void ExitCriticalSection();
 #define FILE_SIZE(blocks) ((blocks) << 16)
 
 /**
+ * No error.
+ */
+#define FILEERR_OK 0x00
+
+/**
+ * File not found
+ */
+#define FILEERR_NOT_FOUND 0x02
+
+/**
+ * Bad device port number (tty2 and up)
+ */
+#define FILEERR_BAD_DEVICE 0x06
+
+/**
+ * Invalid or unused file handle
+ */
+#define FILEERR_UNUSED_HANDLE 0x09
+
+/**
+ * General error (physical I/O error, unformatted, disk changed for old fcb)
+ */
+#define FILEERR_GENERAL 0x10
+
+/**
+ * File already exists
+ */
+#define FILEERR_ALREADY_EXISTS 0x11
+
+/**
+ * Cross device rename
+ */
+#define FILEERR_CROSS_DEV_RENAME 0x12
+
+/**
+ * Unknown device name
+ */
+#define FILEERR_UNKNOWN_DEV 0x13
+
+/**
+ * Alignment error
+ */
+#define FILEERR_ALIGN 0x16
+
+/**
+ * Too many open files
+ */
+#define FILEERR_TOO_MANY_HANDLES 0x18
+
+/**
+ * Device full
+ */
+#define FILEERR_DEV_FULL 0x1C
+
+/**
  * Opens a file on the target device for I/O.
  *
  * Table A, call 0x00.
