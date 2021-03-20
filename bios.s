@@ -113,6 +113,15 @@ SetConf:
 	j 0xA0
 
 ###############
+# B-FUNCTIONS #
+###############
+
+.global GetLastError
+GetLastError:
+	li $t1, 0x54
+	j 0xB0
+
+###############
 # C-FUNCTIONS #
 ###############
 

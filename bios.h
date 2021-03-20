@@ -255,6 +255,19 @@ void CdInit(void);
 void SetConf(uint32_t evcb, uint32_t tcb, uint32_t stacktop);
 
 /*
+ * B-FUNCTIONS
+ */
+
+/**
+ * Returns the error code for the last failed file operation.
+ *
+ * @returns the error code for the last failed file operation.
+ *
+ * Table B, call 0x54.
+ */
+uint32_t GetLastError(void);
+
+/*
  * C-FUNCTIONS
  */
 

@@ -325,7 +325,7 @@ void try_boot_cd() {
 	debug_write("Loading SYSTEM.CNF");
 	int32_t fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
 	if (fd == -1) {
-		debug_write("Open error");
+		debug_write("Open error %x", GetLastError());
 		return;
 	}
 
@@ -333,7 +333,7 @@ void try_boot_cd() {
 	FileClose(fd);
 
 	if (read == -1) {
-		debug_write("Read error");
+		debug_write("Read error %x", GetLastError());
 		return;
 	}
 
