@@ -18,6 +18,7 @@ SPL_OBJECTS := $(patsubst %.c, %.o, $(wildcard *.c)) bios.o
 MCS_FILES := $(patsubst %-tpl.mcs, %.mcs, $(wildcard *-tpl.mcs))
 RAW_FILES = \
 	BASCUS-9415400047975 \
+	BASCUS-9424400000000 \
 	BASCUS-9455916 \
 	BASLUS-00571 \
 	BASLUS-00856 \
@@ -144,6 +145,12 @@ crash2-eu.mcs: crash2-eu-tpl.mcs entry-full.bin
 	cp crash2-eu-tpl.mcs crash2-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=crash2-eu.mcs bs=1 seek=432
 	bash fix-crash-checksum.sh crash2-eu.mcs eu2
+
+# Crash Bandicoot 3 NTSC-US target
+crash3-us.mcs: crash3-us-tpl.mcs entry-full.bin
+	cp crash3-us-tpl.mcs crash3-us.mcs
+	dd conv=notrunc if=entry-full.bin of=crash3-us.mcs bs=1 seek=688
+	bash fix-crash-checksum.sh crash3-us.mcs us3
 
 # Crash Bandicoot 3 PAL-EU target
 crash3-eu.mcs: crash3-eu-tpl.mcs entry-full.bin

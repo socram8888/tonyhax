@@ -23,6 +23,10 @@ case "$region" in
 		dataoffset=$(( 0x280 ))
 		datalen=$(( 0x2A4 * 4 ))
 		;;
+	us3)
+		dataoffset=$(( 0x280 ))
+		datalen=$(( 0x590 * 4 ))
+		;;
 	*)
 		echo "Invalid region"
 		exit 1
