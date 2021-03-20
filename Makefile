@@ -29,6 +29,7 @@ RAW_FILES = \
 	BESCES-0096700765150 \
 	BESCES-0142000000000 \
 	BESCES-0228316 \
+	BESLES_01182CHSv1 \
 	BESLES-01376 \
 	BESLES-02618 \
 	BESLES-02908TNHXG01 \
@@ -118,6 +119,11 @@ brunswick2-us.mcs: brunswick2-us-tpl.mcs entry-full.bin
 brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 	cp brunswick2-eu-tpl.mcs brunswick2-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
+
+# Castrol Honda Superbike Racing PAL-EU target
+castrolsb-eu.mcs: castrolsb-eu-tpl.mcs entry-quick.bin
+	cp castrolsb-eu-tpl.mcs castrolsb-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=castrolsb-eu.mcs bs=1 seek=1760
 
 # Cool Boarders 4 NTSC-US target
 coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
