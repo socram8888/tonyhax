@@ -35,6 +35,7 @@ RAW_FILES = \
 	BESLES-02908TNHXG01 \
 	BESLES-02909TNHXG01 \
 	BESLES-02910TNHXG01 \
+	BESLES-02942CHSVTRv1 \
 	BESLES-03057SSBv1 \
 	BESLES-03645TNHXG01 \
 	BESLES-03646TNHXG01 \
@@ -124,6 +125,11 @@ brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 castrolsb-eu.mcs: castrolsb-eu-tpl.mcs entry-quick.bin
 	cp castrolsb-eu-tpl.mcs castrolsb-eu.mcs
 	dd conv=notrunc if=entry-quick.bin of=castrolsb-eu.mcs bs=1 seek=1760
+
+# Castrol Honda VTR PAL-EU target
+castrolvtr-eu.mcs: castrolvtr-eu-tpl.mcs entry-quick.bin
+	cp castrolvtr-eu-tpl.mcs castrolvtr-eu.mcs
+	dd conv=notrunc if=entry-quick.bin of=castrolvtr-eu.mcs bs=1 seek=824
 
 # Cool Boarders 4 NTSC-US target
 coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
