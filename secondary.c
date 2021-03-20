@@ -356,7 +356,7 @@ void try_boot_cd() {
 	} else {
 		uint32_t errorCode = GetLastError();
 		if (errorCode != FILEERR_NOT_FOUND) {
-			debug_write("Open error %x", GetLastError());
+			debug_write("Open error %x", errorCode);
 			return;
 		}
 
