@@ -22,6 +22,7 @@ RAW_FILES = \
 	BASCUS-9455916 \
 	BASLUS-00571 \
 	BASLUS-00856 \
+	BASLUS-00882CHSv1 \
 	BASLUS-01066TNHXG01 \
 	BASLUS-01419TNHXG01 \
 	BASLUS-01485TNHXG01 \
@@ -120,6 +121,11 @@ brunswick2-us.mcs: brunswick2-us-tpl.mcs entry-full.bin
 brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 	cp brunswick2-eu-tpl.mcs brunswick2-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
+
+# Castrol Honda Superbike Racing NTSC-US target
+castrolsb-us.mcs: castrolsb-us-tpl.mcs entry-quick.bin
+	cp castrolsb-us-tpl.mcs castrolsb-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=castrolsb-us.mcs bs=1 seek=1360
 
 # Castrol Honda Superbike Racing PAL-EU target
 castrolsb-eu.mcs: castrolsb-eu-tpl.mcs entry-quick.bin
