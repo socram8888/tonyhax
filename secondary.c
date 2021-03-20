@@ -173,8 +173,11 @@ bool unlock_drive() {
 	} else if (strcmp((char *) cd_reply, "for U/C") == 0) {
 		region_name = "American";
 		p5_localized = "of America";
+	} else if (strcmp((char *) cd_reply, "for NETEU") == 0) {
+		region_name = "NetYaroze (EU)";
+		p5_localized = "World wide";
 	} else if (strcmp((char *) cd_reply, "for NETNA") == 0) {
-		region_name = "NetYaroze";
+		region_name = "NetYaroze (US)";
 		p5_localized = "World wide";
 	} else {
 		// +4 to skip past "for "
