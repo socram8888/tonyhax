@@ -179,7 +179,7 @@ bool unlock_drive() {
 	} else if (strcmp((char *) cd_reply, "for NETNA") == 0) {
 		region_name = "NetYaroze (US)";
 		p5_localized = "World wide";
-	else if (strcmp((char *) cd_reply, "for US/AEP") == 0) { /* DTL-H1202 */
+	} else if (strcmp((char *) cd_reply, "for US/AEP") == 0) { /* DTL-H1202 */
 		region_name = "Debug 2.2 (EU)";
 		p5_localized = "DONTCARE";
 	} else {
