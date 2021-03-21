@@ -69,6 +69,14 @@ LoadExeFile:
 
 .global DoExecute
 DoExecute:
+	# Pepsiman (J) crashes if s5 is not zero
+	# The BIOS leaves them s1-s6 zeroed, so we'll do the same
+	li $s1, 0
+	li $s2, 0
+	li $s3, 0
+	li $s4, 0
+	li $s5, 0
+	li $s6, 0
 	li $t1, 0x43
 	j 0xA0
 

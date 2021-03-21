@@ -223,7 +223,7 @@ bool LoadExeFile(const char * filename, uint8_t * headerbuf);
  *
  * Table A, call 0x43.
  */
-void DoExecute(uint8_t * headerbuf, uint32_t param1, uint32_t param2);
+void __attribute__((noreturn)) DoExecute(uint8_t * headerbuf, uint32_t param1, uint32_t param2);
 
 /**
  * Copies the three default four-opcode handlers for the A(NNh),B(NNh),C(NNh) functions to A00000A0h..A00000CFh.
