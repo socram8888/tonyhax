@@ -7,6 +7,7 @@
 #include "cdrom.h"
 #include "gpu.h"
 #include "debugscreen.h"
+#include "cfgparse.h"
 #include "hash.h"
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
@@ -221,99 +222,6 @@ void wait_lid_status(bool open) {
 	} while ((cd_reply[0] & 0x10) != expected);
 }
 
-bool config_get_hex(const char * config, const char * wanted, uint32_t * value) {
-	uint32_t wanted_len = strlen(wanted);
-
-	while (true) {
-		// Check if first N characters match
-		if (strncmp(config, wanted, wanted_len) == 0) {
-			// Perfect, we're on the right line. Advance.
-			config += wanted_len;
-
-			// Keep parsing until we hit the end of line or the end of file
-			uint32_t parsed = 0;
-			while (*config != '\n' && *config != '\0') {
-				uint32_t digit = todigit(*config);
-				if (digit < 0x10) {
-					parsed = parsed << 4 | digit;
-				}
-				config++;
-			}
-
-			// Log
-			debug_write("%s = %x", wanted, parsed);
-			*value = parsed;
-			return true;
-
-		} else {
-			// No luck. Advance until next line.
-			config = strchr(config, '\n');
-			
-			// If this is the last line, abort.
-			if (config == NULL) {
-				debug_write("Missing %s", wanted);
-				return false;
-			}
-
-			// Advance to skip line feed.
-			config++;
-		}
-	}
-}
-
-bool config_get_string(const char * config, const char * wanted, char * value) {
-	uint32_t wanted_len = strlen(wanted);
-
-	while (true) {
-		// Check if first N characters match
-		if (strncmp(config, wanted, wanted_len) == 0) {
-			// Perfect, we're on the right line. Advance.
-			config += wanted_len;
-
-			// Advance until the start
-			while (1) {
-				// Skip spaces and equals
-				if (*config == ' ' || *config == '=') {
-					config++;
-				} else if (*config == '\0' || *config == '\n' || *config == '\r') {
-					debug_write("Corrupted %s", wanted);
-					return false;
-				} else {
-					break;
-				}
-			}
-
-			// Copy until space or end of file
-			char * valuecur = value;
-			while (*config != '\0' && *config != '\n' && *config != '\r' && *config != ' ') {
-				*valuecur = *config;
-				config++;
-				valuecur++;
-			}
-
-			// Null terminate
-			*valuecur = '\0';
-
-			// Log
-			debug_write("%s = %s", wanted, value);
-			return true;
-
-		} else {
-			// No luck. Advance until next line.
-			config = strchr(config, '\n');
-			
-			// If this is the last line, abort.
-			if (config == NULL) {
-				debug_write("Missing %s", wanted);
-				return false;
-			}
-
-			// Advance to skip line feed.
-			config++;
-		}
-	}
-}
-
 void try_boot_cd() {
 	debug_write("Swap CD now");
 	wait_lid_status(true);
@@ -343,16 +251,13 @@ void try_boot_cd() {
 		// Null terminate
 		data_buffer[read] = '\0';
 
-		if (
-				!config_get_hex((char *) data_buffer, "TCB", &tcb) ||
-				!config_get_hex((char *) data_buffer, "EVENT", &event) ||
-				!config_get_hex((char *) data_buffer, "STACK", &stacktop) ||
-				!config_get_string((char *) data_buffer, "BOOT", bootfilebuf)
-		) {
-			return;
+		config_get_hex((char *) data_buffer, "TCB", &tcb);
+		config_get_hex((char *) data_buffer, "EVENT", &event);
+		config_get_hex((char *) data_buffer, "STACK", &stacktop);
+		if (config_get_string((char *) data_buffer, "BOOT", bootfilebuf)) {
+			bootfile = bootfilebuf;
 		}
 
-		bootfile = bootfilebuf;
 	} else {
 		uint32_t errorCode = GetLastError();
 		if (errorCode != FILEERR_NOT_FOUND) {
@@ -360,8 +265,14 @@ void try_boot_cd() {
 			return;
 		}
 
-		debug_write("Not found. Using PSX.EXE");
+		debug_write("Not found");
 	}
+
+	// Use string format to reduce ROM usage
+	debug_write("%s = %x", "TCB", tcb);
+	debug_write("%s = %x", "EVENT", event);
+	debug_write("%s = %x", "STACK", stacktop);
+	debug_write("%s = %s", "BOOT", bootfile);
 
 	debug_write("Configuring kernel");
 	SetConf(event, tcb, stacktop);

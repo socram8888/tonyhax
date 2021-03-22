@@ -1,0 +1,111 @@
+
+#include "cfgparse.h"
+#include <stddef.h>
+#include <stdbool.h>
+#include "bios.h"
+#include "debugscreen.h"
+
+const char * advance_until_start(const char * config) {
+	// Advance until the start
+	while (1) {
+		switch (*config) {
+			// Skip spaces and equals
+			case ' ':
+			case '\t':
+			case '=':
+				config++;
+				break;
+
+			// Early end of line
+			case '\0':
+			case '\n':
+			case '\r':
+				return NULL;
+
+			// Found content
+			default:
+				return config;
+		}
+	}
+}
+
+bool config_get_hex(const char * config, const char * wanted, uint32_t * value) {
+	uint32_t wanted_len = strlen(wanted);
+
+	while (true) {
+		// Check if first N characters match
+		if (strncmp(config, wanted, wanted_len) == 0) {
+			// Perfect, we're on the right line. Advance.
+			config += wanted_len;
+
+			// Keep parsing until we hit the end of line or the end of file
+			uint32_t parsed = 0;
+			while (*config != '\n' && *config != '\0') {
+				uint32_t digit = todigit(*config);
+				if (digit < 0x10) {
+					parsed = parsed << 4 | digit;
+				}
+				config++;
+			}
+
+			// Save and return
+			*value = parsed;
+			return true;
+
+		} else {
+			// No luck. Advance until next line.
+			config = strchr(config, '\n');
+			
+			// If this is the last line, abort.
+			if (config == NULL) {
+				debug_write("Missing %s", wanted);
+				return false;
+			}
+
+			// Advance to skip line feed.
+			config++;
+		}
+	}
+}
+
+bool config_get_string(const char * config, const char * wanted, char * value) {
+	uint32_t wanted_len = strlen(wanted);
+
+	while (true) {
+		// Check if first N characters match
+		if (strncmp(config, wanted, wanted_len) == 0) {
+			// Perfect, we're on the right line. Advance.
+			config += wanted_len;
+
+			// Advance until the start
+			while (*config == ' ' || *config == '=') {
+				config++;
+			}
+
+			// Copy until space or end of file
+			char * valuecur = value;
+			while (*config != '\0' && *config != '\n' && *config != '\r' && *config != ' ') {
+				*valuecur = *config;
+				config++;
+				valuecur++;
+			}
+
+			// Null terminate and return
+			*valuecur = '\0';
+			return true;
+
+		} else {
+			// No luck. Advance until next line.
+			config = strchr(config, '\n');
+			
+			// If this is the last line, abort.
+			if (config == NULL) {
+				debug_write("Missing %s", wanted);
+				return false;
+			}
+
+			// Advance to skip line feed.
+			config++;
+		}
+	}
+}
