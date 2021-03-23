@@ -2,6 +2,7 @@
 #include "cfgparse.h"
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
 #include "bios.h"
 #include "debugscreen.h"
 

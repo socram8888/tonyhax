@@ -9,6 +9,7 @@
 #include "debugscreen.h"
 #include "cfgparse.h"
 #include "hash.h"
+#include "patcher.h"
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
 const uint32_t tty_enabled = 0;
@@ -282,6 +283,8 @@ void try_boot_cd() {
 		debug_write("Loading failed");
 		return;
 	}
+
+	patch_game(data_buffer);
 
 	debug_write("Starting");
 	DoExecute(data_buffer, 0, 0);

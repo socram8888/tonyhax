@@ -1,7 +1,7 @@
 
 # Thanks to whoever made https://devhints.io/makefile!
 
-TONYHAX_VERSION=v1.2.1
+TONYHAX_VERSION=v1.2.2b
 
 CC=mips-linux-gnu-gcc
 CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mabi=32 -mfp32 -nostdlib -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -O1 -DTONYHAX_VERSION=$(TONYHAX_VERSION)

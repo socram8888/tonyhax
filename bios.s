@@ -62,6 +62,16 @@ strchr:
 	li $t1, 0x1E
 	j 0xA0
 
+.global memcpy
+memcpy:
+	li $t1, 0x2A
+	j 0xA0
+
+.global memset
+memset:
+	li $t1, 0x2B
+	j 0xA0
+
 .global LoadExeFile
 LoadExeFile:
 	li $t1, 0x42

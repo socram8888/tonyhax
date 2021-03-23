@@ -161,50 +161,6 @@ void FileClose(int32_t fd);
 uint32_t todigit(char c);
 
 /**
- * Compares two strings.
- *
- * Table A, call 0x17.
- *
- * @param a first string
- * @param b second string
- * @returns zero if they are equal, or the difference between the first different byte.
- */
-int32_t strcmp(const char * a, const char * b);
-
-/**
- * Compares two strings with a length limit.
- *
- * Table A, call 0x18.
- *
- * @param a first string
- * @param b second string
- * @param maxlen max length
- * @returns zero if they are equal, or the difference between the first different byte.
- */
-int32_t strncmp(const char * a, const char * b, uint32_t maxlen);
-
-/**
- * Calculates the length of a string.
- *
- * Table A, call 0x1B.
- *
- * @param str string
- * @returns string length, or zero if null
- */
-uint32_t strlen(const char * str);
-
-/**
- * Returns a pointer to the first occurence of the character in the string, or NULL if not found.
- *
- * Table A, call 0x1B.
- *
- * @param haystack string in which to search
- * @param needle character to look for
- * @returns pointer to first occurence, or NULL
- */
-char * strchr(const char * haystack, int needle);
-
-/**
  * Loads an executable to main memory.
  *
  * @param filename executable path
