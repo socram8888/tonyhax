@@ -26,7 +26,7 @@ struct game {
 
 const struct game GAMES[] = {
 	{
-		.name = "Tombi 2 (NTSC-U)",
+		.name = "Tomba 2 (US)",
 		.hash = 0x4122E9DC,
 		.patches = (struct patch[]) {
 			{
