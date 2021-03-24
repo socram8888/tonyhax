@@ -36,6 +36,18 @@ const struct game GAMES[] = {
 				.flags = FLAG_LAST | FLAG_NOP,
 			}
 		}
+	},
+	{
+		.name = "YuGiOh FM (US)",
+		.hash = 0x896FF9BA,
+		.patches = (struct patch[]) {
+			{
+				// Nuke the call to the check antipiracy function
+				.offset = 0x80043AFC,
+				.size = 24,
+				.flags = FLAG_LAST | FLAG_NOP,
+			}
+		}
 	}
 };
 
@@ -62,7 +74,7 @@ void patch_game(const uint8_t * header) {
 		return;
 	}
 
-	debug_write("Detected: %s", game->name);
+	debug_write("Game: %s", game->name);
 
 	const struct patch * cur_patch = game->patches;
 	while (1) {
