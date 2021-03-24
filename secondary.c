@@ -279,12 +279,27 @@ void try_boot_cd() {
 	SetConf(event, tcb, stacktop);
 
 	debug_write("Loading executable");
+	if (!LoadExeHeader(bootfile, data_buffer)) {
+		debug_write("Loading failed");
+		return;
+	}
+
+	exe_header_t * exe_header = (exe_header_t *) data_buffer;
+
+	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
+	// since that's all we can do.
+	if (exe_header->load_addr + exe_header->load_size >= data_buffer) {
+		debug_write("Won't fit. Using BIOS.");
+		LoadAndExecute(bootfile, exe_header->initial_sp_base, exe_header->initial_sp_offset);
+		return;
+	}
+
 	if (!LoadExeFile(bootfile, data_buffer)) {
 		debug_write("Loading failed");
 		return;
 	}
 
-	patch_game(data_buffer);
+	patch_game(exe_header);
 
 	debug_write("Starting");
 	DoExecute(data_buffer, 0, 0);

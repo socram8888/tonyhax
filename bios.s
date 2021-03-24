@@ -72,6 +72,11 @@ memset:
 	li $t1, 0x2B
 	j 0xA0
 
+.global LoadExeHeader
+LoadExeHeader:
+	li $t1, 0x41
+	j 0xA0
+
 .global LoadExeFile
 LoadExeFile:
 	li $t1, 0x42
@@ -118,6 +123,11 @@ GPU_cw:
 .global GPU_cwp
 GPU_cwp:
 	li $t1, 0x4A
+	j 0xA0
+
+.global LoadAndExecute
+LoadAndExecute:
+	li $t1, 0x51
 	j 0xA0
 
 .global CdInit

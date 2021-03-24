@@ -76,11 +76,8 @@ const struct game * find_game(uint32_t hash) {
 	return NULL;
 }
 
-void patch_game(const uint8_t * header) {
-	uint32_t load_offset = *((const uint32_t *) (header + 0x08));
-	uint32_t exec_size   = *((const uint32_t *) (header + 0x0C));
-
-	uint32_t exec_hash = cdb_hash((uint8_t *) load_offset, exec_size);
+void patch_game(const exe_header_t * header) {
+	uint32_t exec_hash = cdb_hash(header->load_addr, header->load_size);
 	debug_write("Exec hash: %x", exec_hash);
 
 	const struct game * game = find_game(exec_hash);

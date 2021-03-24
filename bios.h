@@ -3,6 +3,21 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+struct exe_header {
+	uint32_t initial_pc; // 0x00
+	uint32_t initial_gp; // 0x04
+	uint8_t * load_addr; // 0x08
+	uint32_t load_size; // 0x0C
+	uint32_t _reserved0[2]; // 0x10
+	uint32_t memfill_start; // 0x18
+	uint32_t memfill_size; // 0x1C
+	uint32_t initial_sp_base; // 0x20
+	uint32_t initial_sp_offset; // 0x24
+	uint8_t _reserved1[20];
+};
+
+typedef struct exe_header exe_header_t;
+
 /*
  * SYSCALLS
  */
@@ -161,6 +176,16 @@ void FileClose(int32_t fd);
 uint32_t todigit(char c);
 
 /**
+ * Loads the header of an executable to main memory.
+ *
+ * @param filename executable path
+ * @param headerbuf header buffer
+ *
+ * Table A, call 0x42.
+ */
+bool LoadExeHeader(const char * filename, uint8_t * headerbuf);
+
+/**
  * Loads an executable to main memory.
  *
  * @param filename executable path
@@ -246,6 +271,17 @@ int GPU_cw(uint32_t gp0cmd);
  * Table A, call 0x4A.
  */
 void GPU_cwp(uint32_t * src, uint32_t num);
+
+/**
+ * Loads and executes the given file.
+ *
+ * @param filename executable path
+ * @param stackbase stack pointer base
+ * @param stackoffset stack pointer offset
+ *
+ * Table A, call 0x51.
+ */
+bool LoadAndExecute(const char * filename, uint32_t stack_base, uint32_t stack_offset);
 
 /**
  * Initializes the CD drive and filesystem
