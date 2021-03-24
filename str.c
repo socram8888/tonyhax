@@ -2,6 +2,21 @@
 #include "str.h"
 #include <stddef.h>
 
+int isspace(int c) {
+	switch (c) {
+		case ' ':
+		case '\r':
+		case '\n':
+		case '\t':
+		case '\v':
+		case '\f':
+			return 1;
+
+		default:
+			return 0;
+	}
+}
+
 int mini_vsprintf(char * str, const char * format, va_list args) {
 	char * pos = str;
 

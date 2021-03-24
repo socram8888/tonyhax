@@ -1,8 +1,8 @@
 
-#include "cfgparse.h"
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
+#include "str.h"
 #include "bios.h"
 #include "debugscreen.h"
 
@@ -86,7 +86,7 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 
 	// Copy until space or end of file
 	char * valuecur = value;
-	while (*config != '\0' && *config != '\n' && *config != '\r' && *config != ' ') {
+	while (*config != '\0' && !isspace(*config)) {
 		*valuecur = *config;
 		config++;
 		valuecur++;
