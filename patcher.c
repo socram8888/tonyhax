@@ -25,6 +25,7 @@ struct game {
 };
 
 const struct game GAMES[] = {
+	// Tomba! 2 - The Evil Swine Return (NTSC-U) (SCUS-94454)
 	{
 		.name = "Tomba 2 (US)",
 		.hash = 0x4122E9DC,
@@ -37,6 +38,7 @@ const struct game GAMES[] = {
 			}
 		}
 	},
+	// YuGiOh Forbidden Memories (NTSC-U) (SLUS-01411)
 	{
 		.name = "YuGiOh FM (US)",
 		.hash = 0x896FF9BA,
@@ -44,7 +46,20 @@ const struct game GAMES[] = {
 			{
 				// Nuke the call to the check antipiracy function
 				.offset = 0x80043AFC,
-				.size = 24,
+				.size = 20,
+				.flags = FLAG_LAST | FLAG_NOP,
+			}
+		}
+	},
+	// YuGiOh Forbidden Memories (PAL-SP) (SLES-03951)
+	{
+		.name = "YuGiOh FM (ES)",
+		.hash = 0xA0E27DC8,
+		.patches = (struct patch[]) {
+			{
+				// Nuke the call to the check antipiracy function
+				.offset = 0x80043F30,
+				.size = 20,
 				.flags = FLAG_LAST | FLAG_NOP,
 			}
 		}
