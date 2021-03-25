@@ -44,7 +44,7 @@ const struct game GAMES[] = {
 	 * part of some convoluted, Spyro-3-like booby trap.
 	 */
 	{
-		.crc = 0xDEADBEEF,
+		.crc = 0x9F44049C,
 		.patches = (const struct patch[]) {
 			{
 				// Nuke call to antipiracy
@@ -68,7 +68,7 @@ const struct game GAMES[] = {
 	 * check the BIOS region).
 	 */
 	{
-		.crc = 0xDEADBEEF,
+		.crc = 0xD88B9630,
 		.patches = (const struct patch[]) {
 			{
 				// Nuke the call to the check antipiracy function
@@ -84,7 +84,7 @@ const struct game GAMES[] = {
 	 * It is loaded via CDROM DMA (so don't try to intercept the read via memory write breakpoints)
 	 */
 	{
-		.crc = 0xDEADBEEF,
+		.crc = 0x96382505,
 		.patches = (const struct patch[]) {
 			{
 				// Nuke the call to the check antipiracy function
@@ -98,7 +98,7 @@ const struct game GAMES[] = {
 	 * YuGiOh Forbidden Memories (PAL-SP) (SLES-03951)
 	 */
 	{
-		.crc = 0xDEADBEEF,
+		.crc = 0x9DA374C3,
 		.patches = (const struct patch[]) {
 			{
 				// Nuke the call to the check antipiracy function
