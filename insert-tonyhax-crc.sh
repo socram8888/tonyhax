@@ -5,7 +5,7 @@ set -euo pipefail
 crc32() {
 	# Super hacky way of calculating a CRC32
 	# From https://stackoverflow.com/a/49446525/4454028
-	gzip -c1 | tail -c 8 | od -N4 -An -tx4 | tr -dc [a-f0-9]
+	gzip -c1 | tail -c 8 | od -N4 -An -tx4 | tr -dc [a-f0-9] | tr [a-f] [A-F]
 }
 
 if [ $# -ne 2 ]; then
