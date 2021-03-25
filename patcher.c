@@ -25,6 +25,21 @@ struct game {
 
 const struct game GAMES[] = {
 	/*
+	 * Rockman X5 (NTSC-J) (SLPM-86666)
+	 * Copycat of Tomba 2! Boring.
+	 */
+	{
+		.crc = 0xBD535D34,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x80013230,
+				.size = 4,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Tokimeki Memorial 2 (NTSC-J) (SLPM-86355)
 	 *
 	 * Call is loaded obfuscated from CDPACK00.BIN offset 0x800, and gets loaded to 0x8001000
