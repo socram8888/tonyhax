@@ -37,9 +37,11 @@ realstart:
 
 #ifdef MCINIT
 
+#ifndef NOPAINT
 	# Paint purple
 	li a0, 0xFF00FF
 	bal paintscr
+#endif
 
 	# Load B table address
 	li s3, 0xB0
@@ -59,9 +61,11 @@ realstart:
 
 #endif
 
+#ifndef NOPAINT
 	# Paint blue
 	li a0, 0xFF0000
 	bal paintscr
+#endif
 
 	# Call FileOpen
 	li t1, 0x00
@@ -90,22 +94,27 @@ realstart:
 	move a0, s1
 	jalr s0
 
+#ifndef NOPAINT
 	# Paint green
 	li a0, 0x00FF00
 	bal paintscr
+#endif
 
 	# Jump to it!
 	li s0, LOAD_ADDR+0x100
 	jr s0
 
 fail:
+#ifndef NOPAINT
 	# Red
 	li a0, 0x0000FF
 	bal paintscr
+#endif
 
 lock:
 	b lock
 
+#ifndef NOPAINT
 paintscr:
 	# Add command byte to a0
 	li t0, 0x02000000
@@ -129,6 +138,7 @@ redscreen:
 	.word 0x00000000
 	# Width of 1024, height of 512
 	.word 0x01FF03FF
+#endif
 
 splname:
 	.asciiz "bu00:BESLEM-99999TONYHAX"

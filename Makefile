@@ -67,6 +67,9 @@ $(PACKAGE_FILE): $(PACKAGE_CONTENTS)
 
 # Entry target
 
+entry-quick-nopaint.elf: entry.S
+	$(CC) $(CFLAGS) -DNOPAINT entry.S -o entry-quick-nopaint.elf
+
 entry-quick.elf: entry.S
 	$(CC) $(CFLAGS) entry.S -o entry-quick.elf
 
@@ -185,6 +188,14 @@ superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
 superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-quick.bin
 	cp superbike2-eu-tpl.mcs superbike2-eu.mcs
 	dd conv=notrunc if=entry-quick.bin of=superbike2-eu.mcs bs=1 seek=824
+
+
+# Tekken 2 PAL-EU target
+tekken2-eu.mcs: tekken2-eu-tpl.mcs entry-quick-nopaint.bin
+	cp tekken2-eu-tpl.mcs tekken2-eu.mcs
+	python3 tekken_decoder.py tekken2-eu.mcs tekken2-eu-decoded.bin
+	dd conv=notrunc if=entry-quick-nopaint.bin of=tekken2-eu-decoded.bin bs=1 seek=48
+	python3 tekken_encoder.py tekken2-eu.mcs tekken2-eu-decoded.bin tekken2-eu.mcs
 
 # THPS2 NTSC-US target
 thps2-us.mcs: thps2-us-tpl.mcs entry-quick.bin
