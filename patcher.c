@@ -25,7 +25,37 @@ struct game {
 
 const struct game GAMES[] = {
 	/*
-	 * Rockman X5 (NTSC-J) (SLPM-86666)
+	 * Legend of Dragoon (E) (SCES-03043)
+	 * Plain antipiracy call in a loop.
+	 */
+	{
+		.crc = 0xD89B3731,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x801C0640,
+				.size = 12,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
+	 * Legend of Dragoon (S) (SCES-03047)
+	 * Plain antipiracy call in a loop.
+	 */
+	{
+		.crc = 0xF45338FE,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x801C064C,
+				.size = 12,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
+	 * Rockman X5 (J) (SLPM-86666)
 	 * Copycat of Tomba 2! Boring.
 	 */
 	{
@@ -40,7 +70,7 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
-	 * Tokimeki Memorial 2 (NTSC-J) (SLPM-86355)
+	 * Tokimeki Memorial 2 (J) (SLPM-86355)
 	 *
 	 * Call is loaded obfuscated from CDPACK00.BIN offset 0x800, and gets loaded to 0x8001000
 	 * via CD-ROM DMA (note that write breakpoints don't work in no$psx for DMAs).
@@ -49,8 +79,8 @@ const struct game GAMES[] = {
 	 * the antipiracy main function (at 0x8001146C) gets called from 0x80017A24.
 	 *
 	 * Nuking the call isn't enough as this function sets some global variables:
-	 *	*((uint32_t *) 0x8006C69C) = 0x21D; <<< in .data section
-	 *	*((uint16_t *) 0x80076BEC) |= 0x8000; <<< in .bss section
+	 *  *((uint32_t *) 0x8006C69C) = 0x21D; <<< in .data section
+	 *  *((uint16_t *) 0x80076BEC) |= 0x8000; <<< in .bss section
 	 *  *((uint8_t *)  0x80076BEF) = 1; <<< in .bss section
 	 *
 	 * Without setting the first the game crashes with an invalid opcode exception, but the later
@@ -78,7 +108,7 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
-	 * Tomba! 2 - The Evil Swine Return (NTSC-U) (SCUS-94454)
+	 * Tomba! 2 - The Evil Swine Return (U) (SCUS-94454)
 	 * Easy to find by looking for reads to address 0xBFC7FF52 (the one the antipiracy uses to
 	 * check the BIOS region).
 	 */
@@ -94,7 +124,7 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
-	 * YuGiOh Forbidden Memories (NTSC-U) (SLUS-01411)
+	 * YuGiOh Forbidden Memories (U) (SLUS-01411)
 	 * This game has the check function in the WA_MRG.MRG file.
 	 * It is loaded via CDROM DMA (so don't try to intercept the read via memory write breakpoints)
 	 */
@@ -110,7 +140,7 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
-	 * YuGiOh Forbidden Memories (PAL-SP) (SLES-03951)
+	 * YuGiOh Forbidden Memories (S) (SLES-03951)
 	 */
 	{
 		.crc = 0x9DA374C3,
@@ -144,12 +174,9 @@ void patch_game(const exe_header_t * header) {
 		return;
 	}
 
-	debug_write("Patching:");
-
+	debug_write("Patching");
 	const struct patch * cur_patch = game->patches;
 	while (1) {
-		debug_write(" - %x", cur_patch->offset);
-
 		uint8_t * patch_dest = (uint8_t *) cur_patch->offset;
 		if (cur_patch->flags & FLAG_NOP) {
 			memset(patch_dest, 0, cur_patch->size);
