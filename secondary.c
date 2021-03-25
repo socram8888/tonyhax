@@ -5,10 +5,10 @@
 #include <string.h>
 #include "bios.h"
 #include "cdrom.h"
-#include "gpu.h"
-#include "debugscreen.h"
 #include "cfgparse.h"
-#include "hash.h"
+#include "crc.h"
+#include "debugscreen.h"
+#include "gpu.h"
 #include "patcher.h"
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
@@ -85,12 +85,12 @@ void reinit_kernel() {
 
 bool test_integrity() {
 	/*
-	 * The integrity consists of cdb hash inside the title frame after the title name,
+	 * The integrity consists of a CRC32 inside the title frame after the title name,
 	 * at offset 0x4C.
 	 * This hash is calculated over all the read-only payload.
 	 */
 	uint32_t correct_value = *((uint32_t * ) (&__ROM_START__ - 0x100 + 0x4C));
-	uint32_t calc_value = cdb_hash(&__ROM_START__, &__ROM_END__ - &__ROM_START__);
+	uint32_t calc_value = crc32(&__ROM_START__, &__ROM_END__ - &__ROM_START__);
 
 	bool ok = correct_value == calc_value;
 	debug_write("Integrity check %sed", ok ? "pass" : "fail");
@@ -121,28 +121,23 @@ bool backdoor_cmd(uint_fast8_t cmd, const char * string) {
 	cd_command(cmd, (const uint8_t *) string, strlen(string));
 
 	// Check if INT5, else fail
-	uint_fast8_t interrupt = cd_wait_int();
 	if (cd_wait_int() != 5) {
-		debug_write("Bdoor invalid INT %x", interrupt);
 		return false;
 	}
 
 	// Check length
 	uint_fast8_t reply_len = cd_read_reply(cd_reply);
 	if (reply_len != 2) {
-		debug_write("Bdoor invalid len %x", reply_len);
 		return false;
 	}
 
 	// Check there is an error flagged
 	if (!(cd_reply[0] & 0x01)) {
-		debug_write("Backdoor reply invalid");
 		return false;
 	}
 
 	// Check error code
 	if (cd_reply[1] != 0x40) {
-		debug_write("Backdoor reply invalid");
 		return false;
 	}
 
@@ -199,6 +194,7 @@ bool unlock_drive() {
 			!backdoor_cmd(0x55, p5_localized) ||
 			!backdoor_cmd(0x56, NULL)
 	) {
+		debug_write("Backdoor reply invalid");
 		return false;
 	}
 
