@@ -45,7 +45,7 @@ const struct game GAMES[] = {
 	 */
 	{
 		.crc = 0xDEADBEEF,
-		.patches = (struct patch[]) {
+		.patches = (const struct patch[]) {
 			{
 				// Nuke call to antipiracy
 				.offset = 0x80017A24,
@@ -58,7 +58,7 @@ const struct game GAMES[] = {
 				.offset = 0x8006C69C,
 				.size = 2,
 				.flags = FLAG_LAST,
-				.data = (uint8_t[]) { 0x1D, 0x02 }
+				.data = (const uint8_t[]) { 0x1D, 0x02 }
 			}
 		}
 	},
@@ -69,7 +69,7 @@ const struct game GAMES[] = {
 	 */
 	{
 		.crc = 0xDEADBEEF,
-		.patches = (struct patch[]) {
+		.patches = (const struct patch[]) {
 			{
 				// Nuke the call to the check antipiracy function
 				.offset = 0x8001127C,
@@ -85,7 +85,7 @@ const struct game GAMES[] = {
 	 */
 	{
 		.crc = 0xDEADBEEF,
-		.patches = (struct patch[]) {
+		.patches = (const struct patch[]) {
 			{
 				// Nuke the call to the check antipiracy function
 				.offset = 0x80043AFC,
@@ -99,7 +99,7 @@ const struct game GAMES[] = {
 	 */
 	{
 		.crc = 0xDEADBEEF,
-		.patches = (struct patch[]) {
+		.patches = (const struct patch[]) {
 			{
 				// Nuke the call to the check antipiracy function
 				.offset = 0x80043F30,
