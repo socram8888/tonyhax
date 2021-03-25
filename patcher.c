@@ -25,7 +25,7 @@ struct game {
 
 const struct game GAMES[] = {
 	/*
-	 * Legend of Dragoon (E) (SCES-03043)
+	 * Legend of Dragoon (E) (Disc 1) (SCES-03043)
 	 * Plain antipiracy call in a loop.
 	 */
 	{
@@ -40,7 +40,52 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
-	 * Legend of Dragoon (S) (SCES-03047)
+	 * Legend of Dragoon (F) (Disc 1) (SCES-03044)
+	 * Plain antipiracy call in a loop.
+	 */
+	{
+		.crc = 0x7F603194,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x801C0620,
+				.size = 12,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
+	 * Legend of Dragoon (G) (Disc 1) (SCES-03045)
+	 * Plain antipiracy call in a loop.
+	 */
+	{
+		.crc = 0xF72B58F8,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x801C05DC,
+				.size = 12,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
+	 * Legend of Dragoon (I) (Disc 1) (SCES-03046)
+	 * Plain antipiracy call in a loop.
+	 */
+	{
+		.crc = 0x70EFD7A8,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x801C05D4,
+				.size = 12,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
+	 * Legend of Dragoon (S) (Disc 1) (SCES-03047)
 	 * Plain antipiracy call in a loop.
 	 */
 	{
@@ -70,7 +115,7 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
-	 * Tokimeki Memorial 2 (J) (SLPM-86355)
+	 * Tokimeki Memorial 2 (J) (Disc 1) (SLPM-86355)
 	 *
 	 * Call is loaded obfuscated from CDPACK00.BIN offset 0x800, and gets loaded to 0x8001000
 	 * via CD-ROM DMA (note that write breakpoints don't work in no$psx for DMAs).
