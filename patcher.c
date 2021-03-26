@@ -153,6 +153,28 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Tokimeki Memorial 2 [Konami The Best] (J) (Disc 1) (SLPM-86723)
+	 */
+	{
+		.crc = 0x16CF7197,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x80017A24,
+				.size = 4,
+				.flags = FLAG_NOP
+			},
+			{
+				// Write some variable the game checks.
+				// We have to write 0x0000021D, but the last two are already zero.
+				.offset = 0x8006C708,
+				.size = 2,
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) { 0x1D, 0x02 }
+			}
+		}
+	},
+	/*
 	 * Tomba! 2 - The Evil Swine Return (U) (SCUS-94454)
 	 * Easy to find by looking for reads to address 0xBFC7FF52 (the one the antipiracy uses to
 	 * check the BIOS region).
