@@ -100,6 +100,22 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Ore No Ryouri (J) (SCPS-10099)
+	 * Plain antipiracy. No access to 0xBFC7FF52, but super easy to find by looking for a
+	 * function with a blatantly obfuscated flow.
+	 */
+	{
+		.crc = 0xDB2DA23C,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x800330B0,
+				.size = 12,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Rockman X5 (J) (SLPM-86666)
 	 * Copycat of Tomba 2! Boring.
 	 */
