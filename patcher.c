@@ -131,6 +131,24 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Tetris with Card Captor Sakura - Eternal Heart (J) (SLPS-02886)
+	 * Plain call, but this one checks the function return value.
+	 */
+	{
+		.crc = 0x8E11C761,
+		.patches = (const struct patch[]) {
+			{
+				 // Replace the call with a "ori v0,0,$1"
+				.offset = 0x8001FFC4,
+				.size = 4,
+				.flags = FLAG_LAST
+				.bytes = (const uint8_t[]) {
+					0x01, 0x00, 0x02, 0x34
+				}
+			}
+		}
+	},
+	/*
 	 * Tokimeki Memorial 2 (J) (Disc 1) (SLPM-86355)
 	 *
 	 * Call is loaded obfuscated from CDPACK00.BIN offset 0x800, and gets loaded to 0x8001000
