@@ -141,10 +141,8 @@ const struct game GAMES[] = {
 				 // Replace the call with a "ori v0,0,$1"
 				.offset = 0x8001FFC4,
 				.size = 4,
-				.flags = FLAG_LAST
-				.data = (const uint8_t[]) {
-					0x01, 0x00, 0x02, 0x34
-				}
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) { 0x01, 0x00, 0x02, 0x34 }
 			}
 		}
 	},
