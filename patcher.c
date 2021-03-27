@@ -142,7 +142,7 @@ const struct game GAMES[] = {
 				.offset = 0x8001FFC4,
 				.size = 4,
 				.flags = FLAG_LAST
-				.bytes = (const uint8_t[]) {
+				.data = (const uint8_t[]) {
 					0x01, 0x00, 0x02, 0x34
 				}
 			}
