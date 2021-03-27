@@ -21,4 +21,4 @@ Before opening this kind of issue, please ensure:
 **Target game**: If the bug happens when launching a game, what's its name and game code? Example: "Spyro 3 (SCES-02835)"
 
 **Bug explanation**:
-Please write a detailed explanation on which issue are you experienced.
+Please write a detailed explanation on which issue are you experiencing.
