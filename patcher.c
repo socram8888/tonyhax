@@ -131,6 +131,47 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Seiken Densetsu (J) (SLPS-02170)
+	 *
+	 * A though one.
+	 *
+	 * This game, at offset 0x800111DC, calls a function in RAM at 0x8004FE7C, which gets
+	 * dynamically decompressed from one of the data files (dunno which).
+	 *
+	 * This function is a pretty complex one and does a myriad of things, including initializing
+	 * the video and the audio, and checking antipiracy using a function at 0x80050EA0. Thus we
+	 * cannot stub the entire function call, or it'd crash.
+	 *
+	 * Instead, we'll use a shim that intercepts the call at 0x800111DC, stubs the calls to
+	 * antipiracy, and then continue with the normal program flow.
+	 */
+	{
+		.crc = 0x8F2902AA,
+		.patches = (const struct patch[]) {
+			{
+				// Replace the "jal 0x8004FE7C" with a jal to our patcher
+				.offset = 0x800111DC,
+				.size = 4,
+				.data = (const uint8_t[]) {
+					0x5F, 0x42, 0x00, 0x0C, // "jal 0x8001097C"
+				}
+			},
+			{
+				// Insert the patcher in place of a debug string
+				.offset = 0x8001097C,
+				.size = 20,
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) {
+					0x02, 0x24, 0x08, 0x3C, // "li $t0, 0x24020000", where the constant is "li $v0, 0"
+					0x05, 0x80, 0x09, 0x3C, // "lui $t1, 0x8005"
+					0x30, 0x07, 0x28, 0xAD, // "sw $t0, 0x0730($t1)" to insert at 0x80050730 a "li $v0, 0" in place of the original "jal 0x80050EA0"
+					0x9F, 0x3F, 0x01, 0x08, // "j 0x8004FE7C" to continue with the normal flow
+					0x44, 0x07, 0x28, 0xAD  // "sw $t0, 0x0744($t1)" to insert at 0x80050744 a "li $v0, 0" in place of the original "jal 0x80050EA0"
+				}
+			}
+		}
+	},
+	/*
 	 * Tetris with Card Captor Sakura - Eternal Heart (J) (SLPS-02886)
 	 * Plain call, but this one checks the function return value.
 	 */
