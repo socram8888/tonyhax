@@ -126,40 +126,6 @@ void ExitCriticalSection();
 #define FILEERR_DEV_FULL 0x1C
 
 /**
- * Opens a file on the target device for I/O.
- *
- * Table A, call 0x00.
- *
- * @param path file path
- * @param access access flags
- * @returns file handle, or -1 on error.
- */
-int32_t FileOpen(const char * filename, uint32_t accessmode);
-
-/**
- * Reads the number of bytes from the specified open file.
- *
- * Must be a multiple of 128 bytes for memory card, and 2048 for CD-ROM.
- *
- * Table A, call 0x02.
- *
- * @param fd file handle
- * @param dst data buffer
- * @param length max data length
- * @returns number of bytes read
- */
-int32_t FileRead(int32_t fd, void * dst, uint32_t length);
-
-/**
- * Closes an open file.
- *
- * Table A, call 0x04.
- *
- * @param fd file handle
- */
-void FileClose(int32_t fd);
-
-/**
  * Converts a digit to its numeric value:
  *
  * - '0' to '9' returns 0 to 9
@@ -304,6 +270,40 @@ void SetConf(uint32_t evcb, uint32_t tcb, uint32_t stacktop);
 /*
  * B-FUNCTIONS
  */
+
+/**
+ * Opens a file on the target device for I/O.
+ *
+ * Table B, call 0x32.
+ *
+ * @param path file path
+ * @param access access flags
+ * @returns file handle, or -1 on error.
+ */
+int32_t FileOpen(const char * filename, uint32_t accessmode);
+
+/**
+ * Reads the number of bytes from the specified open file.
+ *
+ * Must be a multiple of 128 bytes for memory card, and 2048 for CD-ROM.
+ *
+ * Table B, call 0x34.
+ *
+ * @param fd file handle
+ * @param dst data buffer
+ * @param length max data length
+ * @returns number of bytes read
+ */
+int32_t FileRead(int32_t fd, void * dst, uint32_t length);
+
+/**
+ * Closes an open file.
+ *
+ * Table B, call 0x36.
+ *
+ * @param fd file handle
+ */
+void FileClose(int32_t fd);
 
 /**
  * Returns the error code for the last failed file operation.

@@ -22,21 +22,6 @@ ExitCriticalSection:
 # A-FUNCTIONS #
 ###############
 
-.global FileOpen
-FileOpen:
-	li $t1, 0x00
-	j 0xA0
-
-.global FileRead
-FileRead:
-	li $t1, 0x02
-	j 0xA0
-
-.global FileClose
-FileClose:
-	li $t1, 0x04
-	j 0xA0
-
 .global todigit
 todigit:
 	li $t1, 0x0A
@@ -143,6 +128,21 @@ SetConf:
 ###############
 # B-FUNCTIONS #
 ###############
+
+.global FileOpen
+FileOpen:
+	li $t1, 0x32
+	j 0xB0
+
+.global FileRead
+FileRead:
+	li $t1, 0x34
+	j 0xB0
+
+.global FileClose
+FileClose:
+	li $t1, 0x36
+	j 0xB0
 
 .global GetLastError
 GetLastError:
