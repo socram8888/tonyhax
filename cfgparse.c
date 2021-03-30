@@ -6,30 +6,6 @@
 #include "bios.h"
 #include "debugscreen.h"
 
-const char * advance_until_start(const char * config) {
-	// Advance until the start
-	while (1) {
-		switch (*config) {
-			// Skip spaces and equals
-			case ' ':
-			case '\t':
-			case '=':
-				config++;
-				break;
-
-			// Early end of line
-			case '\0':
-			case '\n':
-			case '\r':
-				return NULL;
-
-			// Found content
-			default:
-				return config;
-		}
-	}
-}
-
 const char * find_wanted(const char * config, const char * wanted) {
 	uint32_t wanted_len = strlen(wanted);
 
@@ -80,7 +56,7 @@ bool config_get_string(const char * config, const char * wanted, char * value) {
 	}
 
 	// Advance until the start
-	while (*config == ' ' || *config == '=') {
+	while (*config == '=' || isspace(*config)) {
 		config++;
 	}
 
