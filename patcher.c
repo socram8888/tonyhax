@@ -25,6 +25,78 @@ struct game {
 
 const struct game GAMES[] = {
 	/*
+	 * Aconcagua (J) (Disc 1) (SCPS-10131)
+	 *
+	 * Another though one.
+	 *
+	 * This one uses the main executable just as a loader for other dynamically-loaded executables,
+	 * that are loaded from PROGRAM.BIN.
+	 *
+	 * This is done using a function at 0x80011DE4, which takes in a0 the sector relative to the
+	 * beginning of the PROGRAM.BIN file where to load the executable from (one sector = 2048
+	 * bytes)
+	 *
+	 * Loading uses a complex function at 0x80012108, which is called from 0x80011E2C. This
+	 * loads from the disc the executable and decompresses it.
+	 *
+	 * Executing is just a wrapper around the BIOS DoExecute method, resides at 0x80011E34, and is
+	 * called from 0x80011E34.
+	 *
+	 * Now the details on how the patching works:
+	 *
+	 *  - First, we'll hijack the call at 0x80011E0C (originally "jal 0x80016BA0") so we can save
+	 *    the sector from where the exe is being loaded from, which at that point resides in
+	 *    register s0. This shim will save it into a fixed address into RAM, and then continue
+	 *    the normal execution.
+	 *
+	 *  - Second, we'll hijack the call to the DoExecute wrapper at 0x80011E34 (originally
+	 *    "jal 0x80011E74"). This second shim will check if the loaded executable is the first
+	 *    one (the one that contains the antipiracy, with sector = 0), and if so, will patch the
+	 *    contents. It will then go back to the normal flow.
+	 *
+	 * These shims and sector will be stored at 0x80010D08, which contains just a debug text.
+	 */
+	{
+		.crc = 0x4828F3AD,
+		.patches = (const struct patch[]) {
+			{
+				// Shims
+				.offset = 0x80010D0C,
+				.size = 32,
+				.data = (const uint8_t[]) {
+					// First shim, at 0x80010D0C
+					0xE8, 0x5A, 0x00, 0x08, // "j 0x80016BA0" to continue with the normal execution flow
+					0xF4, 0xEE, 0xF0, 0xAF, // "sw s0, -0x110C(ra)" where -0x110C is the difference between 0x80010D08 and ra (0x80011E14)
+
+					// Second shim, at 0x80010D14
+					0xCC, 0xEE, 0xE8, 0x8F, // "lw t0, -0x1134(ra)" where -0x1134 is the difference between 0x80010D08 and ra (0x80011E3C)
+					0x02, 0x00, 0x00, 0x15, // "bnez t0, 0x80010D24"
+					0x02, 0x80, 0x01, 0x3C, // "lui at, 0x8002"
+					0x94, 0x68, 0x20, 0xAC, // "sw 0, 0x6894(at)" to nuke the call to antipiracy at 0x80026894
+					0x9D, 0x47, 0x00, 0x08, // "j 0x80011E74" to continue with the normal execution flow
+					0x00, 0x00, 0x00, 0x00  // "nop"
+				}
+			},
+			{
+				// Hijack the first call to save the sector
+				.offset = 0x80011E0C,
+				.size = 4,
+				.data = (const uint8_t[]) {
+					0x43, 0x43, 0x00, 0x0C // "jal 0x80010D0C"
+				}
+			},
+			{
+				// Hijack the second call to patch it if required
+				.offset = 0x80011E34,
+				.size = 4,
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) {
+					0x45, 0x43, 0x00, 0x0C // "jal 0x80010D14"
+				}
+			}
+		}
+	},
+	/*
 	 * Legend of Dragoon (E) (Disc 1) (SCES-03043)
 	 * Plain antipiracy call in a loop.
 	 */
