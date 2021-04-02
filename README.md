@@ -19,6 +19,7 @@ These have been tested to work on real hardware:
 | Brunswick Circuit Pro Bowling          | PAL-E  | SLES-01376 | brunswick1-eu.mcs | BESLES-01376         |
 | Brunswick Circuit Pro Bowling 2        | NTSC-U | SLUS-00856 | brunswick2-us.mcs | BASLUS-00856         |
 | Brunswick Circuit Pro Bowling 2        | PAL-E  | SLES-02618 | brunswick2-eu.mcs | BESLES-02618         |
+| Castlevania Chronicles                 | NTSC-U | SLUS-01384 | cc-us.mcs         | BASLUS-01384DRACULA  |
 | Castrol Honda Superbike Racing         | NTSC-U | SLUS-00882 | castrolsb-us.mcs  | BASLUS-00882CHSv1    |
 | Castrol Honda Superbike Racing         | PAL-E  | SLES-01182 | castrolsb-eu.mcs  | BESLES_01182CHSv1    |
 | Castrol Honda VTR                      | PAL-E  | SLES-02942 | castrolvtr-eu.mcs | BESLES-02942CHSVTRv1 |

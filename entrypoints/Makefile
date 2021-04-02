@@ -42,6 +42,11 @@ brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 	cp brunswick2-eu-tpl.mcs brunswick2-eu.mcs
 	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
 
+# Castlevania Chronicles NTSC-US target
+cc-us.mcs: cc-us-tpl.mcs entry-quick.bin
+	cp cc-us-tpl.mcs cc-us.mcs
+	dd conv=notrunc if=entry-quick.bin of=cc-us.mcs bs=1 seek=820
+
 # Castrol Honda Superbike Racing NTSC-US target
 castrolsb-us.mcs: castrolsb-us-tpl.mcs entry-full.bin
 	cp castrolsb-us-tpl.mcs castrolsb-us.mcs
