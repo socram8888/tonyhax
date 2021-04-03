@@ -320,10 +320,11 @@ void main() {
 		return;
 	}
 
-	debug_write("Unlocked successfully!");
-
 	while (1) {
 		try_boot_cd();
+
+		debug_write("Reinitializing kernel");
+		reinit_kernel();
 	}
 }
 
