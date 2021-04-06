@@ -10,6 +10,7 @@
 #include "debugscreen.h"
 #include "gpu.h"
 #include "patcher.h"
+#include "io.h"
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
 const uint32_t tty_enabled = 0;
@@ -61,6 +62,10 @@ void reinit_kernel() {
 
 	// Install default exception handlers
 	InstallExceptionHandlers();
+
+	// Clear interrupts and mask
+	*I_STAT = 0;
+	*I_MASK = 0;
 
 	// Setup devices
 	InstallDevices(tty_enabled);
@@ -298,6 +303,10 @@ void try_boot_cd() {
 	patch_game(exe_header);
 
 	debug_write("Starting");
+
+	// Games from WarmBoot start with interrupts disabled
+	EnterCriticalSection();
+
 	DoExecute(data_buffer, 0, 0);
 }
 
