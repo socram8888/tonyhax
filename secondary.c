@@ -153,7 +153,7 @@ bool unlock_drive() {
 
 	// Should succeed with 3
 	if (cd_wait_int() != 3) {
-		debug_write("Region read fail");
+		debug_write("Region read failed");
 		return false;
 	}
 
@@ -194,7 +194,7 @@ bool unlock_drive() {
 			!backdoor_cmd(0x55, p5_localized) ||
 			!backdoor_cmd(0x56, NULL)
 	) {
-		debug_write("Backdoor reply invalid");
+		debug_write("Backdoor failed");
 		return false;
 	}
 
@@ -314,8 +314,13 @@ void main() {
 
 	log_bios_version();
 
-	debug_write("Unlocking CD drive");
+	debug_write("Resetting drive");
+	if (!cd_drive_init()) {
+		debug_write("Reset failed");
+		return;
+	}
 
+	debug_write("Unlocking drive");
 	if (!unlock_drive()) {
 		return;
 	}

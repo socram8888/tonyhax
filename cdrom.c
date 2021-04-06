@@ -57,6 +57,9 @@ uint_fast8_t cd_wait_int(void) {
 		interrupt = CD_REGS[3] & 0x07;
 	} while (interrupt == 0);
 
+	// Acknowledge it
+	CD_REGS[3] = 0x07;
+
 	// Return it
 	return interrupt;
 }
@@ -78,7 +81,23 @@ uint_fast8_t cd_read_reply(uint8_t * reply_buffer) {
 	return len;
 }
 
-bool cd_reset() {
+bool cd_drive_init() {
+	cd_command(CD_CMD_INIT, NULL, 0);
+
+	// Should succeed with 3
+	if (cd_wait_int() != 3) {
+		return false;
+	}
+
+	// Should then return a 2
+	if (cd_wait_int() != 2) {
+		return false;
+	}
+
+	return true;
+}
+
+bool cd_drive_reset() {
 	// Issue a reset
 	cd_command(CD_CMD_RESET, NULL, 0);
 

@@ -123,19 +123,19 @@ brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
 	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
 
 # Castrol Honda Superbike Racing NTSC-US target
-castrolsb-us.mcs: castrolsb-us-tpl.mcs entry-quick.bin
+castrolsb-us.mcs: castrolsb-us-tpl.mcs entry-full.bin
 	cp castrolsb-us-tpl.mcs castrolsb-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=castrolsb-us.mcs bs=1 seek=1360
+	dd conv=notrunc if=entry-full.bin of=castrolsb-us.mcs bs=1 seek=1360
 
 # Castrol Honda Superbike Racing PAL-EU target
-castrolsb-eu.mcs: castrolsb-eu-tpl.mcs entry-quick.bin
+castrolsb-eu.mcs: castrolsb-eu-tpl.mcs entry-full.bin
 	cp castrolsb-eu-tpl.mcs castrolsb-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=castrolsb-eu.mcs bs=1 seek=1760
+	dd conv=notrunc if=entry-full.bin of=castrolsb-eu.mcs bs=1 seek=1760
 
 # Castrol Honda VTR PAL-EU target
-castrolvtr-eu.mcs: castrolvtr-eu-tpl.mcs entry-quick.bin
+castrolvtr-eu.mcs: castrolvtr-eu-tpl.mcs entry-full.bin
 	cp castrolvtr-eu-tpl.mcs castrolvtr-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=castrolvtr-eu.mcs bs=1 seek=824
+	dd conv=notrunc if=entry-full.bin of=castrolvtr-eu.mcs bs=1 seek=824
 
 # Cool Boarders 4 NTSC-US target
 coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry-quick.bin
@@ -177,14 +177,14 @@ crash3-eu.mcs: crash3-eu-tpl.mcs entry-full.bin
 	bash fix-crash-checksum.sh crash3-eu.mcs eu3
 
 # Sports Superbike PAL-EU target
-superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-quick.bin
+superbike1-eu.mcs: superbike1-eu-tpl.mcs entry-full.bin
 	cp superbike1-eu-tpl.mcs superbike1-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=superbike1-eu.mcs bs=1 seek=1888
+	dd conv=notrunc if=entry-full.bin of=superbike1-eu.mcs bs=1 seek=1888
 
 # Sports Superbike 2 PAL-EU target
-superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-quick.bin
+superbike2-eu.mcs: superbike2-eu-tpl.mcs entry-full.bin
 	cp superbike2-eu-tpl.mcs superbike2-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=superbike2-eu.mcs bs=1 seek=824
+	dd conv=notrunc if=entry-full.bin of=superbike2-eu.mcs bs=1 seek=824
 
 # THPS2 NTSC-US target
 thps2-us.mcs: thps2-us-tpl.mcs entry-quick.bin
@@ -247,11 +247,11 @@ thps4-fr.mcs: thps4-fr-tpl.mcs entry-quick.bin
 	dd conv=notrunc if=entry-quick.bin of=thps4-fr.mcs bs=1 seek=5252
 
 # XS Moto NTSC-US target
-xsmoto-us.mcs: xsmoto-us-tpl.mcs entry-quick.bin
+xsmoto-us.mcs: xsmoto-us-tpl.mcs entry-full.bin
 	cp xsmoto-us-tpl.mcs xsmoto-us.mcs
-	dd conv=notrunc if=entry-quick.bin of=xsmoto-us.mcs bs=1 seek=1760
+	dd conv=notrunc if=entry-full.bin of=xsmoto-us.mcs bs=1 seek=1760
 
 # XS Moto PAL-EU target
-xsmoto-eu.mcs: xsmoto-eu-tpl.mcs entry-quick.bin
+xsmoto-eu.mcs: xsmoto-eu-tpl.mcs entry-full.bin
 	cp xsmoto-eu-tpl.mcs xsmoto-eu.mcs
-	dd conv=notrunc if=entry-quick.bin of=xsmoto-eu.mcs bs=1 seek=1760
+	dd conv=notrunc if=entry-full.bin of=xsmoto-eu.mcs bs=1 seek=1760

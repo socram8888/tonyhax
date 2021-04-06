@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #define CD_CMD_GETSTAT 0x01
+#define CD_CMD_INIT 0x0A
 #define CD_CMD_TEST 0x19
 #define CD_CMD_RESET 0x1C
 #define CD_TEST_REGION 0x22
@@ -33,8 +34,15 @@ uint_fast8_t cd_wait_int(void);
 uint_fast8_t cd_read_reply(uint8_t * reply_buffer);
 
 /**
+ * Reinitializes the CD drive.
+ *
+ * @returns true if succeded, or false otherwise.
+ */
+bool cd_drive_init(void);
+
+/**
  * Resets the drive.
  *
  * @returns true if succeded, or false otherwise.
  */
-bool cd_reset(void);
+bool cd_drive_reset(void);
