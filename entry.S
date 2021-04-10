@@ -9,7 +9,7 @@ LOAD_ADDR = 0x801FA000
 # s0 = A table address
 # s1 = file descriptor
 # s2 = realstart physical address
-# s3 = B table address (on MCINIT only), and later load size
+# s3 = B table address (on MCINIT only), and later load address
 
 __start:
 	# Restore stack pointer
@@ -91,6 +91,7 @@ realstart:
 	# Load executable using FileRead
 	li t1, 0x02
 	move a0, s1
+	addi a1, s3, 0x100
 	lw a2, 0x48(s3)
 	jalr s0
 

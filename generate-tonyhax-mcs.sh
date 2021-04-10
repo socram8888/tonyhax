@@ -20,7 +20,7 @@ version="$4"
 
 # Create file
 cp "$tpl_file" "$mcs_file"
-echo -n "Tonyhax ${version}" | dd conv=notrunc bs=1 seek=132 of="$mcs_file"
+echo -n "tonyhax ${version}" | dd conv=notrunc bs=1 seek=132 of="$mcs_file"
 mips-linux-gnu-objcopy -O binary "$elf_file" /dev/stdout | dd conv=notrunc bs=1 seek=384 of="$mcs_file"
 
 # Extract addresses
