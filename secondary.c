@@ -274,10 +274,10 @@ void try_boot_cd() {
 	}
 
 	// Use string format to reduce ROM usage
-	debug_write("%s = %x", "TCB", tcb);
-	debug_write("%s = %x", "EVENT", event);
-	debug_write("%s = %x", "STACK", stacktop);
-	debug_write("%s = %s", "BOOT", bootfile);
+	debug_write(" * %s = %x", "TCB", tcb);
+	debug_write(" * %s = %x", "EVENT", event);
+	debug_write(" * %s = %x", "STACK", stacktop);
+	debug_write(" * %s = %s", "BOOT", bootfile);
 
 	debug_write("Configuring kernel");
 	SetConf(event, tcb, stacktop);
@@ -298,6 +298,7 @@ void try_boot_cd() {
 
 	// On European games, at 0x4C there is a string that "Sony Computer Entertainment Inc. for Europe area"
 	bool is_european_game = strncmp("Europe", (char *) (data_buffer + 0x71), 6) == 0;
+	debug_write("Game expects %s video", is_european_game ? "PAL" : "NTSC");
 
 	exe_header_t * exe_header = (exe_header_t *) (data_buffer + 0x10);
 
@@ -318,7 +319,7 @@ void try_boot_cd() {
 
 	bool is_pal = gpu_is_pal();
 	if (is_pal != is_european_game) {
-		debug_write("Switching to %s", is_european_game ? "PAL" : "NTSC");
+		debug_write("Switching video mode");
 		gpu_init_bios(is_european_game);
 	}
 
@@ -342,10 +343,6 @@ void main() {
 	}
 
 	log_bios_version();
-
-	for (int i = 0; i < 30; i++) {
-		debug_write("Line %x", i);
-	}
 
 	debug_write("Resetting drive");
 	if (!cd_drive_init()) {

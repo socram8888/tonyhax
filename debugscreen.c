@@ -7,17 +7,18 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define CHAR_HEIGHT 15
-#define CHAR_WIDTH 8
+#define CHAR_ROM_WIDTH 8
+#define CHAR_DRAW_WIDTH (CHAR_ROM_WIDTH + 2)
 #define FONT_X 640
 #define CLUT_X 640
-#define CLUT_Y 6 * CHAR_HEIGHT
+#define CLUT_Y (6 * CHAR_HEIGHT)
 
 // Orca loaded right next to the font
 #define ORCA_WIDTH 40
 #define ORCA_HEIGHT 20
 
 // Divided by 4 because each pixel is 4bpp, or 1/4 of a 16-bit short
-#define ORCA_VRAM_X (FONT_X + CHAR_WIDTH * 16 / 4)
+#define ORCA_VRAM_X (FONT_X + CHAR_ROM_WIDTH * 16 / 4)
 
 #define TH_MARGIN 40
 #define LOG_LINES 22
@@ -49,14 +50,20 @@ void decompressfont() {
 				rom_charset++;
 
 				// Iterate through each column of the character
+				bool last_black = false;
 				for (uint_fast8_t bpos = 0; bpos < 8; bpos += 2) {
 					uint_fast8_t char4bpp = 0;
 
-					if (char1bpp & 0x80) {
+					if (last_black) {
 						char4bpp |= 0x0F;
+						last_black = false;
+					}
+					if (char1bpp & 0x80) {
+						char4bpp |= 0xFF;
 					}
 					if (char1bpp & 0x40) {
 						char4bpp |= 0xF0;
+						last_black = true;
 					}
 
 					*bufferpos = char4bpp;
@@ -102,18 +109,18 @@ void debug_init() {
 
 	// Draw border
 	debug_text_at(TH_MARGIN, 40, "tonyhax " STRINGIFY(TONYHAX_VERSION));
-	gpu_fill_rectangle(0, 60, SCREEN_WIDTH, 2, 0xFFFFFF);
+	gpu_fill_rectangle(0, 65, SCREEN_WIDTH, 2, 0xFFFFFF);
 
 	// "orca.pet" website
-	debug_text_at(SCREEN_WIDTH - 8 * CHAR_WIDTH - TH_MARGIN, 40, "orca.pet");
+	debug_text_at(SCREEN_WIDTH - 8 * CHAR_DRAW_WIDTH - TH_MARGIN, 40, "orca.pet");
 
 	// Draw orca
 	struct gpu_tex_rect orca_rect;
-	orca_rect.texcoord.x = 16 * CHAR_WIDTH;
+	orca_rect.texcoord.x = 16 * CHAR_ROM_WIDTH;
 	orca_rect.texcoord.y = 0;
 	orca_rect.width = ORCA_WIDTH;
 	orca_rect.height = ORCA_HEIGHT;
-	orca_rect.pos.x = SCREEN_WIDTH - 8 * CHAR_WIDTH - TH_MARGIN - 5 - ORCA_WIDTH;
+	orca_rect.pos.x = SCREEN_WIDTH - 8 * CHAR_DRAW_WIDTH - TH_MARGIN - 10 - ORCA_WIDTH;
 	orca_rect.pos.y = 40;
 	orca_rect.clut.x = CLUT_X;
 	orca_rect.clut.y = CLUT_Y;
@@ -126,7 +133,7 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 	// Initialize constants of the rect
 	struct gpu_tex_rect rect;
 	rect.pos.y = y_pos;
-	rect.width = CHAR_WIDTH;
+	rect.width = CHAR_ROM_WIDTH;
 	rect.height = CHAR_HEIGHT;
 	rect.clut.x = CLUT_X;
 	rect.clut.y = CLUT_Y;
@@ -143,14 +150,14 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 
 			// Draw text
 			rect.pos.x = x_pos;
-			rect.texcoord.x = (tex_idx % 16) * CHAR_WIDTH;
+			rect.texcoord.x = (tex_idx % 16) * CHAR_ROM_WIDTH;
 			rect.texcoord.y = (tex_idx / 16) * CHAR_HEIGHT;
 
 			gpu_draw_tex_rect(&rect);
 		}
 
 		text++;
-		x_pos += CHAR_WIDTH;
+		x_pos += CHAR_DRAW_WIDTH;
 	}
 }
 
@@ -158,8 +165,8 @@ void debug_write(const char * str, ...) {
 	va_list args;
 	va_start(args, str);
 
-	// For a render width of 320 this should be just 40 but let's be generous
-	char formatted[64];
+	// For a render width of 640 this should be just 40 but let's be generous
+	char formatted[128];
 
 	mini_vsprintf(formatted, str, args);
 
