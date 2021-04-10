@@ -343,6 +343,10 @@ void main() {
 
 	log_bios_version();
 
+	for (int i = 0; i < 30; i++) {
+		debug_write("Line %x", i);
+	}
+
 	debug_write("Resetting drive");
 	if (!cd_drive_init()) {
 		debug_write("Reset failed");
