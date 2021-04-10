@@ -19,7 +19,7 @@ const uint32_t tty_enabled = 0;
 extern uint8_t __RO_START__, __DATA_START__, __BSS_START__, __BSS_END__;
 
 // Buffer right before this executable
-uint8_t * const data_buffer = (uint8_t *) 0x801FB800;
+uint8_t * const data_buffer = (uint8_t *) 0x801F9800;
 
 // Kernel developer
 const char * const KERNEL_AUTHOR = (const char *) 0xBFC0012C;
@@ -225,6 +225,8 @@ void wait_lid_status(bool open) {
 }
 
 void try_boot_cd() {
+	int32_t fd, read;
+
 	debug_write("Swap CD now");
 	wait_lid_status(true);
 	wait_lid_status(false);
@@ -240,10 +242,11 @@ void try_boot_cd() {
 
 	char bootfilebuf[32];
 	debug_write("Loading SYSTEM.CNF");
-	int32_t cfg_fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
-	if (cfg_fd > 0) {
-		int32_t read = FileRead(cfg_fd, data_buffer, 2048);
-		FileClose(cfg_fd);
+
+	fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
+	if (fd > 0) {
+		read = FileRead(fd, data_buffer, 2048);
+		FileClose(fd);
 
 		if (read == -1) {
 			debug_write("Read error %x", GetLastError());
@@ -280,12 +283,23 @@ void try_boot_cd() {
 	SetConf(event, tcb, stacktop);
 
 	debug_write("Loading executable");
-	if (!LoadExeHeader(bootfile, data_buffer)) {
-		debug_write("Loading failed");
+	fd = FileOpen(bootfile, FILE_READ);
+	if (fd <= 0) {
+		debug_write("Open error %x", GetLastError());
+	}
+
+	read = FileRead(fd, data_buffer, 2048);
+	FileClose(fd);
+
+	if (read != 2048) {
+		debug_write("Read error %x", GetLastError());
 		return;
 	}
 
-	exe_header_t * exe_header = (exe_header_t *) data_buffer;
+	// On European games, at 0x4C there is a string that "Sony Computer Entertainment Inc. for Europe area"
+	bool is_european_game = strncmp("Europe", (char *) (data_buffer + 0x71), 6) == 0;
+
+	exe_header_t * exe_header = (exe_header_t *) (data_buffer + 0x10);
 
 	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
 	// since that's all we can do.
@@ -301,6 +315,12 @@ void try_boot_cd() {
 	}
 
 	patch_game(exe_header);
+
+	bool is_pal = gpu_is_pal();
+	if (is_pal != is_european_game) {
+		debug_write("Switching to %s", is_european_game ? "PAL" : "NTSC");
+		gpu_init_bios(is_european_game);
+	}
 
 	debug_write("Starting");
 

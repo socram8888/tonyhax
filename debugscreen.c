@@ -4,12 +4,12 @@
 #include "bios.h"
 #include "str.h"
 
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
 #define CHAR_HEIGHT 15
 #define CHAR_WIDTH 8
-#define FONT_X 512
-#define CLUT_X 512
+#define FONT_X 640
+#define CLUT_X 640
 #define CLUT_Y 6 * CHAR_HEIGHT
 
 // Orca loaded right next to the font
@@ -73,38 +73,16 @@ void decompressfont() {
 
 void debug_init() {
 	bool pal = gpu_is_pal();
+	gpu_init_bios(pal);
 
-	// Restore to sane defaults
-	gpu_reset();
-
-	// Configure mode, keeping PAL flag
-	uint32_t mode = GPU_DISPLAY_H320 | GPU_DISPLAY_V240 | GPU_DISPLAY_15BPP;
 	if (pal) {
-		mode |= GPU_DISPLAY_PAL;
-
 		log_lines = 13;
 	} else {
-		mode |= GPU_DISPLAY_NTSC;
-
 		log_lines = 12;
-	}
-	gpu_display_mode(mode);
-
-	// Center image on screen
-	// Values from THPS2 NTSC and PAL during FMVs
-	if (pal) {
-		gpu_set_hrange(624, 3260);
-		gpu_set_vrange(37, 292);
-	} else {
-		gpu_set_hrange(600, 3160);
-		gpu_set_vrange(16, 256);
 	}
 
 	// Clear entire VRAM
 	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
-
-	// Enable display
-	gpu_display_enable();
 
 	// Load font
 	decompressfont();
@@ -120,16 +98,13 @@ void debug_init() {
 	gpu_flush_cache();
 
 	// Configure Texpage
-	// - Texture page to X=512 Y=0
+	// - Texture page to X=640 Y=0
 	// - Colors to 4bpp
 	// - Allow drawing to display area (fuck Vsync)
-	GPU_cw(0xE1000408);
+	GPU_cw(0xE100040A);
 
 	// Configure texture window
 	GPU_cw(0xE2000000);
-
-	// Set drawing area
-	gpu_set_drawing_area(0, 0, 320, 256);
 
 	// Draw border
 	debug_text_at(20, 10, "tonyhax " STRINGIFY(TONYHAX_VERSION));
@@ -140,14 +115,14 @@ void debug_init() {
 
 	// Draw orca
 	struct gpu_tex_rect orca_rect;
-	orca_rect.tex_x = 16 * CHAR_WIDTH;
-	orca_rect.tex_y = 0;
+	orca_rect.texcoord.x = 16 * CHAR_WIDTH;
+	orca_rect.texcoord.y = 0;
 	orca_rect.width = ORCA_WIDTH;
 	orca_rect.height = ORCA_HEIGHT;
-	orca_rect.draw_x = SCREEN_WIDTH - 8 * CHAR_WIDTH - 20 - ORCA_WIDTH - 5;
-	orca_rect.draw_y = 5;
-	orca_rect.clut_x = CLUT_X;
-	orca_rect.clut_y = CLUT_Y;
+	orca_rect.pos.x = SCREEN_WIDTH - 8 * CHAR_WIDTH - 20 - ORCA_WIDTH - 5;
+	orca_rect.pos.y = 5;
+	orca_rect.clut.x = CLUT_X;
+	orca_rect.clut.y = CLUT_Y;
 	orca_rect.semi_transp = 0;
 	orca_rect.raw_tex = 1;
 	gpu_draw_tex_rect(&orca_rect);
@@ -156,11 +131,11 @@ void debug_init() {
 void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) {
 	// Initialize constants of the rect
 	struct gpu_tex_rect rect;
-	rect.draw_y = y_pos;
+	rect.pos.y = y_pos;
 	rect.width = CHAR_WIDTH;
 	rect.height = CHAR_HEIGHT;
-	rect.clut_x = CLUT_X;
-	rect.clut_y = CLUT_Y;
+	rect.clut.x = CLUT_X;
+	rect.clut.y = CLUT_Y;
 	rect.semi_transp = 0;
 	rect.raw_tex = 1;
 
@@ -173,9 +148,9 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 			}
 
 			// Draw text
-			rect.draw_x = x_pos;
-			rect.tex_x = (tex_idx % 16) * CHAR_WIDTH;
-			rect.tex_y = (tex_idx / 16) * CHAR_HEIGHT;
+			rect.pos.x = x_pos;
+			rect.texcoord.x = (tex_idx % 16) * CHAR_WIDTH;
+			rect.texcoord.y = (tex_idx / 16) * CHAR_HEIGHT;
 
 			gpu_draw_tex_rect(&rect);
 		}

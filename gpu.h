@@ -19,16 +19,29 @@
 
 #define GPU_DISPLAY_INTERLACED (1 << 5)
 
+struct gpu_point {
+	uint16_t x;
+	uint16_t y;
+};
+
 struct gpu_tex_rect {
+	struct gpu_point pos;
+	struct gpu_point texcoord;
+	struct gpu_point clut;
 	uint32_t color;
-	uint16_t draw_x;
-	uint16_t draw_y;
 	uint16_t width;
 	uint16_t height;
-	uint16_t clut_x;
-	uint16_t clut_y;
-	uint8_t tex_x;
-	uint8_t tex_y;
+	uint8_t semi_transp;
+	uint8_t raw_tex;
+};
+
+struct gpu_tex_poly {
+	struct gpu_point vertex[4];
+	struct gpu_point texcoord[4];
+	struct gpu_point clut;
+	struct gpu_point texpage;
+	uint32_t color;
+	uint8_t vertex_count;
 	uint8_t semi_transp;
 	uint8_t raw_tex;
 };
@@ -49,6 +62,8 @@ void gpu_copy_rectangle(uint16_t src_x, uint16_t src_y, uint16_t dest_x, uint16_
 
 void gpu_draw_tex_rect(const struct gpu_tex_rect * rect);
 
+void gpu_draw_tex_poly(const struct gpu_tex_poly * poly);
+
 void gpu_set_drawing_area(uint_fast16_t x, uint_fast16_t y, uint_fast16_t width, uint_fast16_t height);
 
 void gpu_flush_cache(void);
@@ -56,3 +71,5 @@ void gpu_flush_cache(void);
 void gpu_set_hrange(uint_fast16_t x1, uint_fast16_t x2);
 
 void gpu_set_vrange(uint_fast16_t y1, uint_fast16_t y2);
+
+void gpu_init_bios(bool pal);
