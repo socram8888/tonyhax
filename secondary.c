@@ -16,7 +16,7 @@
 const uint32_t tty_enabled = 0;
 
 // Loading address of tonyhax, provided by the secondary.ld linker script
-extern uint8_t __ROM_START__, __ROM_END__;
+extern uint8_t __RO_START__, __DATA_START__, __BSS_START__, __BSS_END__;
 
 // Buffer right before this executable
 uint8_t * const data_buffer = (uint8_t *) 0x801FB800;
@@ -94,8 +94,8 @@ bool test_integrity() {
 	 * at offset 0x4C.
 	 * This hash is calculated over all the read-only payload.
 	 */
-	uint32_t correct_value = *((uint32_t * ) (&__ROM_START__ - 0x100 + 0x4C));
-	uint32_t calc_value = crc32(&__ROM_START__, &__ROM_END__ - &__ROM_START__);
+	uint32_t correct_value = *((uint32_t * ) (&__RO_START__ - 0x100 + 0x4C));
+	uint32_t calc_value = crc32(&__RO_START__, &__DATA_START__ - &__RO_START__);
 
 	bool ok = correct_value == calc_value;
 	debug_write("Integrity check %sed", ok ? "pass" : "fail");
@@ -343,6 +343,10 @@ void main() {
 }
 
 void __attribute__((section(".start"))) start() {
+	// Clear BSS
+	bzero(&__BSS_START__, &__BSS_END__ - &__BSS_START__);
+
 	main();
+
 	while(1);
 }

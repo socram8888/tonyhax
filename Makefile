@@ -1,7 +1,9 @@
 
 # Thanks to whoever made https://devhints.io/makefile!
 
-TONYHAX_VERSION=v1.2.3
+.DELETE_ON_ERROR:
+
+TONYHAX_VERSION=v1.3b
 
 CC=mips-linux-gnu-gcc
 CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mabi=32 -mfp32 -nostdlib -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -O1 -DTONYHAX_VERSION=$(TONYHAX_VERSION)
@@ -93,14 +95,9 @@ orca.inc: orca.img
 secondary.elf: secondary.ld $(SPL_OBJECTS)
 	$(LD) $(LDFLAGS) -T secondary.ld $(SPL_OBJECTS) -o $@
 
-secondary.bin: secondary.elf
-	$(OBJCOPY) $(OBJCOPYFLAGS) secondary.elf secondary.bin
-
 # Tonyhax secondary program loader
-tonyhax.mcs: tonyhax-tpl.mcs secondary.bin
-	cp tonyhax-tpl.mcs tonyhax.mcs
-	dd conv=notrunc if=secondary.bin of=tonyhax.mcs bs=384 seek=1
-	bash insert-tonyhax-crc.sh secondary.elf tonyhax.mcs
+tonyhax.mcs: tonyhax-tpl.mcs secondary.elf
+	bash generate-tonyhax-mcs.sh secondary.elf tonyhax-tpl.mcs tonyhax.mcs $(TONYHAX_VERSION)
 
 # Brunswick Circuit Pro Bowling NTSC-US target
 brunswick1-us.mcs: brunswick1-us-tpl.mcs entry-full.bin

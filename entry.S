@@ -4,12 +4,12 @@
 .text
 .globl __start
 
-LOAD_ADDR = 0x801FC000
+LOAD_ADDR = 0x801FA000
 
 # s0 = A table address
 # s1 = file descriptor
 # s2 = realstart physical address
-# s3 = B table address (on MCINIT only)
+# s3 = B table address (on MCINIT only), and later load size
 
 __start:
 	# Restore stack pointer
@@ -75,28 +75,36 @@ realstart:
 	# Save file handle to s1
 	move s1, v0
 
-	# Load data using FileRead
+	# Load load address
+	li s3, LOAD_ADDR
+
+	# Load header using FileRead
 	li t1, 0x02
 	move a0, s1
-	li a1, LOAD_ADDR
-	li a2, 0x2000
+	move a1, s3
+	li a2, 0x100
 	jalr s0
 
 	# Die if failed
-	bne v0, 0x2000, fail
+	bne v0, 0x100, fail
 
-	# Close file
-	li t1, 0x04
+	# Load executable using FileRead
+	li t1, 0x02
 	move a0, s1
+	lw a2, 0x48(s3)
 	jalr s0
+
+	# Check size
+	lw t0, 0x48(s3)
+	bne v0, t0, fail
 
 	# Paint green
 	li a0, 0x00FF00
 	bal paintscr
 
 	# Jump to it!
-	li s0, LOAD_ADDR+0x100
-	jr s0
+	addi s3, 0x100
+	jr s3
 
 fail:
 	# Red

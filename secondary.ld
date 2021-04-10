@@ -1,9 +1,9 @@
 MEMORY {
-	ram(wrx)	:ORIGIN = 0x801FC100, LENGTH = 0x1F00
+	ram(wrx)	:ORIGIN = 0x801FA100, LENGTH = 0x3F00
 }
 SECTIONS {
-	. = 0x801FC100;
-	PROVIDE(__ROM_START__ = .);
+	. = 0x801FA100;
+	PROVIDE(__RO_START__ = .);
 	.text :
 	{
 		*(.start)
@@ -13,15 +13,17 @@ SECTIONS {
 	{
 		*(.rodata .rodata.*)
 	} >ram
-	PROVIDE(__ROM_END__ = .);
+	PROVIDE(__DATA_START__ = .);
 	.data :
 	{
 		*(.data .data.*)
 	} >ram
+	PROVIDE(__BSS_START__ = .);
 	.bss :
 	{
 		*(.bss .bss.*)
 	} >ram
+	PROVIDE(__BSS_END__ = .);
 	/DISCARD/ :
 	{
 		*(.MIPS.abiflags)

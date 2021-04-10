@@ -47,6 +47,11 @@ strchr:
 	li $t1, 0x1E
 	j 0xA0
 
+.global bzero
+bzero:
+	li $t1, 0x28
+	j 0xA0
+
 .global memcpy
 memcpy:
 	li $t1, 0x2A
