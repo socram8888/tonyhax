@@ -9,4 +9,6 @@ BES*
 BAS*
 *.mcs
 !*-tpl.mcs
+*.exe
+!*-tpl.exe
 *.zip

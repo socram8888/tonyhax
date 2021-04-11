@@ -51,17 +51,17 @@ RAW_FILES = \
 	BESLEM-99999TONYHAX
 
 PACKAGE_FILE = tonyhax-$(TONYHAX_VERSION).zip
-PACKAGE_CONTENTS = $(MCS_FILES) $(RAW_FILES) README.md LICENSE
+PACKAGE_CONTENTS = $(MCS_FILES) $(RAW_FILES) tonyhax.exe README.md LICENSE
 
 .PHONY: clean
 
-all: $(MCS_FILES) $(RAW_FILES) $(PACKAGE_FILE)
+all: $(MCS_FILES) $(RAW_FILES) tonyhax.exe $(PACKAGE_FILE)
 
 $(RAW_FILES): $(MCS_FILES)
 	bash mcs2raw.sh $(MCS_FILES)
 
 clean:
-	$(RM) BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc save-files.zip tonyhax-*.zip
+	$(RM) BES* BAS* $(MCS_FILES) entry-*.elf entry-*.bin secondary.elf secondary.bin *.o orca.inc save-files.zip tonyhax-*.zip tonyhax.exe
 
 $(PACKAGE_FILE): $(PACKAGE_CONTENTS)
 	$(RM) $(PACKAGE_FILE)
@@ -98,6 +98,10 @@ secondary.elf: secondary.ld $(SPL_OBJECTS)
 # Tonyhax secondary program loader
 tonyhax.mcs: tonyhax-tpl.mcs secondary.elf
 	bash generate-tonyhax-mcs.sh secondary.elf tonyhax-tpl.mcs tonyhax.mcs $(TONYHAX_VERSION)
+
+tonyhax.exe: tonyhax-tpl.exe BESLEM-99999TONYHAX
+	cp tonyhax-tpl.exe tonyhax.exe
+	dd conv=notrunc if=BESLEM-99999TONYHAX bs=128 seek=16 of=tonyhax.exe
 
 # Brunswick Circuit Pro Bowling NTSC-US target
 brunswick1-us.mcs: brunswick1-us-tpl.mcs entry-full.bin
