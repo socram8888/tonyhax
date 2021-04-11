@@ -183,7 +183,7 @@ bool unlock_drive() {
 		p5_localized = "World wide";
 	} else {
 		// +4 to skip past "for "
-		debug_write("Unsup. region: %s", (char *) (cd_reply + 4));
+		debug_write("Unsupported region: %s", (char *) (cd_reply + 4));
 		return false;
 	}
 
@@ -306,6 +306,12 @@ void try_boot_cd() {
 	// since that's all we can do.
 	if (exe_header->load_addr + exe_header->load_size >= data_buffer) {
 		debug_write("Won't fit. Using BIOS.");
+
+		if (is_european_game != gpu_is_pal()) {
+			debug_write("Switching video mode");
+			gpu_init_bios(is_european_game);
+		}
+
 		LoadAndExecute(bootfile, exe_header->initial_sp_base, exe_header->initial_sp_offset);
 		return;
 	}
@@ -317,8 +323,7 @@ void try_boot_cd() {
 
 	patch_game(exe_header);
 
-	bool is_pal = gpu_is_pal();
-	if (is_pal != is_european_game) {
+	if (is_european_game != gpu_is_pal()) {
 		debug_write("Switching video mode");
 		gpu_init_bios(is_european_game);
 	}
@@ -327,6 +332,9 @@ void try_boot_cd() {
 
 	// Games from WarmBoot start with interrupts disabled
 	EnterCriticalSection();
+
+	// FlushCache needs to be called with interrupts disabled
+	FlushCache();
 
 	DoExecute(data_buffer, 0, 0);
 }

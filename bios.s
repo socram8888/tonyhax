@@ -62,11 +62,6 @@ memset:
 	li $t1, 0x2B
 	j 0xA0
 
-.global LoadExeHeader
-LoadExeHeader:
-	li $t1, 0x41
-	j 0xA0
-
 .global LoadExeFile
 LoadExeFile:
 	li $t1, 0x42
@@ -83,6 +78,11 @@ DoExecute:
 	li $s5, 0
 	li $s6, 0
 	li $t1, 0x43
+	j 0xA0
+
+.global FlushCache
+FlushCache:
+	li $t1, 0x44
 	j 0xA0
 
 .global init_a0_b0_c0_vectors

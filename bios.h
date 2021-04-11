@@ -142,16 +142,6 @@ void ExitCriticalSection();
 uint32_t todigit(char c);
 
 /**
- * Loads the header of an executable to main memory.
- *
- * @param filename executable path
- * @param headerbuf header buffer
- *
- * Table A, call 0x42.
- */
-bool LoadExeHeader(const char * filename, uint8_t * headerbuf);
-
-/**
  * Loads an executable to main memory.
  *
  * @param filename executable path
@@ -171,6 +161,13 @@ bool LoadExeFile(const char * filename, uint8_t * headerbuf);
  * Table A, call 0x43.
  */
 void __attribute__((noreturn)) DoExecute(uint8_t * headerbuf, uint32_t param1, uint32_t param2);
+
+/**
+ * Flushes the CPU cache. Should be called after modifying code in software.
+ *
+ * Table A, call 0x44.
+ */
+void FlushCache(void);
 
 /**
  * Copies the three default four-opcode handlers for the A(NNh),B(NNh),C(NNh) functions to A00000A0h..A00000CFh.
