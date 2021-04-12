@@ -225,7 +225,7 @@ void wait_lid_status(bool open) {
 }
 
 void try_boot_cd() {
-	int32_t fd, read;
+	int32_t read;
 
 	debug_write("Swap CD now");
 	wait_lid_status(true);
@@ -243,10 +243,10 @@ void try_boot_cd() {
 	char bootfilebuf[32];
 	debug_write("Loading SYSTEM.CNF");
 
-	fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
-	if (fd > 0) {
-		read = FileRead(fd, data_buffer, 2048);
-		FileClose(fd);
+	int32_t cnf_fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
+	if (cnf_fd > 0) {
+		read = FileRead(cnf_fd, data_buffer, 2048);
+		FileClose(cnf_fd);
 
 		if (read == -1) {
 			debug_write("Read error %x", GetLastError());
@@ -282,14 +282,13 @@ void try_boot_cd() {
 	debug_write("Configuring kernel");
 	SetConf(event, tcb, stacktop);
 
-	debug_write("Loading executable");
-	fd = FileOpen(bootfile, FILE_READ);
-	if (fd <= 0) {
+	debug_write("Checking executable");
+	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
+	if (exe_fd <= 0) {
 		debug_write("Open error %x", GetLastError());
 	}
 
-	read = FileRead(fd, data_buffer, 2048);
-	FileClose(fd);
+	read = FileRead(exe_fd, data_buffer, 2048);
 
 	if (read != 2048) {
 		debug_write("Read error %x", GetLastError());
@@ -316,10 +315,14 @@ void try_boot_cd() {
 		return;
 	}
 
-	if (!LoadExeFile(bootfile, data_buffer)) {
-		debug_write("Loading failed");
+	debug_write("Loading executable (%x @ %x)", exe_header->load_size, exe_header->load_addr);
+
+	if (FileRead(exe_fd, exe_header->load_addr, exe_header->load_size) != (int32_t) exe_header->load_size) {
+		debug_write("Read error %x", GetLastError());
 		return;
 	}
+
+	FileClose(exe_fd);
 
 	patch_game(exe_header);
 
@@ -336,7 +339,7 @@ void try_boot_cd() {
 	// FlushCache needs to be called with interrupts disabled
 	FlushCache();
 
-	DoExecute(data_buffer, 0, 0);
+	DoExecute(exe_header, 0, 0);
 }
 
 void main() {

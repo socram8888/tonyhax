@@ -142,16 +142,6 @@ void ExitCriticalSection();
 uint32_t todigit(char c);
 
 /**
- * Loads an executable to main memory.
- *
- * @param filename executable path
- * @param headerbuf header buffer
- *
- * Table A, call 0x42.
- */
-bool LoadExeFile(const char * filename, uint8_t * headerbuf);
-
-/**
  * Starts a previously loaded executable.
  *
  * @param headerbuf header buffer
@@ -160,7 +150,7 @@ bool LoadExeFile(const char * filename, uint8_t * headerbuf);
  *
  * Table A, call 0x43.
  */
-void __attribute__((noreturn)) DoExecute(uint8_t * headerbuf, uint32_t param1, uint32_t param2);
+void __attribute__((noreturn)) DoExecute(const exe_header_t * header, uint32_t param1, uint32_t param2);
 
 /**
  * Flushes the CPU cache. Should be called after modifying code in software.
