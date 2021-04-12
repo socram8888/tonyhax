@@ -260,6 +260,39 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Silent Hill Survivor (U) (SLUS-01087)
+	 *
+	 * This one's main executable just loads KERNEL.BIN and jumps to it, which contains the actual
+	 * antipiracy check at 0x80010D2C, which we will just NOP.
+	 *
+	 * We'd intercept the call to Exec (at 0x80180C94, called from 0x80180A44) after the boot
+	 * executable loads it, patch it, and continue with the boot process.
+	 */
+	{
+		.crc = 0x4B2DB3AB,
+		.patches = (const struct patch[]) {
+			{
+				// Replace the "jal 0x80180C94" with a jal to our patcher
+				.offset = 0x80180A44,
+				.size = 4,
+				.data = (const uint8_t[]) {
+					0x50, 0x02, 0x06, 0x0C, // "jal 0x80180940"
+				}
+			},
+			{
+				// Insert the patcher in place of a debug string
+				.offset = 0x80180940,
+				.size = 12,
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) {
+					0x01, 0x80, 0x08, 0x3C, // "lui $t0, 0x8001"
+					0x25, 0x03, 0x06, 0x08, // "j 0x80180C94" to continue with the normal flow
+					0x2C, 0x0D, 0x00, 0xAD, // "sw $zero, 0x0D2C($t0)" to nop the antipiracy call
+				}
+			}
+		}
+	},
+	/*
 	 * Tetris with Card Captor Sakura - Eternal Heart (J) (SLPS-02886)
 	 * Plain call, but this one checks the function return value.
 	 */
