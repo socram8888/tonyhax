@@ -188,6 +188,22 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * pop'n music 2 (J) (SLPM-86294)
+	 * Antipiracy check at 0x80015318, which gets called from some dynamically loaded code at
+	 * 0x800E6F70, which is called from 0x80070828 (the one we'd NOP).
+	 */
+	{
+		.crc = 0x162DC430,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x80070828,
+				.size = 4,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Rockman X5 (J) (SLPM-86666)
 	 * Copycat of Tomba 2! Boring.
 	 */
