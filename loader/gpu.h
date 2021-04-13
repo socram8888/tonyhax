@@ -8,8 +8,9 @@
 #define GPU_DISPLAY_H512 2
 #define GPU_DISPLAY_H640 3
 
+#define GPU_DISPLAY_INTERLACED (1 << 5)
 #define GPU_DISPLAY_V240 (0 << 2)
-#define GPU_DISPLAY_V480 (1 << 2)
+#define GPU_DISPLAY_V480 (1 << 2 | GPU_DISPLAY_INTERLACED)
 
 #define GPU_DISPLAY_NTSC (0 << 3)
 #define GPU_DISPLAY_PAL  (1 << 3)
@@ -17,7 +18,6 @@
 #define GPU_DISPLAY_15BPP (0 << 4)
 #define GPU_DISPLAY_24BPP (1 << 4)
 
-#define GPU_DISPLAY_INTERLACED (1 << 5)
 
 struct gpu_point {
 	uint16_t x;
