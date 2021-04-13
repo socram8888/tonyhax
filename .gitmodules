@@ -1,0 +1,3 @@
+[submodule "freepsxboot/FreePSXBoot"]
+	path = freepsxboot/FreePSXBoot
+	url = https://github.com/brad-lin/FreePSXBoot

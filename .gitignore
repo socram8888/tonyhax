@@ -12,3 +12,4 @@ BAS*
 *.exe
 !*-tpl.exe
 *.zip
+*.mcd

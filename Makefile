@@ -4,7 +4,7 @@
 include variables.mk
 
 PACKAGE_FILE = tonyhax-$(TONYHAX_VERSION).zip
-PACKAGE_CONTENTS = $(ENTRY_FILES:%=entrypoints/%) $(LOADER_FILES:%=loader/%) README.md LICENSE
+PACKAGE_CONTENTS = $(ENTRY_FILES:%=entrypoints/%) $(LOADER_FILES:%=loader/%) $(FREEPSXBOOT_IMAGES:%=freepsxboot/%) README.md LICENSE
 
 .PHONY: modules clean
 
@@ -19,7 +19,9 @@ $(PACKAGE_CONTENTS): modules
 modules:
 	$(MAKE) -C entrypoints all
 	$(MAKE) -C loader all
+	$(MAKE) -C freepsxboot all
 
 clean:
 	$(MAKE) -C entrypoints clean
 	$(MAKE) -C loader clean
+	$(MAKE) -C freepsxboot clean
