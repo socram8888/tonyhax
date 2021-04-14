@@ -24,6 +24,7 @@ orca.inc: orca.img
 
 secondary.elf: secondary.ld $(LOADER_OBJECTS)
 	$(LD) $(LDFLAGS) -T secondary.ld $(LOADER_OBJECTS) -o $@
+	bash insert-tonyhax-crc.sh secondary.elf
 
 # Results
 

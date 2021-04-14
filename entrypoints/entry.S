@@ -4,110 +4,104 @@
 .text
 .globl __start
 
-LOAD_ADDR = 0x801FA000
-
-# s0 = A table address
+# s0 = realstart physical address
 # s1 = file descriptor
-# s2 = realstart physical address
-# s3 = B table address (on MCINIT only), and later load address
+# s2 = load address
+# s3 = real save size (excluding useless trailing zeros)
 
 __start:
 	# Restore stack pointer
 	li sp, 0x801FFF00
 
-#ifdef MCINIT
-
-	# Disable interrupts
-	mfc0 t0, $12
-	li t1, 0xFFFFFBFE
-	and t0, t1
-	mtc0 t0, $12
-
-#endif
+	# Keep only VBlank interrupts enabled
+	li t1, 0x1
+	lui t0, 0x1f80
+	sw t1, 0x1074(t0)
 
 	# Call ourselves to get the current program counter in ra
 	bal realstart
 
 realstart:
-	# Save real start address in s2
-	move s2, ra
-
-	# Load A table address
-	li s0, 0xA0
-
-#ifdef MCINIT
-
-	# Paint purple
-	li a0, 0xFF00FF
-	bal paintscr
-
-	# Load B table address
-	li s3, 0xB0
-
-	# Call InitCard(0)
-	li t1, 0x4A
-	li a0, 0
-	jalr s3
-
-	# Call StartCard
-	li t1, 0x4B
-	jalr s3
-
-	# Call _bu_init
-	li t1, 0x55
-	jalr s0
-
-#endif
+	# Save real start address in s0
+	move s0, ra
 
 	# Paint blue
 	li a0, 0xFF0000
 	bal paintscr
 
+opensave:
 	# Call FileOpen
-	li t1, 0x00
-	addi a0, s2, (splname - realstart)
+	li t1, 0x32
+	addi a0, s0, (splname - realstart)
 	li a1, 0b00000001
-	jalr s0
+	jal 0xB0
 
-	# Die if failed
-	blt v0, 0, fail
-
-	# Save file handle to s1
+	# Save handle
 	move s1, v0
 
-	# Load load address
-	li s3, LOAD_ADDR
+	# If greater or equal to zero, it succeeded
+	bgez v0, readheader
+
+	# Check if fatal error, and else retry
+	li t1, 0x54
+	jal 0xB0
+	bne v0, 0x10, fatalerror
+
+	b opensave
+
+readheader:
+	# Load temp buffer address
+	li s2, 0x801FA000
 
 	# Load header using FileRead
-	li t1, 0x02
+	li t1, 0x34
 	move a0, s1
-	move a1, s3
+	move a1, s2
 	li a2, 0x100
-	jalr s0
+	jal 0xB0
 
-	# Die if failed
-	bne v0, 0x100, fail
+	# If we read the correct amount, continue
+	beq v0, 0x100, readexec
 
+	# Check if fatal error, and else retry
+	li t1, 0x54
+	jal 0xB0
+	bne v0, 0x10, fatalerror
+
+	b readheader
+
+readexec:
+	# Load executable load address and size
+	lw s3, 0x44(s2)
+	lw s2, 0x40(s2)
+
+retryreadexec:
 	# Load executable using FileRead
-	li t1, 0x02
+	li t1, 0x34
 	move a0, s1
-	addi a1, s3, 0x100
-	lw a2, 0x48(s3)
-	jalr s0
+	move a1, s2
+	move a2, s3
+	jal 0xB0
 
-	# Check size
-	lw t0, 0x48(s3)
-	bne v0, t0, fail
+	# If we read the correct amount, continue
+	beq v0, s3, doexec
 
+	# Check if fatal error, and else retry
+	li t1, 0x54
+	jal 0xB0
+	bne v0, 0x10, fatalerror
+
+	b retryreadexec
+
+doexec:
 	# Paint green
 	li a0, 0x00FF00
 	bal paintscr
 
 	# Jump to it!
-	addi s3, 0x100
-	jr s3
+	jr s2
 
-fail:
+fatalerror:
 	# Red
 	li a0, 0x0000FF
 	bal paintscr
@@ -121,7 +115,7 @@ paintscr:
 	or t0, a0
 
 	# Calculate effective address
-	addi a0, s2, (redscreen - realstart)
+	addi a0, s0, (redscreen - realstart)
 
 	# Store color with command on buffer
 	sw t0, 0(a0)
@@ -129,7 +123,7 @@ paintscr:
 	# Tail call GPU_cwp to paint the entire screen
 	li a1, 3
 	li t1, 0x4A
-	jr s0
+	j 0xA0
 
 redscreen:
 	# Space for color and command

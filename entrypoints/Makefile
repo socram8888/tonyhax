@@ -33,14 +33,14 @@ brunswick1-eu.mcs: brunswick1-eu-tpl.mcs entry-full.bin
 	dd conv=notrunc if=entry-full.bin of=brunswick1-eu.mcs bs=1 seek=2016
 
 # Brunswick Circuit Pro Bowling 2 NTSC-US target
-brunswick2-us.mcs: brunswick2-us-tpl.mcs entry-full.bin
+brunswick2-us.mcs: brunswick2-us-tpl.mcs entry-quick.bin
 	cp brunswick2-us-tpl.mcs brunswick2-us.mcs
-	dd conv=notrunc if=entry-full.bin of=brunswick2-us.mcs bs=1 seek=2272
+	dd conv=notrunc if=entry-quick.bin of=brunswick2-us.mcs bs=1 seek=2272
 
 # Brunswick Circuit Pro Bowling 2 PAL-EU target
-brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-full.bin
+brunswick2-eu.mcs: brunswick2-eu-tpl.mcs entry-quick.bin
 	cp brunswick2-eu-tpl.mcs brunswick2-eu.mcs
-	dd conv=notrunc if=entry-full.bin of=brunswick2-eu.mcs bs=1 seek=2272
+	dd conv=notrunc if=entry-quick.bin of=brunswick2-eu.mcs bs=1 seek=2272
 
 # Castrol Honda Superbike Racing NTSC-US target
 castrolsb-us.mcs: castrolsb-us-tpl.mcs entry-full.bin
