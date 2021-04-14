@@ -362,11 +362,11 @@ void main() {
 }
 
 void __attribute__((section(".start"))) start() {
-	// Execute integrity test
-	integrity_test();
-
 	// Clear BSS
 	bzero(&__BSS_START__, &__BSS_END__ - &__BSS_START__);
+
+	// Execute integrity test
+	integrity_test();
 
 	main();
 
