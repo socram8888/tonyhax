@@ -4,7 +4,7 @@
 #include "bios.h"
 #include "str.h"
 
-#define SCALE(x) ((x) + (x) / 2)
+#define SCALE(x) (2 * (x))
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
@@ -22,7 +22,7 @@
 #define ORCA_VRAM_X (FONT_X + CHAR_WIDTH * 16 / 4)
 
 #define TH_MARGIN 40
-#define LOG_LINES 14
+#define LOG_LINES 11
 #define LOG_MARGIN 32
 #define LOG_START_Y 80
 #define LOG_LINE_HEIGHT SCALE(CHAR_HEIGHT + 1)
