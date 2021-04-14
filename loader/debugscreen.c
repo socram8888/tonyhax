@@ -7,8 +7,8 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define CHAR_HEIGHT 15
-#define CHAR_ROM_WIDTH 8
-#define CHAR_DRAW_WIDTH (CHAR_ROM_WIDTH + 2)
+#define CHAR_DRAW_WIDTH 10
+#define CHAR_VRAM_WIDTH 8
 #define FONT_X 640
 #define CLUT_X 640
 #define CLUT_Y (6 * CHAR_HEIGHT)
@@ -18,7 +18,7 @@
 #define ORCA_HEIGHT 20
 
 // Divided by 4 because each pixel is 4bpp, or 1/4 of a 16-bit short
-#define ORCA_VRAM_X (FONT_X + CHAR_ROM_WIDTH * 16 / 4)
+#define ORCA_TEXCOORD_X (CHAR_VRAM_WIDTH * 16)
 
 #define TH_MARGIN 40
 #define LOG_LINES 22
@@ -37,7 +37,7 @@ static const uint16_t PALETTE[16] = { 0x0000, 0x0842, 0x1084, 0x18C6, 0x2108, 0x
 void decompressfont() {
 	// Font is 1bpp. We have to convert each character to 4bpp.
 	const uint8_t * rom_charset = (const uint8_t *) 0xBFC7F8DE;
-	uint8_t charbuf[60];
+	uint8_t charbuf[CHAR_HEIGHT * CHAR_VRAM_WIDTH / 2];
 
 	// Iterate through the 16x6 character table
 	for (uint_fast8_t tabley = 0; tabley < 6; tabley++) {
@@ -47,24 +47,22 @@ void decompressfont() {
 			// Iterate through each line of the 8x15 character
 			for (uint_fast8_t chary = 0; chary < 15; chary++) {
 				uint_fast8_t char1bpp = *rom_charset;
+				uint_fast8_t bpos = 0;
 				rom_charset++;
 
 				// Iterate through each column of the character
-				bool last_black = false;
-				for (uint_fast8_t bpos = 0; bpos < 8; bpos += 2) {
+				while (bpos < 8) {
 					uint_fast8_t char4bpp = 0;
 
-					if (last_black) {
-						char4bpp |= 0x0F;
-						last_black = false;
-					}
 					if (char1bpp & 0x80) {
-						char4bpp |= 0xFF;
+						char4bpp |= 0x0F;
 					}
+					bpos++;
+
 					if (char1bpp & 0x40) {
 						char4bpp |= 0xF0;
-						last_black = true;
 					}
+					bpos++;
 
 					*bufferpos = char4bpp;
 					bufferpos++;
@@ -72,8 +70,8 @@ void decompressfont() {
 				}
 			}
 
-			// At 4bpp, each character uses 8 * 4 / 16 = 2 shorts, so the texture width is set to 2.
-			GPU_dw(FONT_X + tablex * 2, tabley * CHAR_HEIGHT, 2, CHAR_HEIGHT, (uint16_t *) charbuf);
+			// GPU_dw takes units in 16bpp units, so we have to scale by 1/4
+			GPU_dw(FONT_X + tablex * CHAR_VRAM_WIDTH * 4 / 16, tabley * CHAR_HEIGHT, CHAR_VRAM_WIDTH * 4 / 16, CHAR_HEIGHT, (uint16_t *) charbuf);
 		}
 	}
 }
@@ -111,7 +109,7 @@ void debug_init() {
 
 	// Load orca image
 	// Again, /4 because each pixels is 1/4 of a 16-bit short
-	GPU_dw(ORCA_VRAM_X, 0, ORCA_WIDTH / 4, ORCA_HEIGHT, (const uint16_t *) ORCA_IMAGE);
+	GPU_dw(FONT_X + ORCA_TEXCOORD_X / 4, 0, ORCA_WIDTH / 4, ORCA_HEIGHT, (const uint16_t *) ORCA_IMAGE);
 
 	// Load the palette to Vram
 	GPU_dw(CLUT_X, CLUT_Y, 16, 1, PALETTE);
@@ -141,7 +139,7 @@ void debug_init() {
 	// Draw orca
 	gpu_tex_rect_t orca_rect = {
 		.texcoord = {
-			.x = 16 * CHAR_ROM_WIDTH,
+			.x = ORCA_TEXCOORD_X,
 			.y = 0,
 		},
 		.pos = {
@@ -169,7 +167,7 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 			.y = y_pos,
 		},
 		.size = {
-			.width = CHAR_ROM_WIDTH,
+			.width = CHAR_VRAM_WIDTH,
 			.height = CHAR_HEIGHT,
 		},
 		.clut = {
@@ -190,14 +188,20 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 
 			// Draw text
 			rect.pos.x = x_pos;
-			rect.texcoord.x = (tex_idx % 16) * CHAR_ROM_WIDTH;
+			rect.texcoord.x = (tex_idx % 16) * CHAR_VRAM_WIDTH;
 			rect.texcoord.y = (tex_idx / 16) * CHAR_HEIGHT;
-
 			gpu_draw_tex_rect(&rect);
+
+			// Again to overstrike and improve visibility
+			rect.pos.x++;
+			gpu_draw_tex_rect(&rect);
+
+			x_pos += CHAR_DRAW_WIDTH;
+		} else {
+			x_pos += CHAR_DRAW_WIDTH;
 		}
 
 		text++;
-		x_pos += CHAR_DRAW_WIDTH;
 	}
 }
 
