@@ -4,7 +4,7 @@ set -euo pipefail
 
 for mcsfile in "$@"
 do
-	rawname=$(dd if="$mcsfile" bs=1 skip=10 count=20 | tr -d '\0')
+	rawname=$(dd status=none if="$mcsfile" bs=1 skip=10 count=20 | cut -d '' -f 1)
 	echo "Converting $mcsfile to $rawname"
-	dd if="$mcsfile" bs=128 skip=1 of="$rawname"
+	dd status=none bs=128 skip=1 if="$mcsfile" of="$rawname"
 done
