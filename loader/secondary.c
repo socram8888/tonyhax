@@ -294,7 +294,7 @@ void try_boot_cd() {
 
 		if (is_european_game != bios_is_european()) {
 			debug_write("Switching video mode");
-			gpu_init_bios(is_european_game);
+			debug_switch_standard(is_european_game);
 		}
 
 		LoadAndExecute(bootfile, exe_header->initial_sp_base, exe_header->initial_sp_offset);
@@ -314,7 +314,7 @@ void try_boot_cd() {
 
 	if (is_european_game != bios_is_european()) {
 		debug_write("Switching video mode");
-		gpu_init_bios(is_european_game);
+		debug_switch_standard(is_european_game);
 	}
 
 	debug_write("Starting");

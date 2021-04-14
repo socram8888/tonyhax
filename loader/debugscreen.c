@@ -78,16 +78,7 @@ void decompressfont() {
 
 void debug_init() {
 	bool pal = bios_is_european();
-	gpu_init_bios(pal);
-
-	// Configure Texpage
-	// - Texture page to X=640 Y=0
-	// - Colors to 4bpp
-	// - Allow drawing to display area (fuck Vsync)
-	GPU_cw(0xE100040A);
-
-	// Configure texture window
-	GPU_cw(0xE2000000);
+	debug_switch_standard(pal);
 
 	// Clear display
 	struct gpu_solid_rect background = {
@@ -250,4 +241,45 @@ void debug_write(const char * str, ...) {
 
 	// Draw text on last line
 	debug_text_at(LOG_MARGIN, lastLinePos, formatted);
+}
+
+void debug_switch_standard(bool pal) {
+	// Restore to sane defaults
+	gpu_reset();
+
+	// Configure mode, keeping PAL flag
+	uint32_t mode = GPU_DISPLAY_H640 | GPU_DISPLAY_V480 | GPU_DISPLAY_15BPP;
+	if (pal) {
+		mode |= GPU_DISPLAY_PAL;
+	} else {
+		mode |= GPU_DISPLAY_NTSC;
+	}
+	gpu_display_mode(mode);
+
+	// Center image on screen
+	// Values from BIOSes
+	if (pal) {
+		gpu_set_hrange(638, 3198);
+		gpu_set_vrange(43, 282);
+	} else {
+		gpu_set_hrange(608, 3168);
+		gpu_set_vrange(16, 255);
+	}
+
+	// Set drawing area for entire display port
+	gpu_point_t area_start = { 0, 0 };
+	gpu_size_t area_size = { 640, 480 };
+	gpu_set_drawing_area(&area_start, &area_size);
+
+	// Enable display
+	gpu_display_enable();
+
+	// Configure Texpage
+	// - Texture page to X=640 Y=0
+	// - Colors to 4bpp
+	// - Allow drawing to display area (fuck Vsync)
+	GPU_cw(0xE100040A);
+
+	// Configure texture window
+	GPU_cw(0xE2000000);
 }

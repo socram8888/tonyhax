@@ -99,35 +99,3 @@ void gpu_set_hrange(uint_fast16_t x1, uint_fast16_t x2) {
 void gpu_set_vrange(uint_fast16_t y1, uint_fast16_t y2) {
 	SendGP1Command(GPU_GP1_V_RANGE << 24 | y2 << 10 | y1);
 }
-
-void gpu_init_bios(bool pal) {
-	// Restore to sane defaults
-	gpu_reset();
-
-	// Configure mode, keeping PAL flag
-	uint32_t mode = GPU_DISPLAY_H640 | GPU_DISPLAY_V480 | GPU_DISPLAY_15BPP;
-	if (pal) {
-		mode |= GPU_DISPLAY_PAL;
-	} else {
-		mode |= GPU_DISPLAY_NTSC;
-	}
-	gpu_display_mode(mode);
-
-	// Center image on screen
-	// Values from BIOSes
-	if (pal) {
-		gpu_set_hrange(638, 3198);
-		gpu_set_vrange(43, 282);
-	} else {
-		gpu_set_hrange(608, 3168);
-		gpu_set_vrange(16, 255);
-	}
-
-	// Set drawing area for entire display port
-	gpu_point_t area_start = { 0, 0 };
-	gpu_size_t area_size = { 640, 480 };
-	gpu_set_drawing_area(&area_start, &area_size);
-
-	// Enable display
-	gpu_display_enable();
-}

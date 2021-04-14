@@ -72,5 +72,3 @@ void gpu_flush_cache(void);
 void gpu_set_hrange(uint_fast16_t x1, uint_fast16_t x2);
 
 void gpu_set_vrange(uint_fast16_t y1, uint_fast16_t y2);
-
-void gpu_init_bios(bool pal);
