@@ -19,6 +19,30 @@ struct exe_header {
 typedef struct exe_header exe_header_t;
 
 /**
+ * BIOS author string.
+ */
+extern const char * const BIOS_DEVELOPER;
+
+/**
+ * BIOS version string. Not available on SCPH-1000 consoles.
+ *
+ * Example: "System ROM Version 4.1 12/16/97 E"
+ */
+extern const char * const BIOS_VERSION;
+
+/**
+ * Executes a full reset of the console's BIOS, as if a WarmBoot was issued.
+ */
+void bios_reinitialize(void);
+
+/**
+ * Returns true if the console is running an original PS1 BIOS.
+ *
+ * @returns true if console is a PS1.
+ */
+bool bios_is_ps1(void);
+
+/**
  * Returns true if the console has an European BIOS.
  * @returns true if console is European
  */
@@ -259,6 +283,18 @@ void CdInit(void);
  * Table A, call 0x9C.
  */
 void SetConf(uint32_t evcb, uint32_t tcb, uint32_t stacktop);
+
+/**
+ * Reads the requested amount of sectors from the CD.
+ *
+ * @param sector_count sector count
+ * @param start_sector first sector to read
+ * @param buffer destination buffer
+ * @returns the amount of sectors read, or -1 on error
+ *
+ * Table A, call 0xA5.
+ */
+int32_t CdReadSector(uint32_t sector_count, uint32_t start_sector, void * buffer);
 
 /*
  * B-FUNCTIONS

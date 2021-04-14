@@ -13,6 +13,10 @@
 #define GPU_GP1_V_RANGE 0x07
 #define GPU_GP1_DISPLAY_MODE 0x08
 
+bool gpu_is_pal(void) {
+	return (GPU_STAT & (1 << 20)) != 0;
+}
+
 void gpu_wait_vblank(void) {
 	// Acknowledge if set
 	if (I_STAT & INT_VBLANK) {

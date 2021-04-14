@@ -49,6 +49,8 @@ struct gpu_tex_rect {
 };
 typedef struct gpu_tex_rect gpu_tex_rect_t;
 
+bool gpu_is_pal(void);
+
 void gpu_reset(void);
 
 void gpu_wait_vblank(void);

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #define _REG32(x) (*((volatile uint32_t *) x))
+#define _REG16(x) (*((volatile uint16_t *) x))
 
 #define I_STAT _REG32(0x1F801070)
 #define I_MASK _REG32(0x1F801074)
@@ -20,3 +21,9 @@
 #define INT_LIGHTGUN (1 << 10)
 
 #define GPU_STAT _REG32(0x1F801814)
+
+#define SPU_MAIN_VOL_LEFT _REG16(0x1F801D80)
+#define SPU_MAIN_VOL_RIGHT _REG16(0x1F801D82)
+
+#define SPU_REVERB_VOL_LEFT _REG16(0x1F801D84)
+#define SPU_REVERB_VOL_RIGHT _REG16(0x1F801D86)

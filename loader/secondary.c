@@ -13,81 +13,11 @@
 #include "integrity.h"
 #include "io.h"
 
-// Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
-const uint32_t tty_enabled = 0;
-
 // Loading address of tonyhax, provided by the secondary.ld linker script
-extern uint8_t __RO_START__, __CRC_START__, __BSS_START__, __BSS_END__;
+extern uint8_t __BSS_START__, __BSS_END__;
 
 // Buffer right before this executable
 uint8_t * const data_buffer = (uint8_t *) 0x801F9800;
-
-// Kernel developer
-const char * const KERNEL_AUTHOR = (const char *) 0xBFC0012C;
-
-// Version string
-const char * const VERSION_STRING = (const char *) 0xBFC7FF32;
-
-void reinit_kernel() {
-	// Disable interrupts
-	EnterCriticalSection();
-
-	// The following is adapted from the WarmBoot call
-
-	/*
-	 * Check if a PS1 by testing the developer credit string.
-	 *
-	 * PS1 have in this field one of the following:
-	 *  - CEX-3000 KT-3  by K.S
-	 *  - CEX-3000/1001/1002 by K.S
-	 *  - CEX-3000/1001/1002 by K.S
-	 *
-	 * PS2 have "PS compatible mode by M.T"
-	 */
-	if (strncmp(KERNEL_AUTHOR, "CEX-", 4) == 0) {
-		// Restore part of the kernel memory
-		memcpy((uint8_t *) 0xA0000500, (const uint8_t *) 0xBFC10000, 0x8BF0);
-
-		// Call it to restore everything that it needs to
-		((void (*)(void)) 0xA0000500)();
-
-		// Restore call tables
-		memcpy((uint8_t *)      0x200, (const uint8_t *) 0xBFC04300, 0x300);
-	}
-
-	// Restore A, B and C tables
-	init_a0_b0_c0_vectors();
-
-	// Fix A table
-	AdjustA0Table();
-
-	// Install default exception handlers
-	InstallExceptionHandlers();
-
-	// Clear interrupts and mask
-	I_STAT = 0;
-	I_MASK = 0;
-
-	// Setup devices
-	InstallDevices(tty_enabled);
-
-	// Initialize kernel memory
-	SysInitMemory(0xA000E000, 0x2000);
-
-	// Enqueue syscall handler with priority 0
-	EnqueueSyscallHandler(0);
-
-	// Initialize default interrupt
-	InitDefInt(3);
-
-	// Setup timer and Vblank with priority 1
-	EnqueueTimerAndVblankIrqs(1);
-
-	// End of code adapted
-
-	// Re-enable interrupts
-	ExitCriticalSection();
-}
 
 void log_bios_version() {
 	/*
@@ -96,8 +26,8 @@ void log_bios_version() {
 	 */
 	const char * version;
 
-	if (strncmp(VERSION_STRING + 11, "Version", 7) == 0) {
-		version = VERSION_STRING + 19;
+	if (strncmp(BIOS_VERSION + 11, "Version", 7) == 0) {
+		version = BIOS_VERSION + 19;
 	} else {
 		version = "1.0 or older";
 	}
@@ -220,6 +150,40 @@ void try_boot_cd() {
 	debug_write("Initializing CD");
 	CdInit();
 
+	debug_write("Checking game region");
+	if (CdReadSector(1, 4, data_buffer) != 1) {
+		debug_write("Failed to read sector");
+		return;
+	}
+
+	const char * game_region;
+	bool game_is_pal = false;
+	/*
+	 * EU: "          Licensed  by          Sony Computer Entertainment Euro pe   "
+	 * US: "          Licensed  by          Sony Computer Entertainment Amer  ica "
+	 * JP: "          Licensed  by          Sony Computer Entertainment Inc.",0x0A
+	 *                                                                  |- character we use, at 0x3C
+	 */
+	switch (data_buffer[0x3C]) {
+		case 'E':
+			game_region = "European";
+			game_is_pal = true;
+			break;
+
+		case 'A':
+			game_region = "American";
+			break;
+
+		case 'I':
+			game_region = "Japanese";
+			break;
+
+		default:
+			game_region = "unknown";
+	}
+
+	debug_write("Game's region is %s. Using %s video.", game_region, game_is_pal ? "PAL" : "NTSC");
+
 	// Defaults if no SYSTEM.CNF file exists
 	uint32_t tcb = 4;
 	uint32_t event = 16;
@@ -281,10 +245,6 @@ void try_boot_cd() {
 		return;
 	}
 
-	// On European games, at 0x4C there is a string that "Sony Computer Entertainment Inc. for Europe area"
-	bool is_european_game = strncmp("Europe", (char *) (data_buffer + 0x71), 6) == 0;
-	debug_write("Game expects %s video", is_european_game ? "PAL" : "NTSC");
-
 	exe_header_t * exe_header = (exe_header_t *) (data_buffer + 0x10);
 
 	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
@@ -292,9 +252,9 @@ void try_boot_cd() {
 	if (exe_header->load_addr + exe_header->load_size >= data_buffer) {
 		debug_write("Won't fit. Using BIOS.");
 
-		if (is_european_game != bios_is_european()) {
+		if (game_is_pal != gpu_is_pal()) {
 			debug_write("Switching video mode");
-			debug_switch_standard(is_european_game);
+			debug_switch_standard(game_is_pal);
 		}
 
 		LoadAndExecute(bootfile, exe_header->initial_sp_base, exe_header->initial_sp_offset);
@@ -312,9 +272,9 @@ void try_boot_cd() {
 
 	patch_game(exe_header);
 
-	if (is_european_game != bios_is_european()) {
+	if (game_is_pal != gpu_is_pal()) {
 		debug_write("Switching video mode");
-		debug_switch_standard(is_european_game);
+		debug_switch_standard(game_is_pal);
 	}
 
 	debug_write("Starting");
@@ -330,7 +290,7 @@ void try_boot_cd() {
 
 void main() {
 	// Undo all possible fuckeries during exploiting
-	reinit_kernel();
+	bios_reinitialize();
 
 	// Initialize debug screen
 	debug_init();
@@ -357,7 +317,7 @@ void main() {
 		try_boot_cd();
 
 		debug_write("Reinitializing kernel");
-		reinit_kernel();
+		bios_reinitialize();
 	}
 }
 
