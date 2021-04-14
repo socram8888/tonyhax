@@ -64,8 +64,8 @@ void reinit_kernel() {
 	InstallExceptionHandlers();
 
 	// Clear interrupts and mask
-	*I_STAT = 0;
-	*I_MASK = 0;
+	I_STAT = 0;
+	I_MASK = 0;
 
 	// Setup devices
 	InstallDevices(tty_enabled);
@@ -306,7 +306,7 @@ void try_boot_cd() {
 	if (exe_header->load_addr + exe_header->load_size >= data_buffer) {
 		debug_write("Won't fit. Using BIOS.");
 
-		if (is_european_game != gpu_is_pal()) {
+		if (is_european_game != bios_is_european()) {
 			debug_write("Switching video mode");
 			gpu_init_bios(is_european_game);
 		}
@@ -326,7 +326,7 @@ void try_boot_cd() {
 
 	patch_game(exe_header);
 
-	if (is_european_game != gpu_is_pal()) {
+	if (is_european_game != bios_is_european()) {
 		debug_write("Switching video mode");
 		gpu_init_bios(is_european_game);
 	}

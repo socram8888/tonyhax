@@ -18,6 +18,12 @@ struct exe_header {
 
 typedef struct exe_header exe_header_t;
 
+/**
+ * Returns true if the console has an European BIOS.
+ * @returns true if console is European
+ */
+bool bios_is_european(void);
+
 /*
  * SYSCALLS
  */

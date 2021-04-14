@@ -22,7 +22,7 @@
 
 #define TH_MARGIN 40
 #define LOG_LINES 22
-#define LOG_MARGIN 30
+#define LOG_MARGIN 32
 #define LOG_START_Y 80
 #define LOG_LINE_HEIGHT 16
 
@@ -79,11 +79,32 @@ void decompressfont() {
 }
 
 void debug_init() {
-	bool pal = gpu_is_pal();
+	bool pal = bios_is_european();
 	gpu_init_bios(pal);
 
-	// Clear entire VRAM
-	gpu_fill_rectangle(0, 0, 1023, 511, 0x000000);
+	// Configure Texpage
+	// - Texture page to X=640 Y=0
+	// - Colors to 4bpp
+	// - Allow drawing to display area (fuck Vsync)
+	GPU_cw(0xE100040A);
+
+	// Configure texture window
+	GPU_cw(0xE2000000);
+
+	// Clear display
+	struct gpu_solid_rect background = {
+		.pos = {
+			.x = 0,
+			.y = 0,
+		},
+		.size = {
+			.width = SCREEN_WIDTH,
+			.height = SCREEN_HEIGHT,
+		},
+		.color = 0x000000,
+		.semi_transp = 0,
+	};
+	gpu_draw_solid_rect(&background);
 
 	// Load font
 	decompressfont();
@@ -98,47 +119,66 @@ void debug_init() {
 	// Flush old textures
 	gpu_flush_cache();
 
-	// Configure Texpage
-	// - Texture page to X=640 Y=0
-	// - Colors to 4bpp
-	// - Allow drawing to display area (fuck Vsync)
-	GPU_cw(0xE100040A);
-
-	// Configure texture window
-	GPU_cw(0xE2000000);
-
 	// Draw border
 	debug_text_at(TH_MARGIN, 40, "tonyhax " STRINGIFY(TONYHAX_VERSION));
-	gpu_fill_rectangle(0, 65, SCREEN_WIDTH, 2, 0xFFFFFF);
+	struct gpu_solid_rect band = {
+		.pos = {
+			.x = 0,
+			.y = 65,
+		},
+		.size = {
+			.width = SCREEN_WIDTH,
+			.height = 2,
+		},
+		.color = 0xFFFFFF,
+		.semi_transp = 0,
+	};
+	gpu_draw_solid_rect(&band);
 
 	// "orca.pet" website
 	debug_text_at(SCREEN_WIDTH - 8 * CHAR_DRAW_WIDTH - TH_MARGIN, 40, "orca.pet");
 
 	// Draw orca
-	struct gpu_tex_rect orca_rect;
-	orca_rect.texcoord.x = 16 * CHAR_ROM_WIDTH;
-	orca_rect.texcoord.y = 0;
-	orca_rect.width = ORCA_WIDTH;
-	orca_rect.height = ORCA_HEIGHT;
-	orca_rect.pos.x = SCREEN_WIDTH - 8 * CHAR_DRAW_WIDTH - TH_MARGIN - 10 - ORCA_WIDTH;
-	orca_rect.pos.y = 40;
-	orca_rect.clut.x = CLUT_X;
-	orca_rect.clut.y = CLUT_Y;
-	orca_rect.semi_transp = 0;
-	orca_rect.raw_tex = 1;
+	gpu_tex_rect_t orca_rect = {
+		.texcoord = {
+			.x = 16 * CHAR_ROM_WIDTH,
+			.y = 0,
+		},
+		.pos = {
+			.x = SCREEN_WIDTH - 8 * CHAR_DRAW_WIDTH - TH_MARGIN - 10 - ORCA_WIDTH,
+			.y = 40,
+		},
+		.size = {
+			.width = ORCA_WIDTH,
+			.height = ORCA_HEIGHT,
+		},
+		.clut = {
+			.x = CLUT_X,
+			.y = CLUT_Y,
+		},
+		.semi_transp = 0,
+		.raw_tex = 1,
+	};
 	gpu_draw_tex_rect(&orca_rect);
 }
 
 void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) {
 	// Initialize constants of the rect
-	struct gpu_tex_rect rect;
-	rect.pos.y = y_pos;
-	rect.width = CHAR_ROM_WIDTH;
-	rect.height = CHAR_HEIGHT;
-	rect.clut.x = CLUT_X;
-	rect.clut.y = CLUT_Y;
-	rect.semi_transp = 0;
-	rect.raw_tex = 1;
+	gpu_tex_rect_t rect = {
+		.pos = {
+			.y = y_pos,
+		},
+		.size = {
+			.width = CHAR_ROM_WIDTH,
+			.height = CHAR_HEIGHT,
+		},
+		.clut = {
+			.x = CLUT_X,
+			.y = CLUT_Y,
+		},
+		.semi_transp = 0,
+		.raw_tex = 1,
+	};
 
 	while (*text != 0) {
 		int tex_idx = *text - '!';
@@ -174,25 +214,39 @@ void debug_write(const char * str, ...) {
 	gpu_flush_cache();
 
 	// Scroll text up
+	gpu_size_t line_size = {
+		.width = SCREEN_WIDTH - LOG_MARGIN,
+		.height = LOG_LINE_HEIGHT,
+	};
 	for (int line = 1; line < LOG_LINES; line++) {
-		gpu_copy_rectangle(
-				/* source */
-				LOG_MARGIN,
-				LOG_START_Y + LOG_LINE_HEIGHT * line,
-				
-				/* destination */
-				LOG_MARGIN,
-				LOG_START_Y + LOG_LINE_HEIGHT * (line - 1),
-				
-				/* size */
-				SCREEN_WIDTH - LOG_MARGIN,
-				LOG_LINE_HEIGHT
-		);
+		gpu_point_t source_line = {
+			.x = LOG_MARGIN,
+			.y = LOG_START_Y + LOG_LINE_HEIGHT * line
+		};
+		gpu_point_t dest_line = {
+			.x = LOG_MARGIN,
+			.y = LOG_START_Y + LOG_LINE_HEIGHT * (line - 1)
+		};
+		gpu_copy_rectangle(&source_line, &dest_line, &line_size);
 	}
 
+	uint32_t lastLinePos = LOG_START_Y + (LOG_LINES - 1) * LOG_LINE_HEIGHT;
+
 	// Clear last line
-	gpu_fill_rectangle(0, LOG_START_Y + (LOG_LINES - 1) * LOG_LINE_HEIGHT, SCREEN_WIDTH, CHAR_HEIGHT, 0x000000);
+	gpu_solid_rect_t black_box = {
+		.pos = {
+			.x = LOG_MARGIN,
+			.y = lastLinePos,
+		},
+		.size = {
+			.width = SCREEN_WIDTH - LOG_MARGIN,
+			.height = CHAR_HEIGHT,
+		},
+		.color = 0x000000,
+		.semi_transp = 0,
+	};
+	gpu_draw_solid_rect(&black_box);
 
 	// Draw text on last line
-	debug_text_at(LOG_MARGIN, LOG_START_Y + (LOG_LINES - 1) * LOG_LINE_HEIGHT, formatted);
+	debug_text_at(LOG_MARGIN, lastLinePos, formatted);
 }

@@ -18,37 +18,40 @@
 #define GPU_DISPLAY_15BPP (0 << 4)
 #define GPU_DISPLAY_24BPP (1 << 4)
 
-
 struct gpu_point {
 	uint16_t x;
 	uint16_t y;
 };
+typedef struct gpu_point gpu_point_t;
 
-struct gpu_tex_rect {
-	struct gpu_point pos;
-	struct gpu_point texcoord;
-	struct gpu_point clut;
-	uint32_t color;
+struct gpu_size {
 	uint16_t width;
 	uint16_t height;
-	uint8_t semi_transp;
-	uint8_t raw_tex;
 };
+typedef struct gpu_size gpu_size_t;
 
-struct gpu_tex_poly {
-	struct gpu_point vertex[4];
-	struct gpu_point texcoord[4];
-	struct gpu_point clut;
-	struct gpu_point texpage;
+struct gpu_solid_rect {
+	gpu_point_t pos;
+	gpu_size_t size;
 	uint32_t color;
-	uint8_t vertex_count;
+	uint8_t semi_transp;
+};
+typedef struct gpu_solid_rect gpu_solid_rect_t;
+
+struct gpu_tex_rect {
+	gpu_point_t pos;
+	gpu_size_t size;
+	gpu_point_t texcoord;
+	gpu_point_t clut;
+	uint32_t color;
 	uint8_t semi_transp;
 	uint8_t raw_tex;
 };
+typedef struct gpu_tex_rect gpu_tex_rect_t;
 
 void gpu_reset(void);
 
-bool gpu_is_pal(void);
+void gpu_wait_vblank(void);
 
 void gpu_display_enable(void);
 
@@ -56,15 +59,13 @@ void gpu_display_disable(void);
 
 void gpu_display_mode(uint32_t mode);
 
-void gpu_fill_rectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t rgb);
+void gpu_copy_rectangle(const gpu_point_t * src, const gpu_point_t * dst, const gpu_size_t * size);
 
-void gpu_copy_rectangle(uint16_t src_x, uint16_t src_y, uint16_t dest_x, uint16_t dest_y, uint16_t width, uint16_t height);
+void gpu_draw_solid_rect(const gpu_solid_rect_t * rect);
 
-void gpu_draw_tex_rect(const struct gpu_tex_rect * rect);
+void gpu_draw_tex_rect(const gpu_tex_rect_t * rect);
 
-void gpu_draw_tex_poly(const struct gpu_tex_poly * poly);
-
-void gpu_set_drawing_area(uint_fast16_t x, uint_fast16_t y, uint_fast16_t width, uint_fast16_t height);
+void gpu_set_drawing_area(const gpu_point_t * pos, const gpu_size_t * size);
 
 void gpu_flush_cache(void);
 
