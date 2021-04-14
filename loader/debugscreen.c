@@ -4,11 +4,12 @@
 #include "bios.h"
 #include "str.h"
 
+#define SCALE(x) ((x) + (x) / 2)
+
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define CHAR_HEIGHT 15
-#define CHAR_ROM_WIDTH 8
-#define CHAR_DRAW_WIDTH (CHAR_ROM_WIDTH + 2)
+#define CHAR_WIDTH 8
 #define FONT_X 640
 #define CLUT_X 640
 #define CLUT_Y (6 * CHAR_HEIGHT)
@@ -18,13 +19,13 @@
 #define ORCA_HEIGHT 20
 
 // Divided by 4 because each pixel is 4bpp, or 1/4 of a 16-bit short
-#define ORCA_VRAM_X (FONT_X + CHAR_ROM_WIDTH * 16 / 4)
+#define ORCA_VRAM_X (FONT_X + CHAR_WIDTH * 16 / 4)
 
 #define TH_MARGIN 40
-#define LOG_LINES 22
+#define LOG_LINES 14
 #define LOG_MARGIN 32
 #define LOG_START_Y 80
-#define LOG_LINE_HEIGHT 16
+#define LOG_LINE_HEIGHT SCALE(CHAR_HEIGHT + 1)
 
 #define _STRINGIFY(x) #x
 #define STRINGIFY(x) _STRINGIFY(x)
@@ -50,20 +51,14 @@ void decompressfont() {
 				rom_charset++;
 
 				// Iterate through each column of the character
-				bool last_black = false;
 				for (uint_fast8_t bpos = 0; bpos < 8; bpos += 2) {
 					uint_fast8_t char4bpp = 0;
 
-					if (last_black) {
-						char4bpp |= 0x0F;
-						last_black = false;
-					}
 					if (char1bpp & 0x80) {
-						char4bpp |= 0xFF;
+						char4bpp |= 0x0F;
 					}
 					if (char1bpp & 0x40) {
 						char4bpp |= 0xF0;
-						last_black = true;
 					}
 
 					*bufferpos = char4bpp;
@@ -76,6 +71,45 @@ void decompressfont() {
 			GPU_dw(FONT_X + tablex * 2, tabley * CHAR_HEIGHT, 2, CHAR_HEIGHT, (uint16_t *) charbuf);
 		}
 	}
+}
+
+void draw_scaled_rect(const struct gpu_point * font_offset, const struct gpu_point * size, const struct gpu_point * dst) {
+	gpu_tex_poly_t poly;
+
+	poly.vertex_count = 4;
+	poly.color_mode = GPU_COLORMODE_4BPP;
+	poly.semi_transp = GPU_SEMITRANSP_OFF;
+	poly.raw_tex = 1;
+	poly.clut.x = CLUT_X;
+	poly.clut.y = CLUT_Y;
+	poly.tex_base.x = FONT_X;
+	poly.tex_base.y = 0;
+
+	poly.vertex[0].x = dst->x;
+	poly.vertex[0].y = dst->y;
+
+	poly.vertex[1].x = dst->x + SCALE(size->x);
+	poly.vertex[1].y = dst->y;
+
+	poly.vertex[2].x = dst->x;
+	poly.vertex[2].y = dst->y + SCALE(size->y);
+
+	poly.vertex[3].x = dst->x + SCALE(size->x);
+	poly.vertex[3].y = dst->y + SCALE(size->y);
+
+	poly.tex_coord[0].x = font_offset->x;
+	poly.tex_coord[0].y = font_offset->y;
+
+	poly.tex_coord[1].x = font_offset->x + size->x;
+	poly.tex_coord[1].y = font_offset->y;
+
+	poly.tex_coord[2].x = font_offset->x;
+	poly.tex_coord[2].y = font_offset->y + size->y;
+
+	poly.tex_coord[3].x = font_offset->x + size->x;
+	poly.tex_coord[3].y = font_offset->y + size->y;
+
+	gpu_draw_tex_poly(&poly);
 }
 
 void debug_init() {
@@ -136,49 +170,25 @@ void debug_init() {
 	gpu_draw_solid_rect(&band);
 
 	// "orca.pet" website
-	debug_text_at(SCREEN_WIDTH - 8 * CHAR_DRAW_WIDTH - TH_MARGIN, 40, "orca.pet");
+	debug_text_at(SCREEN_WIDTH - 8 * SCALE(CHAR_WIDTH) - TH_MARGIN, 40, "orca.pet");
 
 	// Draw orca
-	gpu_tex_rect_t orca_rect = {
-		.texcoord = {
-			.x = 16 * CHAR_ROM_WIDTH,
-			.y = 0,
-		},
-		.pos = {
-			.x = SCREEN_WIDTH - 8 * CHAR_DRAW_WIDTH - TH_MARGIN - 10 - ORCA_WIDTH,
-			.y = 40,
-		},
-		.size = {
-			.width = ORCA_WIDTH,
-			.height = ORCA_HEIGHT,
-		},
-		.clut = {
-			.x = CLUT_X,
-			.y = CLUT_Y,
-		},
-		.semi_transp = 0,
-		.raw_tex = 1,
-	};
-	gpu_draw_tex_rect(&orca_rect);
+	struct gpu_point orca_tex, orca_size, orca_dst;
+	orca_tex.x = 16 * CHAR_WIDTH;
+	orca_tex.y = 0;
+	orca_size.x = ORCA_WIDTH;
+	orca_size.y = ORCA_HEIGHT;
+	orca_dst.x = SCREEN_WIDTH - 8 * SCALE(CHAR_WIDTH) - 20 - SCALE(ORCA_WIDTH) - 10;
+	orca_dst.y = 5;
+	draw_scaled_rect(&orca_tex, &orca_size, &orca_dst);
 }
 
 void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) {
-	// Initialize constants of the rect
-	gpu_tex_rect_t rect = {
-		.pos = {
-			.y = y_pos,
-		},
-		.size = {
-			.width = CHAR_ROM_WIDTH,
-			.height = CHAR_HEIGHT,
-		},
-		.clut = {
-			.x = CLUT_X,
-			.y = CLUT_Y,
-		},
-		.semi_transp = 0,
-		.raw_tex = 1,
-	};
+	struct gpu_point font_offset, size, dst;
+	size.x = CHAR_WIDTH;
+	size.y = CHAR_HEIGHT;
+	dst.x = x_pos;
+	dst.y = y_pos;
 
 	while (*text != 0) {
 		int tex_idx = *text - '!';
@@ -189,15 +199,14 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 			}
 
 			// Draw text
-			rect.pos.x = x_pos;
-			rect.texcoord.x = (tex_idx % 16) * CHAR_ROM_WIDTH;
-			rect.texcoord.y = (tex_idx / 16) * CHAR_HEIGHT;
+			font_offset.x = (tex_idx % 16) * CHAR_WIDTH;
+			font_offset.y = (tex_idx / 16) * CHAR_HEIGHT;
 
-			gpu_draw_tex_rect(&rect);
+			draw_scaled_rect(&font_offset, &size, &dst);
 		}
 
 		text++;
-		x_pos += CHAR_DRAW_WIDTH;
+		dst.x += SCALE(CHAR_WIDTH);
 	}
 }
 
@@ -240,7 +249,7 @@ void debug_write(const char * str, ...) {
 		},
 		.size = {
 			.width = SCREEN_WIDTH - LOG_MARGIN,
-			.height = CHAR_HEIGHT,
+			.height = LOG_LINE_HEIGHT,
 		},
 		.color = 0x000000,
 		.semi_transp = 0,

@@ -83,6 +83,49 @@ void gpu_draw_tex_rect(const gpu_tex_rect_t * rect) {
 	GPU_cwp(buf, 4);
 }
 
+void gpu_draw_tex_poly(const struct gpu_tex_poly * poly) {
+	uint32_t buf[9];
+
+	if (poly->raw_tex) {
+		buf[0] = 0x25000000;
+	} else {
+		uint8_t r = poly->color >> 16;
+		uint8_t g = poly->color >> 8;
+		uint8_t b = poly->color >> 0;
+
+		buf[0] = 0x24000000 | (uint32_t) b << 16 | (uint32_t) g << 8 | (uint32_t) r;
+	}
+
+	if (poly->semi_transp) {
+		buf[0] |= 0x02000000;
+	}
+
+	if (poly->vertex_count == 4) {
+		buf[0] |= 0x08000000;
+	}
+
+	buf[1] = (uint32_t) poly->vertex[0].y << 16 | poly->vertex[0].x;
+	buf[2] = (uint32_t) poly->clut.y << 22 | (uint32_t) (poly->clut.x / 16) << 16 | (uint32_t) poly->tex_coord[0].y << 8 | poly->tex_coord[0].x;
+	buf[3] = (uint32_t) poly->vertex[1].y << 16 | poly->vertex[1].x;
+
+	buf[4] = (uint32_t) poly->color_mode << 23 | (uint32_t) (poly->tex_base.y / 256) << 20 | (uint32_t) (poly->tex_base.x / 64) << 16 | (uint32_t) poly->tex_coord[1].y << 8 | poly->tex_coord[1].x;
+	if (poly->semi_transp) {
+		buf[4] |= (uint32_t) (poly->semi_transp - 1) << 21;
+	}
+
+	buf[5] = (uint32_t) poly->vertex[2].y << 16 | poly->vertex[2].x;
+	buf[6] = (uint32_t) poly->tex_coord[2].y << 8 | poly->tex_coord[2].x;
+
+	if (poly->vertex_count == 4) {
+		buf[7] = (uint32_t) poly->vertex[3].y << 16 | poly->vertex[3].x;
+		buf[8] = (uint32_t) poly->tex_coord[3].y << 8 | poly->tex_coord[3].x;
+
+		GPU_cwp(buf, 9);
+	} else {
+		GPU_cwp(buf, 7);
+	}
+}
+
 void gpu_set_drawing_area(const gpu_point_t * pos, const gpu_size_t * size) {
 	GPU_cw(0xE3000000 | pos->y << 10 | pos->x);
 	GPU_cw(0xE4000000 | (pos->y + size->height - 1) << 10 | (pos->x + size->width - 1));

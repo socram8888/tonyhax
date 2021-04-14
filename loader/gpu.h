@@ -18,6 +18,16 @@
 #define GPU_DISPLAY_15BPP (0 << 4)
 #define GPU_DISPLAY_24BPP (1 << 4)
 
+#define GPU_COLORMODE_4BPP 0
+#define GPU_COLORMODE_8BPP 1
+#define GPU_COLORMODE_15BPP 2
+
+#define GPU_SEMITRANSP_OFF 0
+#define GPU_SEMITRANSP_AVG 1
+#define GPU_SEMITRANSP_SUM 2
+#define GPU_SEMITRANSP_DIFF 3
+#define GPU_SEMITRANSP_WEIGHTED 4
+
 struct gpu_point {
 	uint16_t x;
 	uint16_t y;
@@ -49,6 +59,19 @@ struct gpu_tex_rect {
 };
 typedef struct gpu_tex_rect gpu_tex_rect_t;
 
+struct gpu_tex_poly {
+	struct gpu_point vertex[4];
+	struct gpu_point tex_coord[4];
+	struct gpu_point clut;
+	struct gpu_point tex_base;
+	uint32_t color;
+	uint8_t vertex_count;
+	uint8_t color_mode;
+	uint8_t semi_transp;
+	uint8_t raw_tex;
+};
+typedef struct gpu_tex_poly gpu_tex_poly_t;
+
 void gpu_reset(void);
 
 void gpu_wait_vblank(void);
@@ -64,6 +87,8 @@ void gpu_copy_rectangle(const gpu_point_t * src, const gpu_point_t * dst, const 
 void gpu_draw_solid_rect(const gpu_solid_rect_t * rect);
 
 void gpu_draw_tex_rect(const gpu_tex_rect_t * rect);
+
+void gpu_draw_tex_poly(const gpu_tex_poly_t * poly);
 
 void gpu_set_drawing_area(const gpu_point_t * pos, const gpu_size_t * size);
 
