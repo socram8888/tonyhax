@@ -195,12 +195,9 @@ void debug_text_at(uint_fast16_t x_pos, uint_fast16_t y_pos, const char * text) 
 			// Again to overstrike and improve visibility
 			rect.pos.x++;
 			gpu_draw_tex_rect(&rect);
-
-			x_pos += CHAR_DRAW_WIDTH;
-		} else {
-			x_pos += CHAR_DRAW_WIDTH;
 		}
 
+		x_pos += CHAR_DRAW_WIDTH;
 		text++;
 	}
 }
