@@ -13,10 +13,14 @@ SECTIONS {
 	{
 		*(.rodata .rodata.*)
 	} >ram
-	PROVIDE(__DATA_START__ = .);
 	.data :
 	{
 		*(.data .data.*)
+	} >ram
+	PROVIDE(__CRC_START__ = .);
+	.crc :
+	{
+		*(.crc .crc.*)
 	} >ram
 	PROVIDE(__BSS_START__ = .);
 	.bss :

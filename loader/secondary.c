@@ -10,13 +10,14 @@
 #include "debugscreen.h"
 #include "gpu.h"
 #include "patcher.h"
+#include "integrity.h"
 #include "io.h"
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
 const uint32_t tty_enabled = 0;
 
 // Loading address of tonyhax, provided by the secondary.ld linker script
-extern uint8_t __RO_START__, __DATA_START__, __BSS_START__, __BSS_END__;
+extern uint8_t __RO_START__, __CRC_START__, __BSS_START__, __BSS_END__;
 
 // Buffer right before this executable
 uint8_t * const data_buffer = (uint8_t *) 0x801F9800;
@@ -86,21 +87,6 @@ void reinit_kernel() {
 
 	// Re-enable interrupts
 	ExitCriticalSection();
-}
-
-bool test_integrity() {
-	/*
-	 * The integrity consists of a CRC32 inside the title frame after the title name,
-	 * at offset 0x4C.
-	 * This hash is calculated over all the read-only payload.
-	 */
-	uint32_t correct_value = *((uint32_t * ) (&__RO_START__ - 0x100 + 0x4C));
-	uint32_t calc_value = crc32(&__RO_START__, &__DATA_START__ - &__RO_START__);
-
-	bool ok = correct_value == calc_value;
-	debug_write("Integrity check %sed", ok ? "pass" : "fail");
-
-	return ok;
 }
 
 void log_bios_version() {
@@ -349,7 +335,8 @@ void main() {
 	// Initialize debug screen
 	debug_init();
 
-	if (!test_integrity()) {
+	debug_write("Integrity check %sed", integrity_ok ? "pass" : "fail");
+	if (!integrity_ok) {
 		return;
 	}
 
@@ -375,6 +362,9 @@ void main() {
 }
 
 void __attribute__((section(".start"))) start() {
+	// Execute integrity test
+	integrity_test();
+
 	// Clear BSS
 	bzero(&__BSS_START__, &__BSS_END__ - &__BSS_START__);
 
