@@ -25,3 +25,6 @@ echo -ne "\x${crc:6:2}\x${crc:4:2}\x${crc:2:2}\x${crc:0:2}" >$tmpsection
 
 # Insert it
 mips-linux-gnu-objcopy --update-section .crc=$tmpsection "$elf_file"
+
+# Cleanup
+rm $tmpsection

@@ -34,6 +34,5 @@ tonyhax.mcs: tonyhax-tpl.mcs secondary.elf
 BESLEM-99999TONYHAX: tonyhax.mcs
 	bash ../util/mcs2raw.sh tonyhax.mcs
 
-tonyhax.exe: tonyhax-tpl.exe BESLEM-99999TONYHAX
-	cp tonyhax-tpl.exe tonyhax.exe
-	dd conv=notrunc if=BESLEM-99999TONYHAX bs=128 seek=16 of=tonyhax.exe
+tonyhax.exe: secondary.elf
+	bash generate-tonyhax-exe.sh secondary.elf tonyhax.exe
