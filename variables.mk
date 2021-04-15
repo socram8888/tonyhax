@@ -61,5 +61,5 @@ LOADER_FILES := tonyhax.mcs BESLEM-99999TONYHAX tonyhax.exe
 
 # FreePSXBoot images
 
-FREEPSXBOOT_BIOS = v3.0 v4.1 v4.4 v4.5
+FREEPSXBOOT_BIOS = v2.0 v2.1 v2.2 v3.0 v4.1 v4.4 v4.5
 FREEPSXBOOT_IMAGES := $(patsubst %,tonyhax_bios_%.mcd,$(FREEPSXBOOT_BIOS))
