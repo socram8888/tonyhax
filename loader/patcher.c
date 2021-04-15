@@ -310,17 +310,40 @@ const struct game GAMES[] = {
 	/*
 	 * Tetris with Card Captor Sakura - Eternal Heart (J) (SLPS-02886)
 	 * Plain call, but this one checks the function return value.
+	 * It also has several checks for a cheat device at 0x1F000000, freezing
+	 * if it detects one.
+	 * Fixed thanks to https://www.reddit.com/r/PSP/comments/4j3snf/has_anyone_ever_managed_to_make_tetris_with/
 	 */
 	{
 		.crc = 0x8E11C761,
 		.patches = (const struct patch[]) {
 			{
-				 // Replace the call with a "ori v0,0,$1"
+				 // Replace the call with a "ori v0,0,$0"
 				.offset = 0x8001FFC4,
 				.size = 4,
-				.flags = FLAG_LAST,
-				.data = (const uint8_t[]) { 0x01, 0x00, 0x02, 0x34 }
-			}
+				.data = (const uint8_t[]) { 0x00, 0x00, 0x02, 0x34 }
+			},
+			// Nuke the four checks for secondary cheat/backup device at 0x1F000000
+			{
+				.offset = 0x8001882C,
+				.size = 0x8001885C - 0x8001882C,
+				.flags = FLAG_NOP,
+			},
+			{
+				.offset = 0x80016B60,
+				.size = 0x80016BB0 - 0x80016B60,
+				.flags = FLAG_NOP,
+			},
+			{
+				.offset = 0x80020154,
+				.size = 0x800201F0 - 0x80020154,
+				.flags = FLAG_NOP,
+			},
+			{
+				.offset = 0x800217A4,
+				.size = 0x80021804 - 0x800217A4,
+				.flags = FLAG_NOP | FLAG_LAST,
+			},
 		}
 	},
 	/*
