@@ -47,3 +47,19 @@ These have been tested to work on real hardware:
 | XS Moto                                | PAL-E  | SLES-04095 | xsmoto-eu.mcs     | BESLES-04095XSMOTO   |
 
 For more information, look at [its section at orca.pet](https://orca.pet/tonyhax/).
+
+Development
+-----------
+
+This repository uses git submodules for building certain parts, so after cloning, make sure you run:
+```
+git submodule init
+git submodule update --recursive
+```
+
+For compiling tonyhax, you will need a standard MIPS compiler, a bash interpreter and Make, all of which can be installed on Debian/Ubuntu using:
+```
+sudo apt-get install build-essential gcc-10-mips-linux-gnu
+```
+
+After installing all dependencies, you can compile and package it by running `make` on the root of the project, which (hopefully) will result in a .zip file with all the required files created at the root.

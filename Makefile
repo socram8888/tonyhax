@@ -25,3 +25,4 @@ clean:
 	$(MAKE) -C entrypoints clean
 	$(MAKE) -C loader clean
 	$(MAKE) -C freepsxboot clean
+	$(RM) tonyhax-*.zip

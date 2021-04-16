@@ -9,7 +9,7 @@ LOADER_OBJECTS := $(patsubst %.c, %.o, $(patsubst %.s, %.o, $(wildcard *.c *.s))
 all: $(LOADER_FILES)
 
 clean:
-	$(RM) $(LOADER_FILES) *.o orca.inc
+	$(RM) $(LOADER_FILES) *.o *.elf orca.inc
 
 # Intermediate objects
 
