@@ -10,7 +10,7 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 TONYHAX_VERSION=v1.3b
 
 CC=mips-linux-gnu-gcc
-CFLAGS=-Wall -Wextra -Wno-main -EL -march=r3000 -mabi=32 -mfp32 -nostdlib -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -O1 -DTONYHAX_VERSION=$(TONYHAX_VERSION)
+CFLAGS=-O1 -Wall -Wextra -Wno-main -EL -march=r3000 -mabi=32 -mfp32 -mno-abicalls -fno-pic -fdata-sections -ffunction-sections -fno-builtin -nostdlib -DTONYHAX_VERSION=$(TONYHAX_VERSION)
 
 LD=mips-linux-gnu-ld
 LDFLAGS=-EL --gc-sections

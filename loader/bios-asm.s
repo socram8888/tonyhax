@@ -129,6 +129,11 @@ CdReadSector:
 # B-FUNCTIONS #
 ###############
 
+.global alloc_kernel_memory
+alloc_kernel_memory:
+	li $t1, 0x00
+	j 0xB0
+
 .global SetDefaultExitFromException
 SetDefaultExitFromException:
 	li $t1, 0x18
