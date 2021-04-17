@@ -11,7 +11,7 @@
 
 __start:
 	# Restore stack pointer
-	li sp, 0x801FFF00
+	li t0, 0x801FFF00
 	move sp, t0
 
 	# Call ourselves to get the current program counter in ra
@@ -57,8 +57,8 @@ restoreirqs:
 	li t1, 0x18
 	jal 0xB0
 
-	# Call ChangeClearPad(1) so the pad IRQ clears the interrupt flags.
-	# PsyQ disables it to trap VBlanks.
+	# Call ChangeClearPad(1) so the card IRQ clears the interrupt flags.
+	# PsyQ disables it to trap VBlanks, and without reenabling we'll get stuck in the ISR.
 	li t1, 0x5B
 	li a0, 1
 	jal 0xB0
@@ -77,7 +77,7 @@ restoreirqs:
 	move s1, v0
 
 	# If less than zero, it failed
-	bgez v0, fatalerror
+	blt v0, zero, fatalerror
 
 	# The kernel will fail to read if we don't wait a bit (here, ~1/10th of a second)
 	# This is a known issue as specified in LIBOVR46.PDF section 5-11:
@@ -85,7 +85,7 @@ restoreirqs:
 	li t0, 1000000
 busywait:
 	addi t0, -1
-	bnz t0, busywait
+	bne t0, zero, busywait
 
 	# Load temp buffer address
 	li s2, 0x801FA000
