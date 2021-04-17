@@ -57,11 +57,6 @@ memcpy:
 	li $t1, 0x2A
 	j 0xA0
 
-.global memset
-memset:
-	li $t1, 0x2B
-	j 0xA0
-
 .global DoExecute
 DoExecute:
 	# Pepsiman (J) crashes if s5 is not zero

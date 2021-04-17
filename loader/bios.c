@@ -10,6 +10,23 @@ const uint32_t tty_enabled = 0;
 const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
 const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
 
+// Let's just pray these don't vary
+void ** const HANDLER_ARRAY = (void **) 0x100;
+uint32_t * const HANDLER_ARRAY_LEN = (uint32_t *) 0x104;
+
+void initHandlersArray(int32_t priorities) {
+	// 8 is the size of the struct, whose contents we don't really care about
+	uint32_t array_len = 8 * priorities;
+
+	void * array = alloc_kernel_memory(array_len);
+	if (!array) {
+		bzero(array, array_len);
+
+		*HANDLER_ARRAY = array;
+		*HANDLER_ARRAY_LEN = array_len;
+	}
+}
+
 void bios_reinitialize() {
 	// Disable interrupts
 	EnterCriticalSection();
@@ -56,6 +73,9 @@ void bios_reinitialize() {
 
 	// Initialize kernel memory
 	SysInitMemory(0xA000E000, 0x2000);
+
+	// Initialize handlers array
+	initHandlersArray(4);
 
 	// Enqueue syscall handler with priority 0
 	EnqueueSyscallHandler(0);

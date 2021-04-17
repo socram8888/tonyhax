@@ -478,7 +478,7 @@ void patch_game(const exe_header_t * header) {
 	while (1) {
 		uint8_t * patch_dest = (uint8_t *) cur_patch->offset;
 		if (cur_patch->flags & FLAG_NOP) {
-			memset(patch_dest, 0, cur_patch->size);
+			bzero(patch_dest, cur_patch->size);
 		} else {
 			memcpy(patch_dest, cur_patch->data, cur_patch->size);
 		}

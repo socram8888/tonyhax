@@ -301,6 +301,16 @@ int32_t CdReadSector(uint32_t sector_count, uint32_t start_sector, void * buffer
  */
 
 /**
+ * Allocates a chunk of memory on the kernel's heap.
+ *
+ * @param size size in bytes of the chunk.
+ * @returns a pointer to the allocated chunk, or null.
+ *
+ * Table B, call 0x00.
+ */
+void * alloc_kernel_memory(uint32_t size);
+
+/**
  * Restores the default exception exit handler.
  *
  * Table B, call 0x18.
