@@ -134,6 +134,11 @@ CdReadSector:
 # B-FUNCTIONS #
 ###############
 
+.global SetDefaultExitFromException
+SetDefaultExitFromException:
+	li $t1, 0x18
+	j 0xB0
+
 .global FileOpen
 FileOpen:
 	li $t1, 0x32

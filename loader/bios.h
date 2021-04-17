@@ -301,6 +301,13 @@ int32_t CdReadSector(uint32_t sector_count, uint32_t start_sector, void * buffer
  */
 
 /**
+ * Restores the default exception exit handler.
+ *
+ * Table B, call 0x18.
+ */
+void SetDefaultExitFromException(void);
+
+/**
  * Opens a file on the target device for I/O.
  *
  * Table B, call 0x32.

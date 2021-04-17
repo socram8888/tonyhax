@@ -44,6 +44,9 @@ void bios_reinitialize() {
 	// Install default exception handlers
 	InstallExceptionHandlers();
 
+	// Restore default exception return function
+	SetDefaultExitFromException();
+
 	// Clear interrupts and mask
 	I_STAT = 0;
 	I_MASK = 0;
