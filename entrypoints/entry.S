@@ -50,15 +50,9 @@ waitcardready:
 	b waitcardready
 
 restoreirqs:
-	# Call SetDefaultExitFromException
-	# PsyQ uses a custom exit from exception handler as a hook for VSync and other stuff,
-	# which is constantly polling the memory card for changes and fucking us up.
-	# Now that we're sure it left the card in a ready state, disable it.
-	li t1, 0x18
-	jal 0xB0
-
-	# Call ChangeClearPad(1) so the card IRQ clears the interrupt flags.
-	# PsyQ disables it to trap VBlanks, and without reenabling we'll get stuck in the ISR.
+	# Call ChangeClearPad(1) so the BIOS card IRQ clears the interrupt flags.
+	# This prevents the PsyQ VBlank ISR from detecting that VBlank fired, and thus prevent its
+	# LIBMCRD from interrupting us.
 	li t1, 0x5B
 	li a0, 1
 	jal 0xB0
