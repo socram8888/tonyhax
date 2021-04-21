@@ -62,13 +62,13 @@ castrolvtr-eu.mcs: castrolvtr-eu-tpl.mcs entry.bin
 # Cool Boarders 4 NTSC-US target
 coolbrd4-us.mcs: coolbrd4-us-tpl.mcs entry.bin
 	cp coolbrd4-us-tpl.mcs coolbrd4-us.mcs
-	dd conv=notrunc if=entry.bin of=coolbrd4-us.mcs bs=1 seek=3116
+	dd conv=notrunc if=entry.bin of=coolbrd4-us.mcs bs=1 seek=3428
 	bash fix-cb4-checksum.sh coolbrd4-us.mcs
 
 # Cool Boarders 4 PAL-EU target
 coolbrd4-eu.mcs: coolbrd4-eu-tpl.mcs entry.bin
 	cp coolbrd4-eu-tpl.mcs coolbrd4-eu.mcs
-	dd conv=notrunc if=entry.bin of=coolbrd4-eu.mcs bs=1 seek=3116
+	dd conv=notrunc if=entry.bin of=coolbrd4-eu.mcs bs=1 seek=3428
 	bash fix-cb4-checksum.sh coolbrd4-eu.mcs
 
 # Crash Bandicoot 2 NTSC-US target
