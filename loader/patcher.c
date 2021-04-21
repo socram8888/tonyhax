@@ -275,7 +275,7 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
-	 * Silent Hill Survivor (U) (SLUS-01087)
+	 * Resident Evil Survivor (U) (SLUS-01087)
 	 *
 	 * This one's main executable just loads KERNEL.BIN and jumps to it, which contains the actual
 	 * antipiracy check at 0x80010D2C, which we will just NOP.
