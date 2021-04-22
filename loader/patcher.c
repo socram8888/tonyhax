@@ -97,6 +97,47 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Biohazard 3: Last Escape (J) (SLPS-02300)
+	 *
+	 * A call at 0x80029CF0 loads CD_DATA\BIN\WARNING.BIN to 0x80184000.
+	 *
+	 * This binary contains the antipiracy code at 0x801840B8, which gets called from a loop at
+	 * 0x801851F8-0x80185203 until v0 is zero.
+	 *
+	 * Right after that load, at 0x80029D08 there's a "jal 0x800324B0", calls ChangeThread to
+	 * run the code inside the warning binary.
+	 *
+	 * We will replace this jal with a jal to the patcher, which will replace the antipiracy
+	 * "jal" with a "li v0, 0", and then jump to the original function that was being called.
+	 *
+	 * This patcher will be stored at 0x800A1184, where a unreferenced copyright string is.
+	 */
+	{
+		.crc = 0x6CCD3A22,
+		.patches = (const struct patch[]) {
+			{
+				// Insert call to the patcher
+				.offset = 0x80029D08,
+				.size = 4,
+				.data = (const uint8_t[]) {
+					0x61, 0x84, 0x02, 0x0C, // "jal 0x800A1184"
+				}
+			},
+			{
+				// Nuke call to antipiracy
+				.offset = 0x800A1184,
+				.size = 16,
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) {
+					0x02, 0x24, 0x08, 0x3C, // "li t0, 0x24020000", where the constant is "li v0, 0"
+					0x18, 0x80, 0x09, 0x3C, // "lui $t1, 0x8018"
+					0x2C, 0xC9, 0x00, 0x08, // "j 0x800324B0" to continue with the normal flow
+					0xF8, 0x51, 0x28, 0xAD, // "sw t0, 0x51F8(t1)" to replace the jal at 0x801851F8 with the "li v0, 0"
+				}
+			}
+		}
+	},
+	/*
 	 * Biohazard: Gun Survivor (J) (SLPS-02553)
 	 * Plain antipiracy call. Boring.
 	 */
