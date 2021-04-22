@@ -97,6 +97,21 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Biohazard: Gun Survivor (J) (SLPS-02553)
+	 * Plain antipiracy call. Boring.
+	 */
+	{
+		.crc = 0x5C46599F,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x80010D2C,
+				.size = 4,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Legend of Dragoon (E) (Disc 1) (SCES-03043)
 	 * Plain antipiracy call in a loop.
 	 */
