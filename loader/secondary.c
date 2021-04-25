@@ -313,6 +313,8 @@ void main() {
 		return;
 	}
 
+	debug_write("If using FreePSXBoot, please remove the memory card now");
+
 	while (1) {
 		try_boot_cd();
 
