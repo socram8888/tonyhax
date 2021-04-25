@@ -193,7 +193,7 @@ const struct game GAMES[] = {
 		.crc = 0x520EBB0D,
 		.patches = (const struct patch[]) {
 			{
-				// Insert patcher
+				// Nuke call to antipiracy
 				.offset = 0x8002957C,
 				.size = 28,
 				.flags = FLAG_NOP | FLAG_LAST
