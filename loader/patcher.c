@@ -184,6 +184,23 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Dino Crisis (U) (SLUS-00922) (v1.1)
+	 *
+	 * Antipiracy is contained in PSX/BIN/TITLE.BIN, loaded on boot at 0x80148000. It is then
+	 * called in plain from 0x8002957C.
+	 */
+	{
+		.crc = 0x520EBB0D,
+		.patches = (const struct patch[]) {
+			{
+				// Insert patcher
+				.offset = 0x8002957C,
+				.size = 28,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Legend of Dragoon (E) (Disc 1) (SCES-03043)
 	 * Plain antipiracy call in a loop.
 	 */
