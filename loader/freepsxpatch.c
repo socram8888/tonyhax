@@ -17,7 +17,7 @@ void freepsxpatch_apply(void) {
 	// Insert the payload
 	// At this point the sector number is in a2, read buffer is in a1 and v1 is already 1 (success)
 	b_tbl[0x5E] = 0x14C00006; // "bne a2, 0, +6" to the jump to return
-	b_tbl[0x5F] = 0x8CA80010; // "lw t0, 10(a1)"
+	b_tbl[0x5F] = 0x8CA8007C; // "lw t0, 0x7C(a1)"
 	b_tbl[0x60] = 0x3C094258; // "lui t1, 0x4258"
 	b_tbl[0x61] = 0x35295046; // "ori t1, t1, 0x5046"
 	b_tbl[0x62] = 0x15090002; // "bne t0, t1, +2"
