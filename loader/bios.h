@@ -360,6 +360,15 @@ void FileClose(int32_t fd);
  */
 uint32_t GetLastError(void);
 
+/**
+ * Returns the address of the B call table.
+ *
+ * @returns the address of the B call table.
+ *
+ * Table B, call 0x57.
+ */
+uint32_t * GetB0Table(void);
+
 /*
  * C-FUNCTIONS
  */

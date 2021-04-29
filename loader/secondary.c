@@ -12,6 +12,7 @@
 #include "patcher.h"
 #include "integrity.h"
 #include "io.h"
+#include "freepsxpatch.h"
 
 // Loading address of tonyhax, provided by the secondary.ld linker script
 extern uint8_t __BSS_START__, __BSS_END__;
@@ -313,9 +314,8 @@ void main() {
 		return;
 	}
 
-	debug_write("If using FreePSXBoot, please remove the memory card now");
-
 	while (1) {
+		freepsxpatch_apply();
 		try_boot_cd();
 
 		debug_write("Reinitializing kernel");

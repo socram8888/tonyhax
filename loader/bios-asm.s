@@ -159,6 +159,11 @@ GetLastError:
 	li $t1, 0x54
 	j 0xB0
 
+.global GetB0Table
+GetB0Table:
+	li $t1, 0x57
+	j 0xB0
+
 ###############
 # C-FUNCTIONS #
 ###############
