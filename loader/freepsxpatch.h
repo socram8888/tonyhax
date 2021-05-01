@@ -7,13 +7,9 @@
  *
  * The way this is done is by hijacking the "read_card_sector" function (table A, function 0x4F).
  *
- * If the sector being read is sector 0 and it contains "FPSX" on +0x10, we'll return a "memory
- * card not found" error (0x11).
+ * If the sector being read is sector 0 and it contains "FPBZ" at +0x7C, we modify the read data
+ * so it is detected as corrupted and the game skips reading from it.
  *
- * This *might* cause issues as we will be executing the read for that particular sector
- * synchronously, locking until it finishes which is not what the BIOS is supposed to do.
- *
- * This patch will be stored from words 0x5E to 0xFF of the B table itself, which are null and are
- * never used by any official BIOS patch that could collide with us.
+ * As FreePSXBoot is only compatible with PS1, this function does nothing on a PS2.
  */
 void freepsxpatch_apply(void);
