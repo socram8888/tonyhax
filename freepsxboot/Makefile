@@ -10,7 +10,7 @@ all: $(FREEPSXBOOT_IMAGES)
 clean:
 	$(RM) $(FREEPSXBOOT_IMAGES) FreePSXBoot/builder/builder
 
-tonyhax_%.mcd: ../loader/tonyhax.exe FreePSXBoot/builder/builder
+tonyhax_%.mcd: ../loader/tonyhax.exe | FreePSXBoot/builder/builder
 	FreePSXBoot/builder/builder -bios $(patsubst tonyhax_bios_v%.mcd,%,$@) -in ../loader/tonyhax.exe -out $@
 	echo -n "FPBZ" | dd status=none conv=notrunc of=$@ bs=1 seek=124
 
