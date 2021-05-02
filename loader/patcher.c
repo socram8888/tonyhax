@@ -183,6 +183,34 @@ const struct game GAMES[] = {
 			}
 		}
 	},
+#if 0
+	/*
+	 * NOT YET SUPPORTED FINISHED!
+	 *
+	 * Dance Dance Revolution 2nd Remix (J) (SLPM-86252)
+	 *
+	 * The game seems to use a myriad of different compressed modules that are embedded in the
+	 * game's main executable, and there are antipiracy checks in multiple of them.
+	 *
+	 * The first antipiracy module is loaded and executed from 8002009C-800200CC. The game in fact
+	 * seems to be designed to be easily defused (maybe for debugging?), and will only execute the
+	 * antipiracy check if a certain value in RAM (in the .data section) is not zero.
+	 *
+	 * I am still unsure how these modules are decompressed and executed, and if there are any
+	 * stealthy side effects of disabling the ones containing antipiracy checks.
+	 */
+	{
+		.crc = 0x654D32A4,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x80010D2C,
+				.size = 4,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+#endif
 	/*
 	 * Dino Crisis (U) (SLUS-00922) (v1.1)
 	 *
@@ -333,6 +361,40 @@ const struct game GAMES[] = {
 				.offset = 0x80030EC8,
 				.size = 12,
 				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
+	 * Rockman 2 - Dr Wily No Kazo (J) (SLPS-02255)
+	 *
+	 * Antipiracy dynamically loaded into RAM by unknown means (too lazy to figure it out).
+	 * The main antipiracy function is at 0x8006CA58 and is called from 0x8006DB0C.
+	 *
+	 * That function starts at 0x8006DAF8, and it is referenced from 0x80011170, where there is
+	 * a "load address" for to that function.
+	 */
+	{
+		.crc = 0xE3F3C236,
+		.patches = (const struct patch[]) {
+			{
+				// Insert call to the patcher
+				.offset = 0x80011170,
+				.size = 4,
+				.data = (const uint8_t[]) {
+					0xFD, 0x39, 0x01, 0x0C, // "jal 0x8004E7F4"
+				}
+			},
+			{
+				// Insert patcher in the place of a debug string
+				.offset = 0x8004E7F4,
+				.size = 16,
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) {
+					0x02, 0x24, 0x08, 0x3C, // "li t0, 0x24020000", where the constant is "li v0, 0"
+					0x07, 0x80, 0x09, 0x3C, // "lui t1, 0x8007"
+					0x85, 0x04, 0x01, 0x08, // "j 0x80041214" to continue with the normal flow
+					0x0C, 0xDB, 0x28, 0xAD, // "sw t0, -0x24F4(t1)" to replace the jal at 0x8006DB0C with the "li v0, 0"
+				}
 			}
 		}
 	},
