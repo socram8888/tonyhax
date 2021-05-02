@@ -201,6 +201,20 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Dino Crisis (J) (SLPS-02180)
+	 */
+	{
+		.crc = 0xEE0CD6EF,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x80021470,
+				.size = 28,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Legend of Dragoon (E) (Disc 1) (SCES-03043)
 	 * Plain antipiracy call in a loop.
 	 */
