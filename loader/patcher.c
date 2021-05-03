@@ -432,6 +432,35 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Rockman 3 - Dr Wily No Saigo (J) (SLPS-02262)
+	 * Identical to Rockman 2.
+	 */
+	{
+		.crc = 0x55AD4773,
+		.patches = (const struct patch[]) {
+			{
+				// Insert call to the patcher
+				.offset = 0x80011170,
+				.size = 4,
+				.data = (const uint8_t[]) {
+					0xE0, 0x39, 0x01, 0x0C, // "jal 0x8004E780"
+				}
+			},
+			{
+				// Insert patcher in the place of a debug string
+				.offset = 0x8004E780,
+				.size = 16,
+				.flags = FLAG_LAST,
+				.data = (const uint8_t[]) {
+					0x02, 0x24, 0x08, 0x3C, // "li t0, 0x24020000", where the constant is "li v0, 0"
+					0x07, 0x80, 0x09, 0x3C, // "lui t1, 0x8007"
+					0x28, 0x02, 0x01, 0x08, // "j 0x800408A0" to continue with the normal flow
+					0xA4, 0xDA, 0x28, 0xAD, // "sw t0, -0x255C(t1)" to replace the jal at 0x8006DAA4 with the "li v0, 0"
+				}
+			}
+		}
+	},
+	/*
 	 * Rockman X5 (J) (SLPM-86666)
 	 * Copycat of Tomba 2! Boring.
 	 */
