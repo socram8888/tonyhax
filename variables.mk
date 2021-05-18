@@ -61,5 +61,24 @@ LOADER_FILES := tonyhax.mcs BESLEM-99999TONYHAX tonyhax.exe
 
 # FreePSXBoot images
 
-FREEPSXBOOT_BIOS = v2.0 v2.1 v2.2 v3.0 v4.1 v4.4 v4.5
-FREEPSXBOOT_IMAGES := $(patsubst %,tonyhax_bios_%.mcd,$(FREEPSXBOOT_BIOS))
+FREEPSXBOOT_IMAGES := \
+	tonyhax_scph-1001_v2.0.mcd \
+	tonyhax_scph-1001_v2.1.mcd \
+	tonyhax_scph-1001_v2.2.mcd \
+	tonyhax_scph-1002_v2.0.mcd \
+	tonyhax_scph-1002_v2.1.mcd \
+	tonyhax_scph-1002_v2.2.mcd \
+	tonyhax_scph-5001.mcd \
+	tonyhax_scph-5501.mcd \
+	tonyhax_scph-5502.mcd \
+	tonyhax_scph-5552.mcd \
+	tonyhax_scph-7001.mcd \
+	tonyhax_scph-7002.mcd \
+	tonyhax_scph-7501.mcd \
+	tonyhax_scph-7502.mcd \
+	tonyhax_scph-9001.mcd \
+	tonyhax_scph-9002.mcd \
+	tonyhax_scph-101_v4.4.mcd \
+	tonyhax_scph-101_v4.5.mcd \
+	tonyhax_scph-102_v4.4.mcd \
+	tonyhax_scph-102_v4.5.mcd
