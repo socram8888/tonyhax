@@ -97,6 +97,22 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Beat Mania 6th Mix + Core Remix (J) (SLPM-87012)
+	 *
+	 * Has the antipiracy dynamically loaded from the end of SYS6TH.PAK to 0x80130880, and it is
+	 * called from a loop at 80013ED0, which we will nop.
+	 */
+	{
+		.crc = 0x4BCE14C5,
+		.patches = (const struct patch[]) {
+			{
+				.offset = 0x80013ED0,
+				.size = 24,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Biohazard 3: Last Escape (J) (SLPS-02300) (v1.0)
 	 *
 	 * A call at 0x80029CF0 loads CD_DATA\BIN\WARNING.BIN to 0x80184000.
