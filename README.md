@@ -96,26 +96,7 @@ This method requires an entire memory card for itself, and thus:
  * The exploit cannot be copied to another memory card using the console - you'll need a PC with DexDrive or a PS2.
  * The exploit cannot be uninstalled using the console alone either.
 
-If you want to go this route, you'll need to flash the memory card using one of the images available at `freepsxboot/`, depending on your console's BIOS version:
-
-| Model     | BIOS version       |
-|-----------|--------------------|
-| SCPH-1001 | v2.2               |
-| SCPH-1002 | v2.0, v2.1 or v2.2 |
-| SCPH-3500 | v2.1               |
-| SCPH-5001 | v3.0               |
-| SCPH-5501 | v3.0               |
-| SCPH-5502 | v3.0               |
-| SCPH-5503 | v3.0               |
-| SCPH-5903 | v2.2               |
-| SCPH-7001 | v4.1               |
-| SCPH-7002 | v4.1               |
-| SCPH-7501 | v4.1               |
-| SCPH-7502 | v4.1               |
-| SCPH-9001 | v4.1               |
-| SCPH-9002 | v4.1               |
-| SCPH-101  | v4.4 or v4.5       |
-| SCPH-102  | v4.4 or v4.5       |
+If you want to go this route, you'll need to flash the memory card using one of the images available at `freepsxboot/`, depending on your console's model and BIOS version.
 
 Development
 -----------
