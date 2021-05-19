@@ -259,8 +259,32 @@ const struct game GAMES[] = {
 		}
 	},
 	/*
+	 * Legend of Dragoon (U) (Disc 1) (SCUS-94491)
+	 * Legend of Dragoon (U) (Disc 2) (SCUS-94584)
+	 * Legend of Dragoon (U) (Disc 3) (SCUS-94585)
+	 * Legend of Dragoon (U) (Disc 3) (SCUS-94586)
+	 *
+	 * All four discs have the same executable, so I only had to crack one (yay!).
+	 * They have the antipiracy call in plain inside a loop.
+	 */
+	{
+		.crc = 0x59F17B11,
+		.patches = (const struct patch[]) {
+			{
+				// Nuke call to antipiracy
+				.offset = 0x801BF4A4,
+				.size = 12,
+				.flags = FLAG_NOP | FLAG_LAST
+			}
+		}
+	},
+	/*
 	 * Legend of Dragoon (E) (Disc 1) (SCES-03043)
-	 * Plain antipiracy call in a loop.
+	 * Legend of Dragoon (E) (Disc 2) (SCES-13043)
+	 * Legend of Dragoon (E) (Disc 3) (SCES-23043)
+	 * Legend of Dragoon (E) (Disc 4) (SCES-33043)
+	 *
+	 * Same as the 'merican version.
 	 */
 	{
 		.crc = 0xD89B3731,
@@ -275,7 +299,11 @@ const struct game GAMES[] = {
 	},
 	/*
 	 * Legend of Dragoon (F) (Disc 1) (SCES-03044)
-	 * Plain antipiracy call in a loop.
+	 * Legend of Dragoon (F) (Disc 2) (SCES-13044)
+	 * Legend of Dragoon (F) (Disc 3) (SCES-23044)
+	 * Legend of Dragoon (F) (Disc 4) (SCES-33044)
+	 *
+	 * Same as the 'merican version.
 	 */
 	{
 		.crc = 0x7F603194,
@@ -290,7 +318,11 @@ const struct game GAMES[] = {
 	},
 	/*
 	 * Legend of Dragoon (G) (Disc 1) (SCES-03045)
-	 * Plain antipiracy call in a loop.
+	 * Legend of Dragoon (G) (Disc 2) (SCES-13045)
+	 * Legend of Dragoon (G) (Disc 3) (SCES-23045)
+	 * Legend of Dragoon (G) (Disc 4) (SCES-33045)
+	 *
+	 * Same as the 'merican version.
 	 */
 	{
 		.crc = 0xF72B58F8,
@@ -305,7 +337,11 @@ const struct game GAMES[] = {
 	},
 	/*
 	 * Legend of Dragoon (I) (Disc 1) (SCES-03046)
-	 * Plain antipiracy call in a loop.
+	 * Legend of Dragoon (I) (Disc 2) (SCES-13046)
+	 * Legend of Dragoon (I) (Disc 3) (SCES-23046)
+	 * Legend of Dragoon (I) (Disc 4) (SCES-33046)
+	 *
+	 * Same as the 'merican version.
 	 */
 	{
 		.crc = 0x70EFD7A8,
@@ -320,7 +356,11 @@ const struct game GAMES[] = {
 	},
 	/*
 	 * Legend of Dragoon (S) (Disc 1) (SCES-03047)
-	 * Plain antipiracy call in a loop.
+	 * Legend of Dragoon (S) (Disc 2) (SCES-13047)
+	 * Legend of Dragoon (S) (Disc 3) (SCES-23047)
+	 * Legend of Dragoon (S) (Disc 4) (SCES-33047)
+	 *
+	 * Same as the 'merican version.
 	 */
 	{
 		.crc = 0xF45338FE,
