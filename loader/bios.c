@@ -90,7 +90,7 @@ void bios_reinitialize() {
 		 *  - SCPH-77004
 		 */
 
-		// Call the function that restores copies SBIN to 0x500.
+		// Call the function that copies SBIN to 0x500.
 		((void (*)(void)) 0xBFC529C4)();
 
 		// Restore A0 call table.
