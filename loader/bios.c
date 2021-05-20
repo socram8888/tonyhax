@@ -28,7 +28,7 @@ void initHandlersArray(int32_t priorities) {
 	uint32_t array_len = 8 * priorities;
 
 	void * array = alloc_kernel_memory(array_len);
-	if (!array) {
+	if (array) {
 		bzero(array, array_len);
 
 		*HANDLER_ARRAY = array;
