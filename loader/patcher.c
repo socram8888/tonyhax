@@ -201,7 +201,7 @@ const struct game GAMES[] = {
 	},
 #if 0
 	/*
-	 * NOT YET SUPPORTED FINISHED!
+	 * UNFINISHED - NOT FULLY SUPPORTED!
 	 *
 	 * Dance Dance Revolution 2nd Remix (J) (SLPM-86252)
 	 *

@@ -101,7 +101,7 @@ void bios_reinitialize() {
 	/*
 	 * Configure with default values
 	 *
-	 * We can't use SetConf as that one re-queues the CD events (and that's no bueno as
+	 * We can't use SetConf as that one re-queues the CD events (and that's no bueno as we
 	 * haven't initialized the system's memory yet).
 	 */
 	struct boot_cnf_t * boot_cnf = find_boot_cnf();
