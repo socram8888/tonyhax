@@ -66,9 +66,9 @@ void bios_reinitialize() {
 	SPU_REVERB_VOL_LEFT = 0;
 	SPU_REVERB_VOL_RIGHT = 0;
 
-	// Run PS1-specific reset.
-	// PS2 don't have them at specific adresses so we'd need to memsearch it.
 	if (bios_is_ps1()) {
+		// Run PS1-specific reset.
+
 		// Restore part of the kernel memory
 		memcpy((uint8_t *) 0xA0000500, (const uint8_t *) 0xBFC10000, 0x8BF0);
 
@@ -77,6 +77,21 @@ void bios_reinitialize() {
 
 		// Restore A0 call table
 		memcpy((uint8_t *) A0_TBL, (const uint8_t *) 0xBFC04300, 0x300);
+
+	} else {
+		// Run PS2-specific reset.
+
+		/*
+		 * Restore A0 call table.
+		 *
+		 * Source address checked against BIOSes of:
+		 *  - SCPH-10000
+		 *  - SCPH-18000
+		 *  - SCPH-30004
+		 *  - SCPH-39001
+		 *  - SCPH-77004
+		 */
+		memcpy((uint8_t *) A0_TBL, (const uint8_t *) 0xBFC4FC90, 0x300);
 	}
 
 	// Restore A, B and C tables
