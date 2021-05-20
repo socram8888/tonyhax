@@ -79,19 +79,22 @@ void bios_reinitialize() {
 		memcpy((uint8_t *) A0_TBL, (const uint8_t *) 0xBFC04300, 0x300);
 
 	} else {
-		// Run PS2-specific reset.
-
 		/*
-		 * Restore A0 call table.
+		 * Run PS2-specific reset.
 		 *
-		 * Source address checked against BIOSes of:
+		 * Offsets checked against BIOSes of:
 		 *  - SCPH-10000
 		 *  - SCPH-18000
 		 *  - SCPH-30004
 		 *  - SCPH-39001
 		 *  - SCPH-77004
 		 */
-		memcpy((uint8_t *) A0_TBL, (const uint8_t *) 0xBFC4FC90, 0x300);
+
+		// Call the function that restores copies SBIN to 0x500.
+		((void (*)(void)) 0xBFC529C4)();
+
+		// Restore A0 call table.
+		((void (*)(void)) 0xBFC4FC60)();
 	}
 
 	// Restore A, B and C tables
