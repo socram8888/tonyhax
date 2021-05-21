@@ -54,6 +54,39 @@ struct boot_cnf_t * find_boot_cnf() {
 	return (struct boot_cnf_t *) (((int32_t) high << 16) + low - 8);
 }
 
+void * parse_warmboot_jal(uint32_t offset) {
+	const uint8_t * warmboot_start = (const uint8_t *) A0_TBL[0xA0];
+
+	uint32_t jal = *((uint32_t *) (warmboot_start + offset));
+
+	return (void *) (0xB0000000 | (jal & 0x3FFFFFF) * 4);
+}
+
+void call_copy_relocated_kernel() {
+	/*
+	 * This function indirectly calls the BIOS function that copies the relocated kernel code to
+	 * 0x500.
+	 *
+	 * WarmBoot contains a "jal" to this function at WarmBoot+0x30 for all BIOS I've checked,
+	 * including the PS2 consoles in PS1 mode.
+	 */
+
+	void * offset = parse_warmboot_jal(0x30);
+	((void (*)(void)) offset)();
+}
+
+void call_copy_a0_table() {
+	/*
+	 * This function indirectly calls the BIOS function that copies the A0 table to 0x200.
+	 *
+	 * As with the kernel relocation function, WarmBoot contains a "jal" to this function at
+	 * WarmBoot+0x38.
+	 */
+
+	void * offset = parse_warmboot_jal(0x38);
+	((void (*)(void)) offset)();
+}
+
 void bios_reinitialize() {
 	// Disable interrupts
 	EnterCriticalSection();
@@ -66,36 +99,11 @@ void bios_reinitialize() {
 	SPU_REVERB_VOL_LEFT = 0;
 	SPU_REVERB_VOL_RIGHT = 0;
 
-	if (bios_is_ps1()) {
-		// Run PS1-specific reset.
+	// Copy the relocatable kernel chunk
+	call_copy_relocated_kernel();
 
-		// Restore part of the kernel memory
-		memcpy((uint8_t *) 0xA0000500, (const uint8_t *) 0xBFC10000, 0x8BF0);
-
-		// Call it to restore everything that it needs to
-		((void (*)(void)) 0xA0000500)();
-
-		// Restore A0 call table
-		memcpy((uint8_t *) A0_TBL, (const uint8_t *) 0xBFC04300, 0x300);
-
-	} else {
-		/*
-		 * Run PS2-specific reset.
-		 *
-		 * Offsets checked against BIOSes of:
-		 *  - SCPH-10000
-		 *  - SCPH-18000
-		 *  - SCPH-30004
-		 *  - SCPH-39001
-		 *  - SCPH-77004
-		 */
-
-		// Call the function that copies SBIN to 0x500.
-		((void (*)(void)) 0xBFC529C4)();
-
-		// Restore A0 call table.
-		((void (*)(void)) 0xBFC4FC60)();
-	}
+	// Reinitialize the A table
+	call_copy_a0_table();
 
 	// Restore A, B and C tables
 	init_a0_b0_c0_vectors();
