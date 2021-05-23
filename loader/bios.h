@@ -3,13 +3,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef struct boot_cnf boot_cnf_t;
+typedef struct exe_header exe_header_t;
+typedef struct handler_info handler_info_t;
+
 struct boot_cnf {
 	uint32_t event;
 	uint32_t tcb;
 	uint32_t stacktop;
 };
-
-typedef struct boot_cnf boot_cnf_t;
 
 struct exe_header {
 	uint32_t initial_pc; // 0x00
@@ -24,7 +26,12 @@ struct exe_header {
 	uint8_t _reserved1[20];
 };
 
-typedef struct exe_header exe_header_t;
+struct handler_info {
+	handler_info_t * next;
+	void (*handler)(int);
+	int (*verifier)(void);
+	uint32_t dummy;
+};
 
 /*
  * EXTRAS.
@@ -75,6 +82,12 @@ void bios_copy_relocated_kernel(void);
  * Copies the A call table to its destination (0x200).
  */
 void bios_copy_a0_table(void);
+
+/**
+ * Returns a pointer to syscall handler information structure.
+ * @returns pointer to the mutable structure.
+ */
+handler_info_t * bios_get_syscall_handler(void);
 
 /*
  * SYSCALLS
@@ -389,13 +402,22 @@ void FileClose(int32_t fd);
 uint32_t GetLastError(void);
 
 /**
+ * Returns the address of the C call table.
+ *
+ * @returns the address of the C call table.
+ *
+ * Table B, call 0x56.
+ */
+void ** GetC0Table(void);
+
+/**
  * Returns the address of the B call table.
  *
  * @returns the address of the B call table.
  *
  * Table B, call 0x57.
  */
-uint32_t * GetB0Table(void);
+void ** GetB0Table(void);
 
 /*
  * C-FUNCTIONS

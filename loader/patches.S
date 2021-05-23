@@ -32,3 +32,11 @@ antifpxpatch:
 	sw zero, 0(a1)
 fpxret:
 	j 0x5B54
+
+.globl modchippatch
+modchippatch:
+	nop
+
+.globl modchipret
+modchipret:
+	nop

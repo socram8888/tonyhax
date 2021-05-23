@@ -8,7 +8,7 @@
 const uint32_t tty_enabled = 0;
 
 // Address of A table
-uint32_t * const A0_TBL = (uint32_t *) 0x200;
+void ** const A0_TBL = (void **) 0x200;
 
 const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
 const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
@@ -141,37 +141,48 @@ boot_cnf_t * bios_get_config() {
 	return (boot_cnf_t *) (((int32_t) high << 16) + low - 8);
 }
 
-void * parse_warmboot_jal(uint32_t offset) {
-	const uint8_t * warmboot_start = (const uint8_t *) A0_TBL[0xA0];
+void * parse_warmboot_jal(uint32_t opcode) {
+	const uint32_t * warmboot_start = (const uint32_t *) A0_TBL[0xA0];
 	uint32_t prefix = (uint32_t) warmboot_start & 0xF0000000;
 
-	uint32_t * jal = (uint32_t *) (warmboot_start + offset);
+	uint32_t * jal = (uint32_t *) (warmboot_start + opcode);
 	uint32_t suffix = (*jal & 0x3FFFFFF) << 2;
 
 	return (void *) (prefix | suffix);
 }
 
-void bios_copy_relocated_kernel() {
+void bios_copy_relocated_kernel(void) {
 	/*
 	 * This function indirectly calls the BIOS function that copies the relocated kernel code to
 	 * 0x500.
 	 *
-	 * WarmBoot contains a "jal" to this function at WarmBoot+0x30 for all BIOS I've checked,
+	 * The 12th opcode of WarmBoot is a "jal" to this function for all BIOS I've checked,
 	 * including the PS2 consoles in PS1 mode.
 	 */
 
-	void * offset = parse_warmboot_jal(0x30);
-	((void (*)(void)) offset)();
+	void * address = parse_warmboot_jal(12);
+	((void (*)(void)) address)();
 }
 
-void bios_copy_a0_table() {
+void bios_copy_a0_table(void) {
 	/*
 	 * This function indirectly calls the BIOS function that copies the A0 table to 0x200.
 	 *
-	 * As with the kernel relocation function, WarmBoot contains a "jal" to this function at
-	 * WarmBoot+0x38.
+	 * As with the kernel relocation function, the 14th opcode of WarmBoot is a "jal" to this
+	 * function.
 	 */
 
-	void * offset = parse_warmboot_jal(0x38);
-	((void (*)(void)) offset)();
+	void * address = parse_warmboot_jal(14);
+	((void (*)(void)) address)();
+}
+
+handler_info_t * bios_get_syscall_handler(void) {
+	/*
+	 * This function extracts the pointer to the syscall handler by analyzing the opcodes of the
+	 * EnqueueSyscallHandler function.
+	 */
+	uint32_t * func_start = (uint32_t *) GetC0Table()[1];
+
+	// The fourth instruction is a one opcode "la a1, ADDR". Extract it from there.
+	return (handler_info_t *) (func_start[4] & 0xFFFF);
 }
