@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <string.h>
 #include "bios.h"
+#include "bios-patcher.h"
 #include "cdrom.h"
 #include "cfgparse.h"
 #include "crc.h"
