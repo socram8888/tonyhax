@@ -3,20 +3,29 @@
 
 include ../variables.mk
 
-LOADER_HEADERS := $(wildcard *.h) orca.inc
-LOADER_OBJECTS := $(patsubst %.c, %.o, $(patsubst %.s, %.o, $(wildcard *.c *.s)))
+LOADER_AUTOGEN := orca.inc bios-patches.inc
+LOADER_HEADERS := $(wildcard *.h) $(LOADER_AUTOGEN)
+LOADER_OBJECTS := $(patsubst %.c, %.o, $(patsubst %.S, %.o, $(wildcard *.c *.S)))
 
 all: $(LOADER_FILES)
 
 clean:
-	$(RM) $(LOADER_FILES) *.o *.elf orca.inc
+	$(RM) $(LOADER_FILES) *.o *.elf $(LOADER_AUTOGEN)
+
+# BIOS patches
+
+bios-patches.elf: bios-patches.S
+	$(CC) $(CFLAGS) bios-patches.S -o bios-patches.elf
+
+bios-patches.inc: bios-patches.elf
+	bash ../util/elf2h.sh BIOS_PATCHES bios-patches.elf bios-patches.inc
 
 # Intermediate objects
 
 %.o: %.c $(LOADER_HEADERS)
 	$(CC) $(CFLAGS) -c $<
 
-%.o: %.s $(LOADER_HEADERS)
+%.o: %.S $(LOADER_HEADERS)
 	$(CC) $(CFLAGS) -c $<
 
 orca.inc: orca.img
