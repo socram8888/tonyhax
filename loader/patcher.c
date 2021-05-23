@@ -23,7 +23,7 @@ void install_modchip_patch(uint8_t * patches_addr) {
 	// Get the start of the verifier function (the only one set)
 	uint32_t * verifier = (uint32_t *) syscall_handler->verifier;
 
-	/**
+	/*
 	 * At opcode 20 it accesses an 4-word array which contain where to jump depending on the
 	 * syscall performed. We're interested in modifying the value for 1 (EnterCriticalSection)
 	 * so we can intercept it and defuse the antimodchip.
@@ -33,14 +33,24 @@ void install_modchip_patch(uint8_t * patches_addr) {
 		debug_write("Check failed!");
 		return;
 	}
-
-	// Replace
 	void ** cases_array = (void **) (lw_op & 0xFFFF);
-	void * original_address = cases_array[1];
-	cases_array[1] = patches_addr + BIOS_PATCHES_MODCHIPPATCH;
 
-	// Insert jump to original code
-	*((uint32_t *) (patches_addr + BIOS_PATCHES_MODCHIPRET)) = encode_j(original_address);
+	/*
+	 * Insert the jump to the original code, which we'll use if the call was not originated from
+	 * an antipiracy module.
+	 */
+	*((uint32_t *) (patches_addr + BIOS_PATCHES_MODCHIPCONTINUE)) = encode_j(cases_array[1]);
+
+	/*
+	 * Insert the jump we'll use to exit the exception handler once we have finished patching up
+	 * the thread state if the call was indeed originated from an antipiracy module.
+	 *
+	 * We'll use the address of syscall(0) which behaves as a nop to exit the exception.
+	 */
+	*((uint32_t *) (patches_addr + BIOS_PATCHES_MODCHIPRETURN)) = encode_j(cases_array[0]);
+
+	// Finally replace
+	cases_array[1] = patches_addr + BIOS_PATCHES_MODCHIPSTART;
 }
 
 void install_fpx_patch(uint8_t * patches_addr) {

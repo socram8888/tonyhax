@@ -33,10 +33,14 @@ antifpxpatch:
 fpxret:
 	j 0x5B54
 
-.globl modchippatch
-modchippatch:
+.globl modchipstart
+modchipstart:
 	nop
 
-.globl modchipret
-modchipret:
-	nop
+.globl modchipcontinue
+modchipcontinue:
+	j 0x12341234
+
+.globl modchipreturn
+modchipreturn:
+	j 0x12341234
