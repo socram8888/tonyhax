@@ -36,7 +36,7 @@ void initHandlersArray(int32_t priorities) {
 	}
 }
 
-struct boot_cnf_t * find_boot_cnf() {
+boot_cnf_t * bios_get_config() {
 	/*
 	 * Extract from the "la t6, boot_cnf_values+8" opcodes at the start of the GetConf function.
 	 *
@@ -51,7 +51,7 @@ struct boot_cnf_t * find_boot_cnf() {
 	// Extract low from the "addi"
 	int16_t low = *((int16_t *) (get_conf_offset + 0x04));
 
-	return (struct boot_cnf_t *) (((int32_t) high << 16) + low - 8);
+	return (boot_cnf_t *) (((int32_t) high << 16) + low - 8);
 }
 
 void * parse_warmboot_jal(uint32_t offset) {
@@ -62,7 +62,7 @@ void * parse_warmboot_jal(uint32_t offset) {
 	return (void *) (0xB0000000 | (jal & 0x3FFFFFF) * 4);
 }
 
-void call_copy_relocated_kernel() {
+void bios_copy_relocated_kernel() {
 	/*
 	 * This function indirectly calls the BIOS function that copies the relocated kernel code to
 	 * 0x500.
@@ -75,7 +75,7 @@ void call_copy_relocated_kernel() {
 	((void (*)(void)) offset)();
 }
 
-void call_copy_a0_table() {
+void bios_copy_a0_table() {
 	/*
 	 * This function indirectly calls the BIOS function that copies the A0 table to 0x200.
 	 *
@@ -100,10 +100,10 @@ void bios_reinitialize() {
 	SPU_REVERB_VOL_RIGHT = 0;
 
 	// Copy the relocatable kernel chunk
-	call_copy_relocated_kernel();
+	bios_copy_relocated_kernel();
 
 	// Reinitialize the A table
-	call_copy_a0_table();
+	bios_copy_a0_table();
 
 	// Restore A, B and C tables
 	init_a0_b0_c0_vectors();
@@ -130,7 +130,7 @@ void bios_reinitialize() {
 	 * We can't use SetConf as that one re-queues the CD events (and that's no bueno as we
 	 * haven't initialized the system's memory yet).
 	 */
-	struct boot_cnf_t * boot_cnf = find_boot_cnf();
+	boot_cnf_t * boot_cnf = bios_get_config();
 	boot_cnf->event = 4;
 	boot_cnf->tcb = 16;
 	boot_cnf->stacktop = 0x801FFF00;

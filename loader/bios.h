@@ -3,6 +3,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+struct boot_cnf {
+	uint32_t event;
+	uint32_t tcb;
+	uint32_t stacktop;
+};
+
+typedef struct boot_cnf boot_cnf_t;
+
 struct exe_header {
 	uint32_t initial_pc; // 0x00
 	uint32_t initial_gp; // 0x04
@@ -17,6 +25,10 @@ struct exe_header {
 };
 
 typedef struct exe_header exe_header_t;
+
+/*
+ * EXTRAS.
+ */
 
 /**
  * BIOS author string.
@@ -47,6 +59,22 @@ bool bios_is_ps1(void);
  * @returns true if console is European
  */
 bool bios_is_european(void);
+
+/**
+ * Returns a pointer to the current BIOS configuration.
+ * @returns pointer to a mutable BIOS configuration
+ */
+boot_cnf_t * bios_get_config(void);
+
+/**
+ * Copies the relocated kernel code to its destination (0x500).
+ */
+void bios_copy_relocated_kernel(void);
+
+/**
+ * Copies the A call table to its destination (0x200).
+ */
+void bios_copy_a0_table(void);
 
 /*
  * SYSCALLS
