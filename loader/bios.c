@@ -143,10 +143,12 @@ boot_cnf_t * bios_get_config() {
 
 void * parse_warmboot_jal(uint32_t offset) {
 	const uint8_t * warmboot_start = (const uint8_t *) A0_TBL[0xA0];
+	uint32_t prefix = (uint32_t) warmboot_start & 0xF0000000;
 
-	uint32_t jal = *((uint32_t *) (warmboot_start + offset));
+	uint32_t * jal = (uint32_t *) (warmboot_start + offset);
+	uint32_t suffix = (*jal & 0x3FFFFFF) << 2;
 
-	return (void *) (0xB0000000 | (jal & 0x3FFFFFF) * 4);
+	return (void *) (prefix | suffix);
 }
 
 void bios_copy_relocated_kernel() {
