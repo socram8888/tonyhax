@@ -36,57 +36,6 @@ void initHandlersArray(int32_t priorities) {
 	}
 }
 
-boot_cnf_t * bios_get_config() {
-	/*
-	 * Extract from the "la t6, boot_cnf_values+8" opcodes at the start of the GetConf function.
-	 *
-	 * According to psx-spx docs this was used by Spec Ops Airborne Commando so it should work
-	 * on every retail BIOS.
-	 */
-	const uint8_t * get_conf_offset = (const uint8_t *) A0_TBL[0x9D];
-
-	// Extract high from the "lui"
-	uint16_t high = *((uint16_t *) (get_conf_offset + 0x00));
-
-	// Extract low from the "addi"
-	int16_t low = *((int16_t *) (get_conf_offset + 0x04));
-
-	return (boot_cnf_t *) (((int32_t) high << 16) + low - 8);
-}
-
-void * parse_warmboot_jal(uint32_t offset) {
-	const uint8_t * warmboot_start = (const uint8_t *) A0_TBL[0xA0];
-
-	uint32_t jal = *((uint32_t *) (warmboot_start + offset));
-
-	return (void *) (0xB0000000 | (jal & 0x3FFFFFF) * 4);
-}
-
-void bios_copy_relocated_kernel() {
-	/*
-	 * This function indirectly calls the BIOS function that copies the relocated kernel code to
-	 * 0x500.
-	 *
-	 * WarmBoot contains a "jal" to this function at WarmBoot+0x30 for all BIOS I've checked,
-	 * including the PS2 consoles in PS1 mode.
-	 */
-
-	void * offset = parse_warmboot_jal(0x30);
-	((void (*)(void)) offset)();
-}
-
-void bios_copy_a0_table() {
-	/*
-	 * This function indirectly calls the BIOS function that copies the A0 table to 0x200.
-	 *
-	 * As with the kernel relocation function, WarmBoot contains a "jal" to this function at
-	 * WarmBoot+0x38.
-	 */
-
-	void * offset = parse_warmboot_jal(0x38);
-	((void (*)(void)) offset)();
-}
-
 void bios_reinitialize() {
 	// Disable interrupts
 	EnterCriticalSection();
@@ -172,4 +121,55 @@ bool bios_is_ps1(void) {
 
 bool bios_is_european(void) {
 	return BIOS_VERSION[0x20] == 'E';
+}
+
+boot_cnf_t * bios_get_config() {
+	/*
+	 * Extract from the "la t6, boot_cnf_values+8" opcodes at the start of the GetConf function.
+	 *
+	 * According to psx-spx docs this was used by Spec Ops Airborne Commando so it should work
+	 * on every retail BIOS.
+	 */
+	const uint8_t * get_conf_offset = (const uint8_t *) A0_TBL[0x9D];
+
+	// Extract high from the "lui"
+	uint16_t high = *((uint16_t *) (get_conf_offset + 0x00));
+
+	// Extract low from the "addi"
+	int16_t low = *((int16_t *) (get_conf_offset + 0x04));
+
+	return (boot_cnf_t *) (((int32_t) high << 16) + low - 8);
+}
+
+void * parse_warmboot_jal(uint32_t offset) {
+	const uint8_t * warmboot_start = (const uint8_t *) A0_TBL[0xA0];
+
+	uint32_t jal = *((uint32_t *) (warmboot_start + offset));
+
+	return (void *) (0xB0000000 | (jal & 0x3FFFFFF) * 4);
+}
+
+void bios_copy_relocated_kernel() {
+	/*
+	 * This function indirectly calls the BIOS function that copies the relocated kernel code to
+	 * 0x500.
+	 *
+	 * WarmBoot contains a "jal" to this function at WarmBoot+0x30 for all BIOS I've checked,
+	 * including the PS2 consoles in PS1 mode.
+	 */
+
+	void * offset = parse_warmboot_jal(0x30);
+	((void (*)(void)) offset)();
+}
+
+void bios_copy_a0_table() {
+	/*
+	 * This function indirectly calls the BIOS function that copies the A0 table to 0x200.
+	 *
+	 * As with the kernel relocation function, WarmBoot contains a "jal" to this function at
+	 * WarmBoot+0x38.
+	 */
+
+	void * offset = parse_warmboot_jal(0x38);
+	((void (*)(void)) offset)();
 }
