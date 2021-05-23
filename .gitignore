@@ -4,8 +4,7 @@ SC*
 *.elf
 *.bin
 *.o
-bios-patches.inc
-orca.inc
+*.inc
 BES*
 BAS*
 *.mcs

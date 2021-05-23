@@ -4,7 +4,6 @@
 #include <stddef.h>
 #include <string.h>
 #include "bios.h"
-#include "bios-patcher.h"
 #include "cdrom.h"
 #include "cfgparse.h"
 #include "crc.h"
@@ -271,8 +270,6 @@ void try_boot_cd() {
 
 	FileClose(exe_fd);
 
-	patch_game(exe_header);
-
 	if (game_is_pal != gpu_is_pal()) {
 		debug_write("Switching video mode");
 		debug_switch_standard(game_is_pal);
@@ -315,7 +312,7 @@ void main() {
 	}
 
 	while (1) {
-		bios_patcher_apply();
+		patcher_apply();
 		try_boot_cd();
 
 		debug_write("Reinitializing kernel");
