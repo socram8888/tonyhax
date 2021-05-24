@@ -33,14 +33,66 @@ antifpxpatch:
 fpxret:
 	j 0x5B54
 
+/*
+ * Intercepts the syscall(1) (aka EnterCriticalSection).
+ *
+ * When this code is executed, the registers are as follows:
+ *   - v0: saved thread registers, must NOT be modified.
+ * The rest of the registers are not critical and can be used freely.
+ */
 .globl modchipstart
 modchipstart:
-	nop
+	// Load the SP value
+	lw t0, 124(v0)
 
-.globl modchipcontinue
-modchipcontinue:
-	j 0x12341234
+	/*
+	 * 0x28 bytes after this position, there might be the return address to the
+	 * antipiracy_triggered function.
+	 */
+	lw t1, 0x28(t0)
+
+	// Check mask
+	li t2, 0xFFC00003
+	and t2, t1
+	li t3, 0x80000000
+	bne t2, t3, modchipcontinue
+
+	/*
+	 * Okay, now that we have established it is safe to read, check if it contains a
+	 * "sh zero, 0x1F801DAA" 16 bytes after the return address
+	 *
+	 * This is used to mute the sound so the antipiracy screen is silent.
+	 */
+	lw t2, 0x18(t1)
+	li t3, 0x3C011F80
+	lw t4, 0x1C(t1)
+	li t5, 0xA4201DAA
+	bne t2, t3, modchipcontinue
+	bne t4, t5, modchipcontinue
+
+	// Patch registers!
+
+
+	// Load return address to antipiracy function, which is at sp+0x120
+	lw t1, 0x120(t0)
+
+	// The antipiracy function returns cleanly if s0 and s1 are zero, so clear s0 now
+	sw zero, 0x48(v0)
+
+	// Set PC to the return address
+	sw t1, 0x88(v0)
+
+	// Clear s1 now
+	sw zero, 0x4C(v0)
+
+	// Decrement the SP
+	addi t0, 0x128
+	sw t0, 0x7C(v0)
 
 .globl modchipreturn
 modchipreturn:
+	j 0x12341234
+
+.globl modchipcontinue
+modchipcontinue:
 	j 0x12341234
