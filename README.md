@@ -6,25 +6,26 @@ Software backup loader exploit thing for the Sony PlayStation 1.
 
 For more information, look at [its section at orca.pet](https://orca.pet/tonyhax/).
 
-For using tonyhax you have two options:
+For using tonyhax you have three options:
 
-| Method                                 | Game exploit          | FreePSXBoot           |
-|----------------------------------------|-----------------------|-----------------------|
-| Needs an original game?                | Yes                   | No                    |
-| Needs a memory card?                   | Yes                   | Yes                   |
-| Can the memory card store other saves? | Yes                   | No                    |
-| Time from off to playing a backup      | ~1m30s                | ~1m                   |
+| Method                                 | Game exploit          | FreePSXBoot           | Boot CD               |
+|----------------------------------------|-----------------------|-----------------------|-----------------------|
+| Needs an original game?                | Yes                   | No                    | No                    |
+| Needs an chipped console?              | No                    | No                    | Yes                   |
+| Needs a memory card?                   | Yes                   | Yes                   | No                    |
+| Can the memory card store other saves? | Yes                   | No                    | N/A                   |
+| Time from off to playing a backup      | ~1m30s                | ~1m                   | ~1m                   |
 
 Regarding compatibility:
 
-| Method                                 | Game exploit          | FreePSXBoot           |
-|----------------------------------------|-----------------------|-----------------------|
-| Compatible with European PS1?          | Yes                   | Yes                   |
-| Compatible with American PS1?          | Yes                   | Yes                   |
-| Compatible with Japanese PS1?          | No                    | No                    |
-| Compatible with European PS2?          | ≤ SCPH-39000 only     | No                    |
-| Compatible with American PS2?          | ≤ SCPH-39000 only     | No                    |
-| Compatible with Japanese PS2?          | No                    | No                    |
+| Method                                 | Game exploit          | FreePSXBoot           | Boot CD               |
+|----------------------------------------|-----------------------|-----------------------|-----------------------|
+| Compatible with European PS1?          | Yes                   | Yes                   | Yes                   |
+| Compatible with American PS1?          | Yes                   | Yes                   | Yes                   |
+| Compatible with Japanese PS1?          | No                    | No                    | No                    |
+| Compatible with European PS2?          | ≤ SCPH-39000 only     | No                    | ≤ SCPH-39000 only     |
+| Compatible with American PS2?          | ≤ SCPH-39000 only     | No                    | ≤ SCPH-39000 only     |
+| Compatible with Japanese PS2?          | No                    | No                    | No                    |
 
 Both behave identically the same feature-wise, so use whichever suits you more.
 
@@ -97,6 +98,11 @@ This method requires an entire memory card for itself, and thus:
  * The exploit cannot be uninstalled using the console alone either.
 
 If you want to go this route, you'll need to flash the memory card using one of the images available at `freepsxboot/`, depending on your console's model and BIOS version.
+
+Launch using the boot CD
+------------------------
+
+Just burn the BIN/CUE inside the `boot-cd/` folder on a CD-R, insert it on your modded console, and turn it on. Easy peasy!
 
 Development
 -----------
