@@ -236,6 +236,7 @@ void try_boot_cd() {
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
 	if (exe_fd <= 0) {
 		debug_write("Open error %x", GetLastError());
+		return;
 	}
 
 	read = FileRead(exe_fd, data_buffer, 2048);
