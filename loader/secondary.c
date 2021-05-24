@@ -12,7 +12,6 @@
 #include "patcher.h"
 #include "integrity.h"
 #include "io.h"
-#include "freepsxpatch.h"
 
 // Loading address of tonyhax, provided by the secondary.ld linker script
 extern uint8_t __BSS_START__, __BSS_END__;
@@ -237,6 +236,7 @@ void try_boot_cd() {
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
 	if (exe_fd <= 0) {
 		debug_write("Open error %x", GetLastError());
+		return;
 	}
 
 	read = FileRead(exe_fd, data_buffer, 2048);
@@ -270,8 +270,6 @@ void try_boot_cd() {
 	}
 
 	FileClose(exe_fd);
-
-	patch_game(exe_header);
 
 	if (game_is_pal != gpu_is_pal()) {
 		debug_write("Switching video mode");
@@ -315,7 +313,7 @@ void main() {
 	}
 
 	while (1) {
-		freepsxpatch_apply();
+		patcher_apply();
 		try_boot_cd();
 
 		debug_write("Reinitializing kernel");

@@ -1,6 +1,7 @@
 
 #pragma once
-#include <stdint.h>
-#include "bios.h"
 
-void patch_game(const exe_header_t * header);
+/**
+ * Install and apply suitable BIOS patches.
+ */
+void patcher_apply(void);

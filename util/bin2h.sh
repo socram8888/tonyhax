@@ -21,6 +21,6 @@ cat <<EOF >"${header_file}"
 #pragma once
 
 static const uint8_t ${constant_name}[] = {
-$(od -v -tx1 -An <orca.img | sed -r "s/\b(..)\b/0x\1,/g")
+$(od -v -tx1 -An <${binary_file} | sed -r "s/\b(..)\b/0x\1,/g")
 };
 EOF
