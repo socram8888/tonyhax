@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso_project image_name="tonyhax-boot-cd.bin" cue_sheet="tonyhax-boot-cd.cue" no_xa="0">
+
+	<track type="data">
+
+		<identifiers
+			system			="PLAYSTATION"
+			application		="PLAYSTATION"
+			volume			="TONYHAX"
+			volume_set		="TONYHAX"
+			publisher		="SOCRAM8888"
+			data_preparer		="MKPSXISO"
+			copyright		="WTFPL"
+		/>
+		
+		<license file="LICENSEE.DAT"/>
+
+		<directory_tree>
+
+			<file name="system.cnf"	type="data"	source="system.txt"/>
+			
+			<file name="THCD.EXE"	type="data"	source="../loader/tonyhax.exe"/>
+
+		<dummy sectors="1024"/>
+			
+		</directory_tree>
+		
+	</track>
+
+</iso_project>
