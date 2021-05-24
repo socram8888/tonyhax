@@ -1,4 +1,4 @@
-# Version: 2021.03.11.01
+# Version: 2021.05.25.01
 
 # Force all text files to be LF
 * text=auto eol=lf
@@ -9,6 +9,7 @@
 *.conf text
 *.config text
 *.cmd text eol=crlf
+*.cnf text
 *.cs text diff=csharp
 *.csproj text diff=html
 *.css text

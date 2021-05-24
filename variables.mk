@@ -82,3 +82,7 @@ FREEPSXBOOT_IMAGES := \
 	tonyhax_scph-101_v4.5.mcd \
 	tonyhax_scph-102_v4.4.mcd \
 	tonyhax_scph-102_v4.5.mcd
+
+# Boot CD files
+
+BOOT_CD_FILES := tonyhax-boot-cd.bin tonyhax-boot-cd.cue
