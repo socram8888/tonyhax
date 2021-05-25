@@ -42,12 +42,6 @@ void bios_reinitialize() {
 
 	// The following is adapted from the WarmBoot call
 
-	// Mute SPU
-	SPU_MAIN_VOL_LEFT = 0;
-	SPU_MAIN_VOL_RIGHT = 0;
-	SPU_REVERB_VOL_LEFT = 0;
-	SPU_REVERB_VOL_RIGHT = 0;
-
 	// Copy the relocatable kernel chunk
 	bios_copy_relocated_kernel();
 

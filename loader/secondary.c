@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include "audio.h"
 #include "bios.h"
 #include "cdrom.h"
 #include "cfgparse.h"
@@ -290,6 +291,9 @@ void try_boot_cd() {
 void main() {
 	// Undo all possible fuckeries during exploiting
 	bios_reinitialize();
+
+	// Mute the audio
+	audio_halt();
 
 	// Initialize debug screen
 	debug_init();
