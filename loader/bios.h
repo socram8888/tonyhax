@@ -3,15 +3,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct boot_cnf boot_cnf_t;
 typedef struct exe_header exe_header_t;
 typedef struct handler_info handler_info_t;
-
-struct boot_cnf {
-	uint32_t event;
-	uint32_t tcb;
-	uint32_t stacktop;
-};
 
 struct exe_header {
 	uint32_t initial_pc; // 0x00
@@ -32,6 +25,10 @@ struct handler_info {
 	int (*verifier)(void);
 	uint32_t dummy;
 };
+
+#define BIOS_DEFAULT_EVCB 0x10
+#define BIOS_DEFAULT_TCB 0x4
+#define BIOS_DEFAULT_STACKTOP 0x801FFF00
 
 /*
  * EXTRAS.
@@ -68,12 +65,6 @@ bool bios_is_ps1(void);
 bool bios_is_european(void);
 
 /**
- * Returns a pointer to the current BIOS configuration.
- * @returns pointer to a mutable BIOS configuration
- */
-boot_cnf_t * bios_get_config(void);
-
-/**
  * Copies the relocated kernel code to its destination (0x500).
  */
 void bios_copy_relocated_kernel(void);
@@ -88,6 +79,12 @@ void bios_copy_a0_table(void);
  * @returns pointer to the mutable structure.
  */
 handler_info_t * bios_get_syscall_handler(void);
+
+/**
+ * Fake version of the EnqueueCdIntr call that we'll use to skip the CD reinitialization in the
+ * SetConf call during the BIOS reinitialization.
+ */
+void FakeEnqueueCdIntr(void);
 
 /*
  * SYSCALLS
@@ -342,16 +339,6 @@ int32_t CdReadSector(uint32_t sector_count, uint32_t start_sector, void * buffer
  */
 
 /**
- * Allocates a chunk of memory on the kernel's heap.
- *
- * @param size size in bytes of the chunk.
- * @returns a pointer to the allocated chunk, or null.
- *
- * Table B, call 0x00.
- */
-void * alloc_kernel_memory(uint32_t size);
-
-/**
  * Restores the default exception exit handler.
  *
  * Table B, call 0x18.
@@ -424,45 +411,11 @@ void ** GetB0Table(void);
  */
 
 /**
- * Configures the Vblank and timer handlers.
- *
- * @param priority IRQ priority.
- *
- * Table C, call 0x00.
- */
-void EnqueueTimerAndVblankIrqs(uint32_t priority);
-
-/**
- * Configures the syscall handler.
- *
- * @param priority IRQ priority.
- *
- * Table C, call 0x01.
- */
-void EnqueueSyscallHandler(uint32_t priority);
-
-/**
  * Copies the default four-opcode exception handler to the exception vector at 0x80000080h~0x8000008F.
  *
  * Table C, call 0x07.
  */
 void InstallExceptionHandlers(void);
-
-/**
- * Initializes the address and size of the allocatable Kernel Memory region.
- *
- * Table C, call 0x08.
- */
-void SysInitMemory(uint32_t start_address, uint32_t size);
-
-/**
- * Configures some IRQ handlers.
- *
- * @param priority IRQ priority.
- *
- * Table C, call 0x0C.
- */
-void InitDefInt(uint32_t priority);
 
 /**
  * Initializes the default device drivers for the TTY, CDROM and memory cards.

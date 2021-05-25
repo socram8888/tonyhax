@@ -186,9 +186,9 @@ void try_boot_cd() {
 	debug_write("Game's region is %s. Using %s video.", game_region, game_is_pal ? "PAL" : "NTSC");
 
 	// Defaults if no SYSTEM.CNF file exists
-	uint32_t tcb = 4;
-	uint32_t event = 16;
-	uint32_t stacktop = 0x801FFF00;
+	uint32_t tcb = BIOS_DEFAULT_TCB;
+	uint32_t event = BIOS_DEFAULT_EVCB;
+	uint32_t stacktop = BIOS_DEFAULT_STACKTOP;
 	const char * bootfile = "cdrom:PSX.EXE;1";
 
 	char bootfilebuf[32];

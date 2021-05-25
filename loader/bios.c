@@ -13,29 +13,6 @@ void ** const A0_TBL = (void **) 0x200;
 const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
 const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
 
-// Let's just pray these don't vary
-void ** const HANDLER_ARRAY = (void **) 0x100;
-uint32_t * const HANDLER_ARRAY_LEN = (uint32_t *) 0x104;
-
-struct boot_cnf_t {
-	uint32_t event;
-	uint32_t tcb;
-	uint32_t stacktop;
-};
-
-void initHandlersArray(int32_t priorities) {
-	// 8 is the size of the struct, whose contents we don't really care about
-	uint32_t array_len = 8 * priorities;
-
-	void * array = alloc_kernel_memory(array_len);
-	if (array) {
-		bzero(array, array_len);
-
-		*HANDLER_ARRAY = array;
-		*HANDLER_ARRAY_LEN = array_len;
-	}
-}
-
 void bios_reinitialize() {
 	// Disable interrupts
 	EnterCriticalSection();
@@ -70,28 +47,36 @@ void bios_reinitialize() {
 	/*
 	 * Configure with default values
 	 *
-	 * We can't use SetConf as that one re-queues the CD events (and that's no bueno as we
-	 * haven't initialized the system's memory yet).
+	 * SetConf call does:
+	 *  - Configure the system memory (via SysInitMemory)
+	 *  - Initialize the exception handler arrays
+	 *  - Enqueues the syscall handler (via EnqueueSyscallHandler)
+	 *  - Initializes the default interrupt (via InitDefInt)
+	 *  - Allocates the event handler array
+	 *  - Allocates the thread structure
+	 *  - Enqueues the timer and VBlank handler (via EnqueueTimerAndVblankIrqs)
+	 *  - Calls a function that re-configures the CD subsystem as follows:
+	 *      - Enqueues the CD interrupt (via EnqueueCdIntr)
+	 *      - Opens shit-ton of CD-related events (via OpenEvent)
+	 *      - Enables the CD-related events (via EnableEvent)
+	 *      - Re-enables interrupts (via ExitCriticalSection)
+	 *
+	 * This call is to be used after the CdInit has happened, once we've read the SYSTEM.CNF
+	 * file and we want to reconfigure the kernel before launching the game's executable.
+	 *
+	 * However, for the purpose of reinitializing the BIOS, the CD reinitialization procedure is
+	 * problematic, as CdInit (which we'll call later once the disc is swapped) calls this very
+	 * same function, resulting in the CD interrupt being added twice to the array of handlers,
+	 * as wells as events being opened twice.
+	 *
+	 * We can't patch this code because it's stored in ROM. Instead, before calling this function
+	 * we'll replace the EnqueueCdIntr with a fake version that patches the system state to return
+	 * earlier and avoid the CD reinitialization entirely.
 	 */
-	boot_cnf_t * boot_cnf = bios_get_config();
-	boot_cnf->event = 4;
-	boot_cnf->tcb = 16;
-	boot_cnf->stacktop = 0x801FFF00;
-
-	// Initialize kernel memory
-	SysInitMemory(0xA000E000, 0x2000);
-
-	// Initialize handlers array
-	initHandlersArray(4);
-
-	// Enqueue syscall handler with priority 0
-	EnqueueSyscallHandler(0);
-
-	// Initialize default interrupt
-	InitDefInt(3);
-
-	// Setup timer and Vblank with priority 1
-	EnqueueTimerAndVblankIrqs(1);
+	void * realEnqueueCdIntr = A0_TBL[0xA2];
+	A0_TBL[0xA2] = FakeEnqueueCdIntr;
+	SetConf(BIOS_DEFAULT_EVCB, BIOS_DEFAULT_TCB, BIOS_DEFAULT_STACKTOP);
+	A0_TBL[0xA2] = realEnqueueCdIntr;
 
 	// End of code adapted
 
@@ -115,24 +100,6 @@ bool bios_is_ps1(void) {
 
 bool bios_is_european(void) {
 	return BIOS_VERSION[0x20] == 'E';
-}
-
-boot_cnf_t * bios_get_config() {
-	/*
-	 * Extract from the "la t6, boot_cnf_values+8" opcodes at the start of the GetConf function.
-	 *
-	 * According to psx-spx docs this was used by Spec Ops Airborne Commando so it should work
-	 * on every retail BIOS.
-	 */
-	const uint8_t * get_conf_offset = (const uint8_t *) A0_TBL[0x9D];
-
-	// Extract high from the "lui"
-	uint16_t high = *((uint16_t *) (get_conf_offset + 0x00));
-
-	// Extract low from the "addi"
-	int16_t low = *((int16_t *) (get_conf_offset + 0x04));
-
-	return (boot_cnf_t *) (((int32_t) high << 16) + low - 8);
 }
 
 void * parse_warmboot_jal(uint32_t opcode) {
