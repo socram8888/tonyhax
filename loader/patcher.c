@@ -54,7 +54,7 @@ void install_modchip_patch(uint8_t * patches_addr) {
 }
 
 void install_fpx_patch(uint8_t * patches_addr) {
-	if (bios_is_ps1()) {
+	if (!bios_is_ps1()) {
 		return;
 	}
 
