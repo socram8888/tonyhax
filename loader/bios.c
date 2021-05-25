@@ -13,9 +13,23 @@ void ** const A0_TBL = (void **) 0x200;
 const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
 const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
 
+extern uint8_t __RO_START__;
+
 void bios_reinitialize() {
 	// Disable interrupts
 	EnterCriticalSection();
+
+	/*
+	 * Clear unused RAM, from the kernel heap start all the way to ourselves.
+	 *
+	 * Test Drive 6 has a bug in which it calls OpenEvent too many times, causing the function
+	 * to fail and return -1.
+	 *
+	 * It then later calls WaitEvent(-1), which locks up because it waits for an uninitialized
+	 * memory address corresponding to event -1 to be zero.
+	 */
+	uint8_t * user_start = (void *) 0x8000E000;
+	bzero(user_start, &__RO_START__ - user_start);
 
 	// The following is adapted from the WarmBoot call
 
