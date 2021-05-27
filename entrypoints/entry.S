@@ -49,7 +49,7 @@ realstart:
 	# You see, LIBMCRD suffers from Bubsyitis and is constantly talking to memory cards, issuing
 	# _card_info calls on every god damn frame.
 	#
-	# This wouldn't be a problem if it the BIOS wasn't retarded and, when opening a file, waited
+	# This wouldn't be a problem if the BIOS wasn't retarded and, when opening a file, waited
 	# for the sector read to finish. In line with Sony's marvelous programming practices, it
 	# instead waits for *any* memory card access to finish.
 	#
