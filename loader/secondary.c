@@ -15,7 +15,7 @@
 #include "io.h"
 
 // Loading address of tonyhax, provided by the secondary.ld linker script
-extern uint8_t __BSS_START__, __BSS_END__;
+extern uint8_t __RO_START__, __BSS_START__, __BSS_END__;
 
 // Buffer right before this executable
 uint8_t * const data_buffer = (uint8_t *) 0x801F9800;
@@ -232,6 +232,10 @@ void try_boot_cd() {
 
 	debug_write("Configuring kernel");
 	SetConf(event, tcb, stacktop);
+
+	debug_write("Clearing RAM");
+	uint8_t * user_start = (uint8_t *) 0x80010000;
+	bzero(user_start, &__RO_START__ - user_start);
 
 	debug_write("Checking executable");
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
