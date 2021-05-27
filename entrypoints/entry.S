@@ -30,26 +30,6 @@ realstart:
 	lui t0, 0x1f80
 	sw t1, 0x1074(t0)
 
-waitcardready:
-	# Enter critical section
-	li a0, 1
-	syscall
-
-	# Call get_card_status(0)
-	li t1, 0x5C
-	li a0, 0
-	jal 0xB0
-
-	# If status is ready (0x01), continue
-	beq v0, 0x01, restoreirqs
-
-	# Else exit critical section to let the CPU do its magic
-	li a0, 2
-	syscall
-
-	b waitcardready
-
-restoreirqs:
 	# Call ChangeClearPad(1) so the BIOS card IRQ clears the interrupt flags.
 	# This prevents the PsyQ VBlank ISR from detecting that VBlank fired, and thus prevent its
 	# LIBMCRD from interrupting us.
@@ -57,9 +37,27 @@ restoreirqs:
 	li a0, 1
 	jal 0xB0
 
-	# Exit critical section
-	li a0, 2
-	syscall
+	# Call wait_card_status(0) to make sure we can access card on slot 1 safely
+	li t1, 0x5D
+	li a0, 0
+	jal 0xB0
+
+	# Call wait_card_status(1)
+	#
+	# You might be wondering, "why do we care about the status of the slot 2?".
+	#
+	# You see, LIBMCRD suffers from Bubsyitis and is constantly talking to memory cards, issuing
+	# _card_info calls on every god damn frame.
+	#
+	# This wouldn't be a problem if it the BIOS wasn't retarded and, when opening a file, waited
+	# for the sector read to finish. In line with Sony's marvelous programming practices, it
+	# instead waits for *any* memory card access to finish.
+	#
+	# This combination results in dev_card_open failing because it checks a buffer for the "MC"
+	# signature before the actual sector read has finished.
+	li t1, 0x5D
+	li a0, 1
+	jal 0xB0
 
 	# Call FileOpen
 	li t1, 0x32
