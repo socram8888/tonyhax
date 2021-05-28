@@ -2,6 +2,7 @@
 #include "bios.h"
 #include "io.h"
 #include "util.h"
+#include "debugscreen.h"
 #include <string.h>
 
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
@@ -13,11 +14,13 @@ void ** const A0_TBL = (void **) 0x200;
 const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
 const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
 
+void * original_disc_error;
+
 void bios_reinitialize() {
 	// Disable interrupts
 	EnterCriticalSection();
 
-	// Clear kernel RAM, from the kernel heap start all the way to ourselves.
+	// Clear kernel heap space. Not really needed but nice for debugging.
 	bzero((void *) 0xA000E000, 0x2000);
 
 	// The following is adapted from the WarmBoot call
@@ -85,6 +88,9 @@ void bios_reinitialize() {
 
 	// Re-enable interrupts
 	ExitCriticalSection();
+
+	// Save for later
+	original_disc_error = A0_TBL[0xA1];
 }
 
 bool bios_is_ps1(void) {
@@ -149,4 +155,16 @@ handler_info_t * bios_get_syscall_handler(void) {
 
 	// The fourth instruction is a one opcode "la a1, ADDR". Extract it from there.
 	return (handler_info_t *) (func_start[4] & 0xFFFF);
+}
+
+void logging_disc_error_handler(char type, int errorcode) {
+	debug_write("Disc error type %c code %x", type, errorcode);
+}
+
+void bios_inject_disc_error(void) {
+	A0_TBL[0xA1] = logging_disc_error_handler;
+}
+
+void bios_restore_disc_error(void) {
+	A0_TBL[0xA1] = original_disc_error;
 }

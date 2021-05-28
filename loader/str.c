@@ -54,6 +54,13 @@ int mini_vsprintf(char * str, const char * format, va_list args) {
 				format++;
 
 				switch (*format) {
+					case 'c': {
+						int c = va_arg(args, int);
+						*pos = c;
+						pos++;
+						break;
+					}
+
 					case 's': {
 						const char * subtext = va_arg(args, const char *);
 						while (*subtext != '\0') {

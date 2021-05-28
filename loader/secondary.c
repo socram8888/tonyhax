@@ -148,8 +148,11 @@ void try_boot_cd() {
 	wait_lid_status(true);
 	wait_lid_status(false);
 
-	debug_write("Initializing CD");
-	CdInit();
+	debug_write("Initializing CD!!");
+	if (!CdInit()) {
+		debug_write("Init failed");
+		return;
+	}
 
 	debug_write("Checking game region");
 	if (CdReadSector(1, 4, data_buffer) != 1) {
@@ -283,6 +286,9 @@ void try_boot_cd() {
 
 	debug_write("Starting");
 
+	// Restore original error handler
+	bios_restore_disc_error();
+
 	// Games from WarmBoot start with interrupts disabled
 	EnterCriticalSection();
 
@@ -307,6 +313,7 @@ void main() {
 		return;
 	}
 
+	bios_inject_disc_error();
 	log_bios_version();
 
 	debug_write("Resetting drive");
@@ -326,6 +333,7 @@ void main() {
 
 		debug_write("Reinitializing kernel");
 		bios_reinitialize();
+		bios_inject_disc_error();
 	}
 }
 

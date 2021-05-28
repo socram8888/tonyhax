@@ -81,6 +81,16 @@ void bios_copy_a0_table(void);
 handler_info_t * bios_get_syscall_handler(void);
 
 /**
+ * Replaces the disc error handler with one that logs the code to the screen and returns.
+ */
+void bios_inject_disc_error(void);
+
+/**
+ * Restores the disc error handler.
+ */
+void bios_restore_disc_error(void);
+
+/**
  * Fake version of the EnqueueCdIntr call that we'll use to skip the CD reinitialization in the
  * SetConf call during the BIOS reinitialization.
  */
@@ -305,11 +315,13 @@ void GPU_cwp(uint32_t * src, uint32_t num);
 bool LoadAndExecute(const char * filename, uint32_t stack_base, uint32_t stack_offset);
 
 /**
- * Initializes the CD drive and filesystem
+ * Initializes the CD drive and filesystem.
+ *
+ * @returns true if succeeded, else false
  *
  * Table A, call 0x54.
  */
-void CdInit(void);
+bool CdInit(void);
 
 /**
  * (Re-)initializes kernel resources.
