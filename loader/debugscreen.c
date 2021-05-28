@@ -1,4 +1,5 @@
 
+#include <string.h>
 #include "debugscreen.h"
 #include "gpu.h"
 #include "bios.h"
@@ -75,6 +76,9 @@ void decompressfont() {
 		}
 	}
 }
+
+char last_printed_line[64];
+uint32_t last_printed_count;
 
 void debug_init() {
 	bool pal = bios_is_european();
@@ -197,29 +201,45 @@ void debug_write(const char * str, ...) {
 	va_list args;
 	va_start(args, str);
 
-	// For a render width of 640 this should be just 40 but let's be generous
-	char formatted[128];
-
+	// For a render width of 640 at width 10 max line should be 64 chars long
+	char formatted[64];
+	char formatted_repeated[64];
+	char * to_print;
 	mini_vsprintf(formatted, str, args);
 
 	// Flush old textures
 	gpu_flush_cache();
 
-	// Scroll text up
-	gpu_size_t line_size = {
-		.width = SCREEN_WIDTH - LOG_MARGIN,
-		.height = LOG_LINE_HEIGHT,
-	};
-	for (int line = 1; line < LOG_LINES; line++) {
-		gpu_point_t source_line = {
-			.x = LOG_MARGIN,
-			.y = LOG_START_Y + LOG_LINE_HEIGHT * line
+	if (strcmp(last_printed_line, formatted) != 0) {
+		// Line's text is different, so scroll up 
+		gpu_size_t line_size = {
+			.width = SCREEN_WIDTH - LOG_MARGIN,
+			.height = LOG_LINE_HEIGHT,
 		};
-		gpu_point_t dest_line = {
-			.x = LOG_MARGIN,
-			.y = LOG_START_Y + LOG_LINE_HEIGHT * (line - 1)
-		};
-		gpu_copy_rectangle(&source_line, &dest_line, &line_size);
+		for (int line = 1; line < LOG_LINES; line++) {
+			gpu_point_t source_line = {
+				.x = LOG_MARGIN,
+				.y = LOG_START_Y + LOG_LINE_HEIGHT * line
+			};
+			gpu_point_t dest_line = {
+				.x = LOG_MARGIN,
+				.y = LOG_START_Y + LOG_LINE_HEIGHT * (line - 1)
+			};
+			gpu_copy_rectangle(&source_line, &dest_line, &line_size);
+		}
+
+		// Copy to last printed buffer and reset counter
+		strcpy(last_printed_line, formatted);
+		last_printed_count = 1;
+
+		to_print = formatted;
+	} else {
+		last_printed_count++;
+
+		// Same line, so print with a repeat counter
+		mini_sprintf(formatted_repeated, "%s (x%d)", last_printed_line, last_printed_count);
+
+		to_print = formatted_repeated;
 	}
 
 	uint32_t lastLinePos = LOG_START_Y + (LOG_LINES - 1) * LOG_LINE_HEIGHT;
@@ -240,7 +260,7 @@ void debug_write(const char * str, ...) {
 	gpu_draw_solid_rect(&black_box);
 
 	// Draw text on last line
-	debug_text_at(LOG_MARGIN, lastLinePos, formatted);
+	debug_text_at(LOG_MARGIN, lastLinePos, to_print);
 }
 
 void debug_switch_standard(bool pal) {

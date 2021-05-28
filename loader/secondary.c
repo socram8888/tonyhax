@@ -203,7 +203,7 @@ void try_boot_cd() {
 		FileClose(cnf_fd);
 
 		if (read == -1) {
-			debug_write("Read error %x", GetLastError());
+			debug_write("Read error %d", GetLastError());
 			return;
 		}
 
@@ -220,7 +220,7 @@ void try_boot_cd() {
 	} else {
 		uint32_t errorCode = GetLastError();
 		if (errorCode != FILEERR_NOT_FOUND) {
-			debug_write("Open error %x", errorCode);
+			debug_write("Open error %d", errorCode);
 			return;
 		}
 
@@ -243,14 +243,14 @@ void try_boot_cd() {
 	debug_write("Checking executable");
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
 	if (exe_fd <= 0) {
-		debug_write("Open error %x", GetLastError());
+		debug_write("Open error %d", GetLastError());
 		return;
 	}
 
 	read = FileRead(exe_fd, data_buffer, 2048);
 
 	if (read != 2048) {
-		debug_write("Read error %x", GetLastError());
+		debug_write("Read error %d", GetLastError());
 		return;
 	}
 
@@ -270,10 +270,10 @@ void try_boot_cd() {
 		return;
 	}
 
-	debug_write("Loading executable (%x @ %x)", exe_header->load_size, exe_header->load_addr);
+	debug_write("Loading executable (%d bytes @ %x)", exe_header->load_size, exe_header->load_addr);
 
 	if (FileRead(exe_fd, exe_header->load_addr, exe_header->load_size) != (int32_t) exe_header->load_size) {
-		debug_write("Read error %x", GetLastError());
+		debug_write("Read error %d", GetLastError());
 		return;
 	}
 

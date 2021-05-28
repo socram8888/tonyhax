@@ -158,7 +158,7 @@ handler_info_t * bios_get_syscall_handler(void) {
 }
 
 void logging_disc_error_handler(char type, int errorcode) {
-	debug_write("Disc error type %c code %x", type, errorcode);
+	debug_write("Disc error type %c code %d", type, errorcode);
 }
 
 void bios_inject_disc_error(void) {

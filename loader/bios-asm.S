@@ -49,6 +49,11 @@ strncmp:
 	li t1, 0x18
 	j 0xA0
 
+.global strcpy
+strcpy:
+	li t1, 0x19
+	j 0xA0
+
 .global strlen
 strlen:
 	li t1, 0x1B

@@ -5,6 +5,8 @@
 
 int isspace(int c);
 
+int mini_sprintf(char * str, const char * format, ...);
+
 int mini_vsprintf(char * str, const char * format, va_list args);
 
 int memcmp(const void * ptr1, const void * ptr2, uint32_t num);

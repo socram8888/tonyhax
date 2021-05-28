@@ -17,6 +17,12 @@ int isspace(int c) {
 	}
 }
 
+int mini_sprintf(char * str, const char * format, ...) {
+	va_list args;
+	va_start(args, format);
+	return mini_vsprintf(str, format, args);
+}
+
 int mini_vsprintf(char * str, const char * format, va_list args) {
 	char * pos = str;
 
@@ -71,8 +77,38 @@ int mini_vsprintf(char * str, const char * format, va_list args) {
 						break;
 					}
 
-					case 'x':
-					case 'X': {
+					case 'd': {
+						int val = va_arg(args, int);
+
+						if (val == 0) {
+							*pos = '0';
+							pos++;
+						} else {
+							if (val < 0) {
+								*pos = '-';
+								pos++;
+							}
+
+							// Calculate digits backwards
+							char digits[10];
+							int digpos = 0;
+							do {
+								digits[digpos] = '0' + val % 10;
+								val = val / 10;
+								digpos++;
+							} while (val != 0);
+
+							// And copy them now also backwards
+							while (digpos != 0) {
+								digpos--;
+								*pos = digits[digpos];
+								pos++;
+							}
+						}
+						break;
+					}
+
+					case 'x': {
 						char c;
 						uint32_t val = va_arg(args, uint32_t);
 						for (int i = 28; i >= 0; i -= 4) {
