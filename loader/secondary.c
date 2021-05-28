@@ -148,7 +148,7 @@ void try_boot_cd() {
 	wait_lid_status(true);
 	wait_lid_status(false);
 
-	debug_write("Initializing CD!!");
+	debug_write("Initializing CD");
 	if (!CdInit()) {
 		debug_write("Init failed");
 		return;
