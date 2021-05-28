@@ -211,7 +211,7 @@ void debug_write(const char * str, ...) {
 	gpu_flush_cache();
 
 	if (strcmp(last_printed_line, formatted) != 0) {
-		// Line's text is different, so scroll up 
+		// Line's text is different, so scroll up
 		gpu_size_t line_size = {
 			.width = SCREEN_WIDTH - LOG_MARGIN,
 			.height = LOG_LINE_HEIGHT,
