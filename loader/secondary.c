@@ -17,8 +17,8 @@
 // Loading address of tonyhax, provided by the secondary.ld linker script
 extern uint8_t __RO_START__, __BSS_START__, __BSS_END__;
 
-// Buffer right before this executable
-uint8_t * const data_buffer = (uint8_t *) 0x801F9800;
+// CD sector buffer used by the original BIOS
+uint8_t * const data_buffer = (uint8_t *) 0xA000B070;
 
 void log_bios_version() {
 	/*
@@ -240,7 +240,7 @@ void try_boot_cd() {
 	uint8_t * user_start = (uint8_t *) 0x80010000;
 	bzero(user_start, &__RO_START__ - user_start);
 
-	debug_write("Checking executable");
+	debug_write("Reading executable header");
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
 	if (exe_fd <= 0) {
 		debug_write("Open error %d", GetLastError());
@@ -259,12 +259,15 @@ void try_boot_cd() {
 	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
 	// since that's all we can do.
 	if (exe_header->load_addr + exe_header->load_size >= data_buffer) {
-		debug_write("Won't fit. Using BIOS.");
+		debug_write("Executable won't fit. Using buggy BIOS call.");
 
 		if (game_is_pal != gpu_is_pal()) {
 			debug_write("Switching video mode");
 			debug_switch_standard(game_is_pal);
 		}
+
+		// Restore original error handler
+		bios_restore_disc_error();
 
 		LoadAndExecute(bootfile, exe_header->initial_sp_base, exe_header->initial_sp_offset);
 		return;
