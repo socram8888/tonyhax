@@ -100,7 +100,8 @@ FREEPSXBOOT_IMAGES := \
 	tonyhax_scph-101_v4.5_slot2.mcd \
 	tonyhax_scph-102_v4.4_slot1.mcd \
 	tonyhax_scph-102_v4.4_slot2.mcd \
-	tonyhax_scph-102_v4.5.mcd
+	tonyhax_scph-102_v4.5_slot1.mcd \
+	tonyhax_scph-102_v4.5_slot2.mcd
 
 # Boot CD files
 
