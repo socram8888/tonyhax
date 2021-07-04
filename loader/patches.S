@@ -46,15 +46,22 @@ modchipstart:
 	lw t0, 124(v0)
 
 	/*
+	 * Ensure SP is not in BIOS area, or else Elemental Gearbolt (U) (SLUS-00654) crashes.
+	 * No idea why this is happening - it works fine in no$psx but fails in real hardware.
+	 */
+	li t2, 0xFFE00003
+	li t3, 0x80000000
+	and t1, t2, t0
+	bne t1, t3, modchipcontinue
+
+	/*
 	 * 0x28 bytes after this position, there might be the return address to the
 	 * antipiracy_triggered function.
 	 */
 	lw t1, 0x28(t0)
 
-	// Check mask
-	li t2, 0xFFE00003
+	// Check mask to ensure we will cause an unaligned word read.
 	and t2, t1
-	li t3, 0x80000000
 	bne t2, t3, modchipcontinue
 
 	/*
