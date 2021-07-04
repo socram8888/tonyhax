@@ -52,7 +52,7 @@ modchipstart:
 	lw t1, 0x28(t0)
 
 	// Check mask
-	li t2, 0xFFC00003
+	li t2, 0xFFE00003
 	and t2, t1
 	li t3, 0x80000000
 	bne t2, t3, modchipcontinue
@@ -71,7 +71,6 @@ modchipstart:
 	bne t4, t5, modchipcontinue
 
 	// Patch registers!
-
 
 	// Load return address to antipiracy function, which is at sp+0x120
 	lw t1, 0x120(t0)
