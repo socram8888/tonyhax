@@ -151,3 +151,13 @@ end:
 
 	return pos - str;
 }
+
+// The BIOS has already this function but for clearing the console's RAM it's unbearably slow.
+void bzero(void * start, uint32_t len) {
+	uint8_t * bytes = (uint8_t *) start;
+	while (len) {
+		*bytes = 0;
+		bytes++;
+		len--;
+	}
+}
