@@ -17,8 +17,8 @@
 // Loading address of tonyhax, provided by the secondary.ld linker script
 extern uint8_t __RO_START__, __BSS_START__, __BSS_END__;
 
-// CD sector buffer used by the original BIOS
-uint8_t * const data_buffer = (uint8_t *) 0xA000B070;
+// Buffer right before this executable
+uint8_t * const data_buffer = (uint8_t *) 0x801F9800;
 
 void log_bios_version() {
 	/*
