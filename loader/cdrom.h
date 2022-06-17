@@ -8,7 +8,12 @@
 #define CD_CMD_TEST 0x19
 #define CD_CMD_RESET 0x1C
 #define CD_TEST_REGION 0x22
-
+#define CD_CMD_SET_SESSION 0x12
+#define CD_CMD_STOP 0x08
+#define CD_CMD_GETID 0x1A
+#define CD_CMD_SETMODE 0x0E
+#define CD_CMD_GETTN 0x13
+#define CD_CMD_GETTD 0x14
 /**
  * Starts executing a CD command.
  *
@@ -40,9 +45,5 @@ uint_fast8_t cd_read_reply(uint8_t * reply_buffer);
  */
 bool cd_drive_init(void);
 
-/**
- * Resets the drive.
- *
- * @returns true if succeded, or false otherwise.
- */
-bool cd_drive_reset(void);
+// Resets the drive.
+void cd_drive_reset();

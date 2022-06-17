@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if command -v dnf &> /dev/null; then
+    sudo dnf install -y git autoconf automake texinfo help2man libtool ncurses-devel g++ make cmake cdrdao
+elif command -v apt &> /dev/null; then
+    sudo apt install build-essential mips-linux-gnu-gcc cmake libtinyxml2-dev git
+fi

@@ -236,9 +236,12 @@ void debug_write(const char * str, ...) {
 	} else {
 		last_printed_count++;
 
-		// Same line, so print with a repeat counter
-		mini_sprintf(formatted_repeated, "%s (x%d)", last_printed_line, last_printed_count);
-
+		// Same line, so print with a repeat counter unless we are just waiting for controller input and are displaying a blank line
+        if(!controller_input) {
+		    mini_sprintf(formatted_repeated, "%s (x%d)", last_printed_line, last_printed_count);
+        } else {
+		    mini_sprintf(formatted_repeated, "%s", last_printed_line);
+        }
 		to_print = formatted_repeated;
 	}
 

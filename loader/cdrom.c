@@ -97,17 +97,13 @@ bool cd_drive_init() {
 	return true;
 }
 
-bool cd_drive_reset() {
-	// Issue a reset
+void cd_drive_reset() {
+	// Issue a reset (looses authentication and or unlock so do an unlock after this)
 	cd_command(CD_CMD_RESET, NULL, 0);
 
-	// Should succeed with 3
-	if (cd_wait_int() != 3) {
-		return false;
-	}
+	// Should succeed with 3 but doesn't sometimes so we can't check the return value
+	cd_wait_int();
 
 	// Need to wait for some cycles before it springs back to life
 	for (int i = 0; i < 0x400000; i++);
-
-	return true;
 }
