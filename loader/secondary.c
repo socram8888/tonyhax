@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <string.h>
+#include "str.h"
 #include "audio.h"
 #include "bios.h"
 #include "cdrom.h"

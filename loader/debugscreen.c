@@ -1,5 +1,5 @@
 
-#include <string.h>
+#include "str.h"
 #include "debugscreen.h"
 #include "gpu.h"
 #include "bios.h"

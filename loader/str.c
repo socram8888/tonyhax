@@ -1,6 +1,6 @@
 
 #include "str.h"
-#include <stddef.h>
+#include <stdint.h>
 
 int isspace(int c) {
 	switch (c) {
@@ -110,7 +110,7 @@ int mini_vsprintf(char * str, const char * format, va_list args) {
 
 					case 'x': {
 						char c;
-						uint32_t val = va_arg(args, uint32_t);
+						unsigned int val = va_arg(args, unsigned int);
 						for (int i = 28; i >= 0; i -= 4) {
 							c = (val >> i) & 0xF;
 							if (c < 10) {
@@ -153,7 +153,7 @@ end:
 }
 
 // The BIOS has already this function but for clearing the console's RAM it's unbearably slow.
-void bzero(void * start, uint32_t len) {
+void bzero(void * start, size_t len) {
 	uint8_t * bytes = (uint8_t *) start;
 	while (len) {
 		*bytes = 0;

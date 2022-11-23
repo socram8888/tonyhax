@@ -1,7 +1,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <string.h>
+#include "str.h"
 #include "str.h"
 #include "bios.h"
 #include "debugscreen.h"

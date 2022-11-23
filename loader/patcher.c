@@ -1,7 +1,7 @@
 
 #include "bios.h"
 #include "debugscreen.h"
-#include <string.h>
+#include "str.h"
 #include "patcher.h"
 
 #include "patches.inc"
