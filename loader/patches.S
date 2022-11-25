@@ -106,11 +106,11 @@ modchipstart:
 	// Compare signature, and test for v2 if does not match
 	lw t2, 0x74(t1)
 	li t3, 0x3C02E600
-	bne t2, t3, modchipv2
+	bne t2, t3, modchipv15
 
 	lw t2, 0x78(t1)
 	li t3, 0x34420002
-	bne t2, t3, modchipv2
+	bne t2, t3, modchipv15
 
 	// Load return address from ap_failed to ap_check
 	lw t1, 0xE8(t0)
@@ -120,6 +120,28 @@ modchipstart:
 
 	// Save and return
 	b modchipsave
+
+	/*
+	 * Handle another variant of the v1, used by Vandal Hearts II - Tenjou no Mon (J) (SLPM-86251)
+	 *  - ap_check           (0x800C4868)
+	 *  - ap_failed          (0x800C4C40, called from 0x800C49D4)
+	 *  - StopCallback       (0x800D2700, called from 0x800C4C58)
+	 *  - disable_ints       (0x800D2B90, called from 0x800D2718)
+	 *  - EnterCriticalSection
+	 *
+	 * Same idea, except the load is now a "li v1, 0xE6000002" at +0x64 bytes after ap_failed
+	 * returns to ap_check.
+	 *
+	 * The offsets are the same as for v2, so we will reuse those adjusts.
+	 */
+modchipv15:
+	lw t2, 0x64(t1)
+	li t3, 0x3C03E600
+	bne t2, t3, modchipv2
+
+	lw t2, 0x68(t1)
+	li t3, 0x34630002
+	beq t2, t3, adjustv2
 
 	/*
 	 * We will now attempt to patch an antimodchip v2 module.
@@ -156,6 +178,7 @@ modchipv2:
 	li t3, 0xA4201DAA
 	bne t2, t3, modchipcontinue
 
+adjustv2:
 	// Load return address to from ap_failed to ap_check
 	lw t1, 0x120(t0)
 
