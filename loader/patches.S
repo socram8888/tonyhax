@@ -46,23 +46,41 @@ modchipstart:
 	lw t0, 0x7C(v0)
 
 	/*
-	 * This mask checks for aligned accesses in either the KUSEG (0x00000000-0x007FFFFF)
-	 * region, or the KSEG0 (0x80000000-0x807FFFFF) region.
+	 * Check that SP is not in the BIOS area (0xA0000000-0xA000FFFF). Without this check,
+	 * Elemental Gearbolt (U) (SLUS-00654) crashes in real hardware (though not in no$psx).
+	 */
+	srl t1, t0, 16
+	xori t1, 0xA000
+	beq t1, zero, modchipcontinue
+
+	/*
+	 * If we are being called from an antimodchip module, the call stack will look like this:
+	 *  - (game code)
+	 *  - ap_check
+	 *  - ap_failed
+	 *  - StopCallback
+	 *  - disable_ints
+	 *  - EnterCriticalSection
+	 *
+	 * For all known modules, the return address from StopCallback to ap_failed sits at SP+0x28.
+	 * We will load this address, and then proceed to check if it is safe to read from it.
+	 */
+	lw t1, 0x28(t0)
+
+	/*
+	 * Check now if the loaded value could be a word-aligned address in either the KUSEG
+	 * (0x00000000-0x007FFFFF) or the KSEG0 (0x80000000-0x807FFFFF) regions, which is were user
+	 * code is executed.
 	 *
 	 * Most games use the KSEG0, except for Emperors New Groove (U) (SCUS-94571) whose programmers
-	 * seem to prefer the KUSEG region.
+	 * seemed to prefer the KUSEG region.
 	 *
 	 * We cannot limit ourselves to checking the first 2MB of RAM, because some games, like
 	 * Robbit Mon Dieu (J) (SCPS-10103) use a mirror (0x80600000-0x807FFFFF).
-	 *
-	 * This check excludes doing any reads if called from the the KSEG1 mirror
-	 * (0xA0000000-0xA07FFFFF), which corresponds to calls made by the BIOS itself. Without
-	 * excluding this area, Elemental Gearbolt (U) (SLUS-00654) seems to crash for not very clear
-	 * reasons.
 	 */
 	li t2, 0x7F800003
-	and t1, t2, t0
-	bne t1, zero, modchipcontinue
+	and t2, t1
+	bne t2, zero, modchipcontinue
 
 	/*
 	 * First, we will attempt to handle a version 1 antimodchip module.
@@ -71,8 +89,7 @@ modchipstart:
 	 * increments when it should not. It is also only capable of displaying the stop screen
 	 * in Japanese.
 	 *
-	 * EnterCriticalSection for this module is called when the antipiracy check failed,
-	 * and the call stack looks like this:
+	 * The offsets for some of the checked games are:
 	 *
 	 * Um Jammer Lammy (PAL-E):
 	 *  - ap_check           (0x801D8008)
@@ -95,13 +112,6 @@ modchipstart:
 	 * If it exists, we will patch the thread state to return back to ap_check, as if the
 	 * ap_failed function had returned.
 	 */
-
-	// Load return address from StopCallback to ap_failed
-	lw t1, 0x28(t0)
-
-	// Check if the address corresponds to user RAM and is aligned
-	and t2, t1
-	bne t2, zero, modchipcontinue
 
 	// Compare signature, and test for v2 if does not match
 	lw t2, 0x74(t1)
@@ -150,8 +160,7 @@ modchipv15:
 	 * to detect CD swapping; and for dumb modchips by checking for absence of the wobble
 	 * in the outer tracks.
 	 *
-	 * EnterCriticalSection for this module is called when the antipiracy check failed,
-	 * and the call stack looks like this:
+	 * The offsets for some of the checked games are:
 	 *
 	 * Rockman 2 - Dr. Wily no Nazo (J) (SLPS-02255):
 	 *  - ap_check           (0x8006CA58)
