@@ -81,21 +81,18 @@ modchipstart:
 	 *  - disable_ints       (0x8002ECA4, called from 0x8002E82C)
 	 *  - EnterCriticalSection
 	 *
-	 * The return call from StopCallback to ap_failed is located at SP+0x28. We want to return to
-	 * this function, but instead of returning to the saved address, we want to jump straight
-	 * away to the end, so it returns back to the ap_check function and the game starts properly.
+	 * The return call from StopCallback to ap_failed is located at SP+0x28. We will check if
+	 * at this address +0x74 exists a "li v0, 0xE6000002", which is a black rentangle passed to
+	 * the DrawPrim function to clear the screen.
 	 *
-	 * The way we will check if we are indeed being called from this ap_check function, is by
-	 * checking for a piece of code that should have run after we return.
-	 *
-	 * This code, located 0x74 bytes after the return address, is a "li v0, 0xE6000002",
-	 * which is a black rentangle. This passed to the DrawPrim function to clear the screen.
+	 * If it exists, we will patch the thread state to return back to ap_check, as if the
+	 * ap_failed function had returned.
 	 */
 
-	// Load the address we would return to if the ap_failed function returned
+	// Load return address from StopCallback to ap_failed
 	lw t1, 0x28(t0)
 
-	// Check if game code
+	// Check if the address corresponds to game code region
 	and t4, t1, t2
 	bne t4, t3, modchipcontinue
 
@@ -108,8 +105,11 @@ modchipstart:
 	li t3, 0x34420002
 	bne t2, t3, modchipv2
 
-	// Adjust return address
-	addi t1, 0x104
+	// Load return address from ap_failed to ap_check
+	lw t1, 0xE8(t0)
+
+	// Adjust stack pointer
+	addi t0, 0xF0
 
 	// Save and return
 	b modchipsave
@@ -131,12 +131,13 @@ modchipstart:
 	 *  - disable_ints       (0x800249B4, called from 0x8002453C)
 	 *  - EnterCriticalSection
 	 *
-	 * Here we will need not only to skip most of the code from the ap_failed function by patching
-	 * the return, but also make sure we clear s0 and s1 so the state machine that called us ends
-	 * as soon as it returns.
+	 * The return address from StopCallback to ap_failed is located at SP+0x28, exactly as above
+	 * so we will not load it again.
 	 *
-	 * To see if we are being called from an antimodchip module, we will check now for a store of
-	 * "sh zero, 0x1F801DAA" 16 bytes after the return address, which is used to mute the audio.
+	 * For this other version, we will check if at this return address +0x10 bytes exists a
+	 * "sh zero, 0x1F801DAA", which is used to mute the audio.
+	 *
+	 * If that exists, we will patch the thread state to return back to ap_check.
 	 */
 modchipv2:
 	// Compare signature
@@ -148,16 +149,16 @@ modchipv2:
 	li t3, 0xA4201DAA
 	bne t2, t3, modchipcontinue
 
-	// Zero the s0 and s1 stored in the stack
-	sw zero, 0x118(t0)
-	sw zero, 0x11C(t0)
+	// Load return address to from ap_failed to ap_check
+	lw t1, 0x120(t0)
 
-	// Adjust return address
-	addi t1, 0xEC
+	// Adjust stack pointer
+	addi t0, 0x128
 
 modchipsave:
-	// Adjust stack pointer
-	addi t0, 0x30
+	// Zero the s0 and s1 stored in the thread state, so the state machine used by ap_check exits
+	sw zero, 0x48(v0)
+	sw zero, 0x4C(v0)
 
 	// Save adjusted stack pointer and return address
 	sw t0, 0x7C(v0)
