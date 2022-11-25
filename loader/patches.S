@@ -48,8 +48,11 @@ modchipstart:
 	/*
 	 * Ensure SP is not in BIOS area, or else Elemental Gearbolt (U) (SLUS-00654) crashes.
 	 * No idea why this is happening - it works fine in no$psx but fails in real hardware.
+	 *
+	 * We have to check for the entire 0x80000000-0x9FFFFFFF because some games, like
+	 * Robbit Mon Dieu (J) (SCPS-10103) might use a mirror.
 	 */
-	li t2, 0xFFE00003
+	li t2, 0xE0000003
 	li t3, 0x80000000
 	and t1, t2, t0
 	bne t1, t3, modchipcontinue
