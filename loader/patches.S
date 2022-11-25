@@ -43,7 +43,7 @@ fpxret:
 .globl modchipstart
 modchipstart:
 	// Load the SP value
-	lw t0, 124(v0)
+	lw t0, 0x7C(v0)
 
 	/*
 	 * Ensure SP is not in BIOS area, or else Elemental Gearbolt (U) (SLUS-00654) crashes.
@@ -55,45 +55,110 @@ modchipstart:
 	bne t1, t3, modchipcontinue
 
 	/*
-	 * 0x28 bytes after this position, there might be the return address to the
-	 * antipiracy_triggered function.
+	 * First, we will attempt to handle a version 1 antimodchip module.
+	 *
+	 * This checks only for the presence of a dumb modchip, by checking if the SCEx counter
+	 * increments when it should not. It is also only capable of displaying the stop screen
+	 * in Japanese.
+	 *
+	 * EnterCriticalSection for this module is called when the antipiracy check failed,
+	 * and the call stack looks like this:
+	 *
+	 * Um Jammer Lammy (PAL-E):
+	 *  - ap_check           (0x801D8008)
+	 *  - ap_failed          (0x801D83E0, called from 0x801D8174)
+	 *  - StopCallback       (0x800356C4, called from 0x801D8400)
+	 *  - disable_ints       (0x80035B54, called from 0x800356E0)
+	 *  - EnterCriticalSection
+	 *
+	 * For Saru! Get You (NTSC-J):
+	 *  - ap_check           (0x80136950)
+	 *  - ap_failed          (0x80136D28, called from 0x80136ABC)
+	 *  - StopCallback       (0x8002E814, called from 0x80136D48)
+	 *  - disable_ints       (0x8002ECA4, called from 0x8002E82C)
+	 *  - EnterCriticalSection
+	 *
+	 * The return call from StopCallback to ap_failed is located at SP+0x28. We want to return to
+	 * this function, but instead of returning to the saved address, we want to jump straight
+	 * away to the end, so it returns back to the ap_check function and the game starts properly.
+	 *
+	 * The way we will check if we are indeed being called from this ap_check function, is by
+	 * checking for a piece of code that should have run after we return.
+	 *
+	 * This code, located 0x74 bytes after the return address, is a "li v0, 0xE6000002",
+	 * which is a black rentangle. This passed to the DrawPrim function to clear the screen.
 	 */
+
+	// Load the address we would return to if the ap_failed function returned
 	lw t1, 0x28(t0)
 
-	// Check mask to ensure we will cause an unaligned word read.
-	and t2, t1
-	bne t2, t3, modchipcontinue
+	// Check if game code
+	and t4, t1, t2
+	bne t4, t3, modchipcontinue
+
+	// Compare signature, and test for v2 if does not match
+	lw t2, 0x74(t1)
+	li t3, 0x3C02E600
+	bne t2, t3, modchipv2
+
+	lw t2, 0x78(t1)
+	li t3, 0x34420002
+	bne t2, t3, modchipv2
+
+	// Adjust return address
+	addi t1, 0x104
+
+	// Save and return
+	b modchipsave
 
 	/*
-	 * Okay, now that we have established it is safe to read, check if it contains a
-	 * "sh zero, 0x1F801DAA" 16 bytes after the return address
+	 * We will now attempt to patch an antimodchip v2 module.
 	 *
-	 * This is used to mute the sound so the antipiracy screen is silent.
+	 * This one is smarter and checks that the SCEx wobble is present in the inner tracks,
+	 * to detect CD swapping; and for dumb modchips by checking for absence of the wobble
+	 * in the outer tracks.
+	 *
+	 * EnterCriticalSection for this module is called when the antipiracy check failed,
+	 * and the call stack looks like this:
+	 *
+	 * Rockman 2 - Dr. Wily no Nazo (J) (SLPS-02255):
+	 *  - ap_check           (0x8006CA58)
+	 *  - ap_failed          (0x8006D654, called from 0x8006CE5C and 0x8006D238)
+	 *  - StopCallback       (0x80024524, called from 0x8006D66C)
+	 *  - disable_ints       (0x800249B4, called from 0x8002453C)
+	 *  - EnterCriticalSection
+	 *
+	 * Here we will need not only to skip most of the code from the ap_failed function by patching
+	 * the return, but also make sure we clear s0 and s1 so the state machine that called us ends
+	 * as soon as it returns.
+	 *
+	 * To see if we are being called from an antimodchip module, we will check now for a store of
+	 * "sh zero, 0x1F801DAA" 16 bytes after the return address, which is used to mute the audio.
 	 */
+modchipv2:
+	// Compare signature
 	lw t2, 0x18(t1)
 	li t3, 0x3C011F80
-	lw t4, 0x1C(t1)
-	li t5, 0xA4201DAA
 	bne t2, t3, modchipcontinue
-	bne t4, t5, modchipcontinue
 
-	// Patch registers!
+	lw t2, 0x1C(t1)
+	li t3, 0xA4201DAA
+	bne t2, t3, modchipcontinue
 
-	// Load return address to antipiracy function, which is at sp+0x120
-	lw t1, 0x120(t0)
+	// Zero the s0 and s1 stored in the stack
+	sw zero, 0x118(t0)
+	sw zero, 0x11C(t0)
 
-	// The antipiracy function returns cleanly if s0 and s1 are zero, so clear s0 now
-	sw zero, 0x48(v0)
+	// Adjust return address
+	addi t1, 0xEC
 
-	// Set PC to the return address
-	sw t1, 0x88(v0)
+modchipsave:
+	// Adjust stack pointer
+	addi t0, 0x30
 
-	// Clear s1 now
-	sw zero, 0x4C(v0)
-
-	// Decrement the SP
-	addi t0, 0x128
+	// Save adjusted stack pointer and return address
 	sw t0, 0x7C(v0)
+	sw t1, 0x88(v0)
 
 .globl modchipreturn
 modchipreturn:
