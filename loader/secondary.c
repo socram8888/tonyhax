@@ -240,6 +240,8 @@ void try_boot_cd() {
 	uint8_t * user_start = (uint8_t *) 0x80010000;
 	bzero(user_start, &__RO_START__ - user_start);
 
+	patcher_apply(bootfile);
+
 	debug_write("Reading executable header");
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
 	if (exe_fd <= 0) {
@@ -313,7 +315,7 @@ void main() {
 
 	debug_write("Integrity check %sed", integrity_ok ? "pass" : "fail");
 	if (!integrity_ok) {
-		//return;
+		return;
 	}
 
 	bios_inject_disc_error();
@@ -331,7 +333,6 @@ void main() {
 	}
 
 	while (1) {
-		patcher_apply();
 		try_boot_cd();
 
 		debug_write("Reinitializing kernel");

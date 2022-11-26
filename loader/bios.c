@@ -8,12 +8,6 @@
 // Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
 const uint32_t tty_enabled = 0;
 
-// Address of A table
-void ** const A0_TBL = (void **) 0x200;
-
-const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
-const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
-
 void * original_disc_error;
 
 void bios_reinitialize() {
@@ -79,10 +73,10 @@ void bios_reinitialize() {
 	 * we'll replace the EnqueueCdIntr with a fake version that patches the system state to return
 	 * earlier and avoid the CD reinitialization entirely.
 	 */
-	void * realEnqueueCdIntr = A0_TBL[0xA2];
-	A0_TBL[0xA2] = FakeEnqueueCdIntr;
+	void * realEnqueueCdIntr = BIOS_A0_TABLE[0xA2];
+	BIOS_A0_TABLE[0xA2] = FakeEnqueueCdIntr;
 	SetConf(BIOS_DEFAULT_EVCB, BIOS_DEFAULT_TCB, BIOS_DEFAULT_STACKTOP);
-	A0_TBL[0xA2] = realEnqueueCdIntr;
+	BIOS_A0_TABLE[0xA2] = realEnqueueCdIntr;
 
 	// End of code adapted
 
@@ -90,7 +84,7 @@ void bios_reinitialize() {
 	ExitCriticalSection();
 
 	// Save for later
-	original_disc_error = A0_TBL[0xA1];
+	original_disc_error = BIOS_A0_TABLE[0xA1];
 }
 
 bool bios_is_ps1(void) {
@@ -112,7 +106,7 @@ bool bios_is_european(void) {
 }
 
 void * parse_warmboot_jal(uint32_t opcode) {
-	const uint32_t * warmboot_start = (const uint32_t *) A0_TBL[0xA0];
+	const uint32_t * warmboot_start = (const uint32_t *) BIOS_A0_TABLE[0xA0];
 	uint32_t prefix = (uint32_t) warmboot_start & 0xF0000000;
 
 	uint32_t * jal = (uint32_t *) (warmboot_start + opcode);
@@ -162,9 +156,9 @@ void logging_disc_error_handler(char type, int errorcode) {
 }
 
 void bios_inject_disc_error(void) {
-	A0_TBL[0xA1] = logging_disc_error_handler;
+	BIOS_A0_TABLE[0xA1] = logging_disc_error_handler;
 }
 
 void bios_restore_disc_error(void) {
-	A0_TBL[0xA1] = original_disc_error;
+	BIOS_A0_TABLE[0xA1] = original_disc_error;
 }

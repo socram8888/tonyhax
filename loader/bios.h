@@ -37,14 +37,19 @@ struct handler_info {
 /**
  * BIOS author string.
  */
-extern const char * const BIOS_DEVELOPER;
+static const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
 
 /**
  * BIOS version string. Not available on SCPH-1000 consoles.
  *
  * Example: "System ROM Version 4.1 12/16/97 E"
  */
-extern const char * const BIOS_VERSION;
+static const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
+
+/**
+ * A0-table location.
+ */
+static void ** const BIOS_A0_TABLE = (void **) 0x200;
 
 /**
  * Executes a full reset of the console's BIOS, as if a WarmBoot was issued.

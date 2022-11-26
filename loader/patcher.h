@@ -4,4 +4,4 @@
 /**
  * Install and apply suitable BIOS patches.
  */
-void patcher_apply(void);
+void patcher_apply(const char * boot_file);

@@ -4,24 +4,34 @@
 #include "str.h"
 #include "patcher.h"
 
-extern uint8_t patch_ap_start;
-extern uint8_t patch_ap_end;
-extern uint8_t patch_ap_skip;
-extern uint8_t patch_ap_success;
-
-extern uint8_t patch_fpb_start;
-extern uint8_t patch_fpb_end;
-
-inline uint32_t encode_j(const void * addr) {
-	return 0x08000000 | (((uint32_t) addr >> 2) & 0x3FFFFFF);
+inline void encode_j(void * jump_location, const void * jump_dest) {
+	uint32_t * words = (uint32_t *) jump_location;
+	words[0] = 0x08000000 | (((uint32_t) jump_dest >> 2) & 0x3FFFFFF);
 }
 
-inline uint32_t encode_jal(const void * addr) {
-	return 0x0C000000 | (((uint32_t) addr >> 2) & 0x3FFFFFF);
+inline void encode_jal(void * jump_location, const void * jump_dest) {
+	uint32_t * words = (uint32_t *) jump_location;
+	words[0] = 0x0C000000 | (((uint32_t) jump_dest >> 2) & 0x3FFFFFF);
 }
 
-uint8_t * install_generic_modchip_patch(uint8_t * install_addr) {
-	debug_write(" * Generic antimodchip");
+inline void encode_li(void * load_location, int regnum, uint32_t value) {
+	uint32_t * words = (uint32_t *) load_location;
+
+	// LUI - Load Upper Immediate
+	words[0] = 0x3C000000 | (regnum << 16) | (value >> 16);
+
+	// ORI - OR Immediate
+	words[1] = 0x34000000 | (regnum << 21) | (regnum << 16) | (value & 0xFFFF);
+}
+
+uint8_t * install_generic_antipiracy_patch(uint8_t * install_addr) {
+	// Exports defined by the patch
+	extern uint8_t patch_ap_start;
+	extern uint8_t patch_ap_end;
+	extern uint8_t patch_ap_skip;
+	extern uint8_t patch_ap_success;
+
+	debug_write(" * Generic antipiracy");
 
 	// Get the handler info structure
 	handler_info_t * syscall_handler = bios_get_syscall_handler();
@@ -50,7 +60,7 @@ uint8_t * install_generic_modchip_patch(uint8_t * install_addr) {
 	 * Insert the jump to the original code, which we'll use if the call was not originated from
 	 * an antipiracy module.
 	 */
-	*((uint32_t *) (install_addr + (&patch_ap_skip - &patch_ap_start))) = encode_j(cases_array[1]);
+	encode_j(install_addr + (&patch_ap_skip - &patch_ap_start), cases_array[1]);
 
 	/*
 	 * Insert the jump we'll use to exit the exception handler once we have finished patching up
@@ -58,7 +68,7 @@ uint8_t * install_generic_modchip_patch(uint8_t * install_addr) {
 	 *
 	 * We'll use the address of syscall(0) which behaves as a nop to exit the exception.
 	 */
-	*((uint32_t *) (install_addr + (&patch_ap_success - &patch_ap_start))) = encode_j(cases_array[0]);
+	encode_j(install_addr + (&patch_ap_success - &patch_ap_start), cases_array[0]);
 
 	// Finally replace
 	cases_array[1] = install_addr;
@@ -66,28 +76,60 @@ uint8_t * install_generic_modchip_patch(uint8_t * install_addr) {
 	return install_addr + (&patch_ap_end - &patch_ap_start);
 }
 
+uint8_t * install_vandal_patch(uint8_t * install_addr) {
+	// Exports defined by the patch
+	extern uint8_t patch_vandal_start;
+	extern uint8_t patch_vandal_return;
+	extern uint8_t patch_vandal_end;
+
+	debug_write(" * Vandal Hearths 2 AP");
+
+	// Copy blob
+	memcpy(install_addr, &patch_vandal_start, &patch_vandal_end - &patch_vandal_start);
+
+	// Hook into call 16 of table B (OutdatedPadGetButtons), which is called once per frame
+	void ** b0_tbl = GetB0Table();
+
+	// Insert call to real function
+	encode_j(install_addr + (&patch_vandal_return - &patch_vandal_start), b0_tbl[0x16]);
+
+	// Replace it now
+	b0_tbl[0x16] = install_addr;
+
+	// Advance installation address
+	return install_addr + (&patch_vandal_end - &patch_vandal_start);
+}
+
 uint8_t * install_fpb_patch(uint8_t * install_addr) {
+	// Exports defined by the patch
+	extern uint8_t patch_fpb_start;
+	extern uint8_t patch_fpb_end;
+
 	debug_write(" * FreePSXBoot");
 
 	// Copy blob
 	memcpy(install_addr, &patch_fpb_start, &patch_fpb_end - &patch_fpb_start);
 
 	// Install it
-	*((uint32_t *) 0x5B40) = encode_jal(install_addr);
+	encode_jal((void *) 0x5B40, install_addr);
 
 	// Advance installation address
 	return install_addr + (&patch_fpb_end - &patch_fpb_start);
 }
 
-void patcher_apply(void) {
+void patcher_apply(const char * boot_file) {
 	// We have plenty of space at the end of table B
 	uint8_t * install_addr = (uint8_t *) (GetB0Table() + 0x5E);
 
 	// Install patches
 	debug_write("Installing patches:");
 
-	// Generic antimodchip, which works on pretty much every game with antipiracy
-	install_addr = install_generic_modchip_patch(install_addr);
+	// Install a suitable antimodchip patch
+	if (strcmp(boot_file, "cdrom:\\SLUS_009.40;1") == 0) {
+		install_addr = install_vandal_patch(install_addr);
+	} else {
+		install_addr = install_generic_antipiracy_patch(install_addr);
+	}
 
 	// FreePSXBoot does not work on PS2 so skip its installation
 	if (bios_is_ps1()) {
