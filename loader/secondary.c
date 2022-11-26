@@ -313,7 +313,7 @@ void main() {
 
 	debug_write("Integrity check %sed", integrity_ok ? "pass" : "fail");
 	if (!integrity_ok) {
-		return;
+		//return;
 	}
 
 	bios_inject_disc_error();

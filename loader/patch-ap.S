@@ -2,36 +2,6 @@
 #include <regdef.h>
 
 .text
-.globl __start
-__start:
-
-/*
- * The anti-FreePSXBoot patch.
- *
- * This patch is called right at the very end of the last step in the read sector finite state
- * machine:
- * https://github.com/grumpycoders/pcsx-redux/blob/f6484e8010a40a81e4019d9bfa1a9d408637b614/src/mips/openbios/sio0/card.c#L194
- *
- * When this code is executed, the registers are as follows:
- *   - v0 contains 1, or "success".
- *   - a1 contains the read buffer
- *   - a2 contains the current sector number
- *
- * If the sector being read is sector 0 and it contains "FPBZ" at +0x7C, we modify the read data
- * so it is detected as corrupted and the game skips reading from it
- *
- * The offsets have been checked against BIOSes 2.2, 3.0, 4.1 and 4.4
- */
-.globl antifpxpatch
-antifpxpatch:
-	lw t0, 0x7C(a1)
-	li t1, 0x5A425046
-	bne a2, 0, fpxret
-	bne t0, t1, fpxret
-
-	sw zero, 0(a1)
-fpxret:
-	j 0x5B54
 
 /*
  * Intercepts the syscall(1) (aka EnterCriticalSection).
@@ -40,8 +10,8 @@ fpxret:
  *   - v0: saved thread registers, must NOT be modified.
  * The rest of the registers are not critical and can be used freely.
  */
-.globl modchipstart
-modchipstart:
+.globl patch_ap_start
+patch_ap_start:
 	// Load the SP value
 	lw t0, 0x7C(v0)
 
@@ -51,7 +21,7 @@ modchipstart:
 	 */
 	srl t1, t0, 16
 	xori t1, 0xA000
-	beq t1, zero, modchipcontinue
+	beq t1, zero, patch_ap_skip
 
 	/*
 	 * If we are being called from an antimodchip module, the call stack will look like this:
@@ -80,7 +50,7 @@ modchipstart:
 	 */
 	li t2, 0x7F800003
 	and t2, t1
-	bne t2, zero, modchipcontinue
+	bne t2, zero, patch_ap_skip
 
 	/*
 	 * First, we will attempt to handle a version 1 antimodchip module.
@@ -116,11 +86,11 @@ modchipstart:
 	// Compare signature, and test for v2 if does not match
 	lw t2, 0x74(t1)
 	li t3, 0x3C02E600
-	bne t2, t3, modchipv15
+	bne t2, t3, patch_ap_v15
 
 	lw t2, 0x78(t1)
 	li t3, 0x34420002
-	bne t2, t3, modchipv15
+	bne t2, t3, patch_ap_v15
 
 	// Load return address from ap_failed to ap_check
 	lw t1, 0xE8(t0)
@@ -129,7 +99,7 @@ modchipstart:
 	addi t0, 0xF0
 
 	// Save and return
-	b modchipsave
+	b patch_ap_save
 
 	/*
 	 * Handle another variant of the v1, used by Vandal Hearts II - Tenjou no Mon (J) (SLPM-86251)
@@ -144,14 +114,14 @@ modchipstart:
 	 *
 	 * The offsets are the same as for v2, so we will reuse those adjusts.
 	 */
-modchipv15:
+patch_ap_v15:
 	lw t2, 0x64(t1)
 	li t3, 0x3C03E600
-	bne t2, t3, modchipv2
+	bne t2, t3, patch_ap_v2
 
 	lw t2, 0x68(t1)
 	li t3, 0x34630002
-	beq t2, t3, adjustv2
+	beq t2, t3, patch_ap_adjust_v2
 
 	/*
 	 * We will now attempt to patch an antimodchip v2 module.
@@ -177,24 +147,24 @@ modchipv15:
 	 *
 	 * If that exists, we will patch the thread state to return back to ap_check.
 	 */
-modchipv2:
+patch_ap_v2:
 	// Compare signature
 	lw t2, 0x18(t1)
 	li t3, 0x3C011F80
-	bne t2, t3, modchipcontinue
+	bne t2, t3, patch_ap_skip
 
 	lw t2, 0x1C(t1)
 	li t3, 0xA4201DAA
-	bne t2, t3, modchipcontinue
+	bne t2, t3, patch_ap_skip
 
-adjustv2:
+patch_ap_adjust_v2:
 	// Load return address to from ap_failed to ap_check
 	lw t1, 0x120(t0)
 
 	// Adjust stack pointer
 	addi t0, 0x128
 
-modchipsave:
+patch_ap_save:
 	// Zero the s0 and s1 stored in the thread state, so the state machine used by ap_check exits
 	sw zero, 0x48(v0)
 	sw zero, 0x4C(v0)
@@ -203,10 +173,13 @@ modchipsave:
 	sw t0, 0x7C(v0)
 	sw t1, 0x88(v0)
 
-.globl modchipreturn
-modchipreturn:
+.globl patch_ap_success
+patch_ap_success:
 	j 0x12341234
 
-.globl modchipcontinue
-modchipcontinue:
+.globl patch_ap_skip
+patch_ap_skip:
 	j 0x12341234
+
+.globl patch_ap_end
+patch_ap_end:

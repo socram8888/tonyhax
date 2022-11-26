@@ -30,11 +30,7 @@ SECTIONS {
 	PROVIDE(__BSS_END__ = .);
 	/DISCARD/ :
 	{
-		*(.MIPS.abiflags)
-		*(.pdr)
-		*(.gnu.attributes)
-		*(.comment)
-		*(.reginfo)
+		*(*)
 	}
 }
 ENTRY (start)

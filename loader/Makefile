@@ -3,7 +3,7 @@
 
 include ../variables.mk
 
-LOADER_AUTOGEN := orca.inc patches.inc
+LOADER_AUTOGEN := orca.inc
 LOADER_HEADERS := $(wildcard *.h) $(LOADER_AUTOGEN)
 LOADER_OBJECTS := $(patsubst %.c, %.o, $(patsubst %.S, %.o, $(wildcard *.c *.S)))
 
@@ -11,14 +11,6 @@ all: $(LOADER_FILES)
 
 clean:
 	$(RM) $(LOADER_FILES) *.o *.elf $(LOADER_AUTOGEN)
-
-# BIOS patches
-
-patches.elf: patches.S
-	$(CC) $(CFLAGS) patches.S -o patches.elf
-
-patches.inc: patches.elf
-	bash ../util/elf2h.sh BIOS_PATCHES patches.elf patches.inc
 
 # Intermediate objects
 
