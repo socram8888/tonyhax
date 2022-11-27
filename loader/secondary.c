@@ -267,7 +267,7 @@ void try_boot_cd() {
 
 	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
 	// since that's all we can do.
-	if (exe_header->load_addr + exe_header->load_size >= data_buffer) {
+	if (exe_header->load_addr + exe_header->load_size >= &__RO_START__) {
 		debug_write("Executable won't fit. Using buggy BIOS call.");
 
 		if (game_is_pal != gpu_is_pal()) {
