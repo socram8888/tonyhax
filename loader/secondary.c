@@ -17,9 +17,6 @@
 // Loading address of tonyhax, provided by the secondary.ld linker script
 extern uint8_t __RO_START__, __BSS_START__, __BSS_END__;
 
-// Buffer right before this executable
-uint8_t * const data_buffer = (uint8_t *) 0x801F9800;
-
 void log_bios_version() {
 	/*
 	 * "System ROM Version 4.5 05/25/00 A"
@@ -153,6 +150,16 @@ void try_boot_cd() {
 		debug_write("Init failed");
 		return;
 	}
+
+	/*
+	 * Use the space the BIOS has allocated for reading CD sectors.
+	 *
+	 * The English translation of Mizzurna Falls (J) (SLPS-01783) depends on the header being
+	 * present here (see issue #95 in GitHub).
+	 *
+	 * This address varies between PS1 and PS2.
+	 */
+	uint8_t * data_buffer = (uint8_t *) (bios_is_ps1() ? 0xA000B070 : 0xA000A8D0);
 
 	debug_write("Checking game region");
 	if (CdReadSector(1, 4, data_buffer) != 1) {
