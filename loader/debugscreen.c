@@ -206,6 +206,7 @@ void debug_write(const char * str, ...) {
 	char formatted_repeated[64];
 	char * to_print;
 	mini_vsprintf(formatted, str, args);
+	va_end(args);
 
 	// Flush old textures
 	gpu_flush_cache();

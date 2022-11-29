@@ -18,9 +18,12 @@ int isspace(int c) {
 }
 
 int mini_sprintf(char * str, const char * format, ...) {
+	int retcode = 0;
 	va_list args;
 	va_start(args, format);
-	return mini_vsprintf(str, format, args);
+	retcode = mini_vsprintf(str, format, args);
+	va_end(args);
+	return retcode;
 }
 
 int mini_vsprintf(char * str, const char * format, va_list args) {
