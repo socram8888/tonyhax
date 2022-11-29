@@ -35,11 +35,6 @@ struct handler_info {
  */
 
 /**
- * BIOS author string.
- */
-static const char * const BIOS_DEVELOPER = (const char *) 0xBFC0012C;
-
-/**
  * BIOS version string. Not available on SCPH-1000 consoles.
  *
  * Example: "System ROM Version 4.1 12/16/97 E"
