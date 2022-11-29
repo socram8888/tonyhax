@@ -89,16 +89,12 @@ void bios_reinitialize() {
 
 bool bios_is_ps1(void) {
 	/*
-	 * Check if a PS1 by testing the developer credit string.
+	 * All PS2, from firmware 1.00 to 2.50 have a version "System ROM Version 5.0" followed by
+	 * a varying date and region code.
 	 *
-	 * PS1 have in this field one of the following:
-	 *  - CEX-3000 KT-3  by K.S
-	 *  - CEX-3000/1001/1002 by K.S
-	 *  - CEX-3000/1001/1002 by K.S
-	 *
-	 * PS2 have "PS compatible mode by M.T"
+	 * To see if we're running on a PS1, we'll just check that the version is not 5.0.
 	 */
-	return strncmp(BIOS_DEVELOPER, "CEX-", 4) == 0;
+	return strncmp(BIOS_VERSION + 0x13, "5.0", 3) != 0;
 }
 
 bool bios_is_european(void) {
