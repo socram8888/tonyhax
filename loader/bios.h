@@ -260,21 +260,6 @@ void init_a0_b0_c0_vectors(void);
 void GPU_dw(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint16_t * src);
 
 /**
- * Copies the width*height 16-bit half words to Vram at x, y coords using DMA.
- *
- * width*height MUST be a multiple of 32, or else it'll lock up.
- *
- * @param x Vram coord X
- * @param y Vram coord Y
- * @param width texture width, in 16-bit pixels
- * @param height texture height, in lines
- * @param src texture data
- *
- * Table A, call 0x47.
- */
-void gpu_send_dma(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint16_t * src);
-
-/**
  * Executes the given GPU GP1 command.
  *
  * @param gp1cmd the command

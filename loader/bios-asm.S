@@ -97,11 +97,6 @@ GPU_dw:
 	li t1, 0x46
 	j 0xA0
 
-.global gpu_send_dma
-gpu_send_dma:
-	li t1, 0x47
-	j 0xA0
-
 .global SendGP1Command
 SendGP1Command:
 	li t1, 0x48
