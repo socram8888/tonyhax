@@ -136,3 +136,12 @@ void patcher_apply(const char * boot_file) {
 		install_addr = install_fpb_patch(install_addr);
 	}
 }
+
+void patcher_apply_softuart() {
+	// Exports defined by the patch
+	extern uint8_t patch_uartputc_start;
+	extern uint8_t patch_uartputc_end;
+
+	// Overwrite BIOS' std_out_putchar function
+	memcpy(BIOS_A0_TABLE[0x3C], &patch_uartputc_start, &patch_uartputc_end - &patch_uartputc_start);
+}

@@ -69,6 +69,11 @@ memcpy:
 	li t1, 0x2A
 	j 0xA0
 
+.global std_out_puts
+std_out_puts:
+	li t1, 0x3E
+	j 0xA0
+
 .global DoExecute
 DoExecute:
 	# Pepsiman (J) crashes if s5 is not zero

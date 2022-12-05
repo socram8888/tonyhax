@@ -328,6 +328,8 @@ void main() {
 
 	bios_inject_disc_error();
 	log_bios_version();
+	patcher_apply_softuart();
+	std_out_puts("Hello world!\n");
 
 	debug_write("Resetting drive");
 	if (!cd_drive_init()) {
@@ -346,6 +348,8 @@ void main() {
 		debug_write("Reinitializing kernel");
 		bios_reinitialize();
 		bios_inject_disc_error();
+		patcher_apply_softuart();
+		std_out_puts("Hello world!\n");
 	}
 }
 

@@ -220,6 +220,13 @@ void ExitCriticalSection();
 uint32_t todigit(char c);
 
 /**
+ * Prints a text through the TTY.
+ *
+ * @param text text to print
+ */
+void std_out_puts(const char * text);
+
+/**
  * Starts a previously loaded executable.
  *
  * @param headerbuf header buffer
