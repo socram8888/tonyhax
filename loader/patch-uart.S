@@ -43,6 +43,7 @@ return:
 	lw ra, 8(sp)
 	lw s0, 4(sp)
 	addi sp, 12
+	jr ra
 
 #
 # UART WRITE
