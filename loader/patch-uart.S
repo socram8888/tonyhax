@@ -3,65 +3,64 @@
 
 .text
 
+#
+# This is a complete replacement for the original std_out_putc the BIOS has.
+#
+# In this function:
+#  - a0: data to bitbang
+#  - t0: working registers
+#  - t1: bits to send
+#  - t2: last IRQ flag value
+#  - t3: 0x1F800000 (I/O start address)
+#  - t4: COP0 SR value
+#
 .globl patch_uartputc_start
 patch_uartputc_start:
-
-	# Prepare frame
-	addi sp, -12
-	sw s0, 4(sp)
-	sw ra, 8(sp)
-
-	# Save argument in s0
-	move s0, a0
-
-	# Call EnterCriticalSection
-	li a0, 1
-	syscall
-
-	# If "\n", prefix with "\r"
-	li t0, 0x0A
-	bne t0, s0, notnl
-
-	# Print "\r"
-	li a0, 0x0D
-	jal writebyte
-
-notnl:
-	# Print character
-	move a0, s0
-	jal writebyte
-
-	# If EnterCriticalSection failed (interrupts were already disabled), do not reenable them
-	beq v0, zero, return
-
-	# Else do reenable them with ExitCriticalSection
-	li a0, 2
-	syscall
-
-return:
-	# Restore registers and return
-	lw ra, 8(sp)
-	lw s0, 4(sp)
-	addi sp, 12
-	jr ra
-
-#
-# UART WRITE
-#
-# Arguments:
-#  - a0: byte to send
-#
-writebyte:
-	# Load I/O start
-	lui t3, 0x1F80
-
 	# Add start (0) and stop (1) bits to byte
 	andi a0, 0xFF
 	sll a0, 1
 	ori a0, 0x200
 
+	# Newline (after processing)
+	li t0, (0x0A << 1 | 0x200)
+
 	# Bits to send (1 start + 8 data + 1 stop)
 	li t1, 10
+
+	# Compare against newline (0x0A)
+	bne a0, t0, notnl
+
+	# If newline, prepend a 0x0D, like the original function did and increment bit count
+	sll a0, 10
+	ori a0, (0x0D << 1 | 0x200)
+	addi t1, 10
+
+notnl:
+	# We will directly manipulate the COP0 status registers instead of using EnterCriticalSection
+	# to avoid other threads/interrupts from fucking up the timing.
+	#
+	# The reason is two-fold:
+	#  - The kernel does not support reentrant calls - if something calls us while we are
+	#    executing kernel code and we generate a syscall, we'd nuke the current thread state.
+	#
+	#  - SetConf calls printf while re-configuring the TCBs (thread control blocks). Executing
+	#    *any* interrupt at that point (which includes syscalls) will cause the interrupt
+	#    handler to write the current thread state to the zero address, wiping the interrupt
+	#    trampoline at 0x80.
+	#
+	# By directly manipulating this register we're opening ourselves to all kinds of race
+	# conditions, but since this is just for debugging tonyhax, that's good enough for me.
+
+	# Load current SR state in t4
+	mfc0 t4, $12
+
+	# Clear bits 10 and 0, the same flags WarmBoot clears
+	li t0, 0xFFFFFBFE
+	and t0, t4
+	mtc0 t0, $12
+
+	# Load I/O start
+	lui t3, 0x1F80
 
 	# Set timer 0 target to 293 cycles (33868800Hz/115200bps-1)
 	li t0, 293
@@ -112,6 +111,9 @@ writewait:
 
 	# If not done, keep going
 	bne t1, zero, writebit
+
+	# Restore coprocessor flags
+	mtc0 t4, $12
 
 	jr ra
 
