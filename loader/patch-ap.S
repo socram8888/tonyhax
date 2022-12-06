@@ -16,14 +16,6 @@ patch_ap_start:
 	lw t0, 0x7C(v0)
 
 	#
-	# Check that SP is not in the BIOS area (0xA0000000-0xA000FFFF). Without this check,
-	# Elemental Gearbolt (U) (SLUS-00654) crashes in real hardware (though not in no$psx).
-	#
-	srl t1, t0, 16
-	xori t1, 0xA000
-	beq t1, zero, patch_ap_skip
-
-	#
 	# If we are being called from an antimodchip module, the call stack will look like this:
 	#  - (game code)
 	#  - ap_check
@@ -33,8 +25,27 @@ patch_ap_start:
 	#  - EnterCriticalSection
 	#
 	# For all known modules, the return address from StopCallback to ap_failed sits at SP+0x28.
-	# We will load this address, and then proceed to check if it is safe to read from it.
 	#
+	# Before reading from this address, we will check that after adding that offset, we do not
+	# cross a 2MB boundary, which could cause an illegal memory read.
+	#
+	# Without this check the following games crash:
+	#  - Elemental Gearbolt (U) (SLUS-00654), calling with a stack at 0x807FFFE0, as we attempt
+	#    to read from 0x80800008.
+	#  - Rival Schools (U) (SLUS-00681), calling with a stack of 0x801FFFD8, as we attempt to
+	#    read from 0x80200000. A mirror would be generally present here, but not for this game
+	#    as it calls SetMemSize(2) to intentionally block this.
+	#
+	# Some games, like Grind Session (U) (SCUS-94568) use the scratchpad during gameplay for the
+	# stack, which is only 1KB. For now, we will not add a safety check for this case since the
+	# vast majority of games store the stack in RAM and no game is known to crash without it.
+	#
+	addi t1, t0, 0x28
+	xor t1, t0
+	srl t1, 21
+	bne t1, zero, patch_ap_skip
+
+	# Load alledged return address
 	lw t1, 0x28(t0)
 
 	#
