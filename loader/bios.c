@@ -5,10 +5,21 @@
 #include "debugscreen.h"
 #include "str.h"
 
-// Set to zero unless you are using an emulator or have a physical UART on the PS1, else it'll freeze
-const uint32_t tty_enabled = 0;
-
 void * original_disc_error;
+
+bool console_has_tty() {
+	/*
+	 * Check if the console has a SCN2681 TTY used for debug by writing data to the control
+	 * registers and reading it back.
+	 *
+	 * The control is 16 bit wide, and is accessed by writing or reading twice the same register.
+	 */
+	volatile uint8_t * scn2681modereg = (uint8_t *) 0x1F802020;
+
+	*scn2681modereg = 0x55;
+	*scn2681modereg = 0xAA;
+	return *scn2681modereg == 0x55 && *scn2681modereg == 0xAA;
+}
 
 void bios_reinitialize() {
 	// Disable interrupts
@@ -41,8 +52,8 @@ void bios_reinitialize() {
 	I_STAT = 0;
 	I_MASK = 0;
 
-	// Setup devices
-	InstallDevices(tty_enabled);
+	// Setup devices.
+	InstallDevices(console_has_tty());
 
 	/*
 	 * Configure with default values
