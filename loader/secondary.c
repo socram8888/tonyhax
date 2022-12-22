@@ -257,8 +257,6 @@ void try_boot_cd() {
 	uint8_t * user_start = (uint8_t *) 0x80010000;
 	bzero(user_start, &__RO_START__ - user_start);
 
-	patcher_apply(bootfile);
-
 	debug_write("Reading executable header");
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
 	if (exe_fd <= 0) {
@@ -300,6 +298,8 @@ void try_boot_cd() {
 	}
 
 	FileClose(exe_fd);
+
+	patcher_apply(bootfile);
 
 	if (game_is_pal != gpu_is_pal()) {
 		debug_write("Switching video mode");
