@@ -7,7 +7,7 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 # Common variables
 
-TONYHAX_VERSION=v1.4.5b
+TONYHAX_VERSION=v1.4.5
 SOFTUART_PATCH=0
 
 CC=mips-linux-gnu-gcc
