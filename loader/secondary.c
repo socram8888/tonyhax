@@ -247,11 +247,12 @@ void try_boot_cd() {
 	 * If an interrupt happens while the BIOS is reinitializing the TCBs (thread control blocks),
 	 * the interrupt handler will store the current thread state in the zero address, wiping
 	 * vital data, like the interrupt trampoline at 0x80.
+	 *
+	 * We do not need to reenable the interrupts because SetConf already does it for us.
 	 */
 	debug_write("Configuring kernel");
 	EnterCriticalSection();
 	SetConf(event, tcb, stacktop);
-	ExitCriticalSection();
 
 	debug_write("Clearing RAM");
 	uint8_t * user_start = (uint8_t *) 0x80010000;
