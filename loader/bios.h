@@ -327,6 +327,15 @@ bool CdInit(void);
 void SetConf(uint32_t evcb, uint32_t tcb, uint32_t stacktop);
 
 /**
+ * Configured the RAM size.
+ *
+ * @param size memory size in megabytes, either 2 or 8.
+ *
+ * Table A, call 0x9F.
+ */
+void SetMemSize(uint32_t size);
+
+/**
  * Reads the requested amount of sectors from the CD.
  *
  * @param sector_count sector count

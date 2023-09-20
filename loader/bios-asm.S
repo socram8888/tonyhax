@@ -132,6 +132,11 @@ SetConf:
 	li t1, 0x9C
 	j 0xA0
 
+.global SetMemSize
+SetMemSize:
+	li t1, 0x9F
+	j 0xA0
+
 .global CdReadSector
 CdReadSector:
 	li t1, 0xA5

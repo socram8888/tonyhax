@@ -91,6 +91,15 @@ void bios_reinitialize() {
 
 	// End of code adapted
 
+	/*
+	 * Set RAM size to 8MB, which is incorrect but it's what the BIOS sets.
+	 *
+	 * This is required because the entrypoint game might've set it to 2MB, and a bugged target
+	 * game might accidentally access an address in the mirror region, causing a fault to be caused
+	 * in real hardware.
+	 */
+	SetMemSize(8);
+
 	// Re-enable interrupts
 	ExitCriticalSection();
 
