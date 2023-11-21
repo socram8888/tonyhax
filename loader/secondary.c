@@ -274,6 +274,13 @@ void try_boot_cd() {
 
 	exe_header_t * exe_header = (exe_header_t *) (data_buffer + 0x10);
 
+	/*
+	 * Patch executable header like stock does. Fixes issue #153 with King's Field (J) (SLPS-00017).
+	 * https://github.com/grumpycoders/pcsx-redux/blob/a072e38d78c12a4ce1dadf951d9cdfd7ea59220b/src/mips/openbios/main/main.c#L380-L381
+	 */
+	exe_header->initial_sp_base = stacktop;
+	exe_header->initial_sp_offset = 0;
+
 	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
 	// since that's all we can do.
 	if (exe_header->load_addr + exe_header->load_size >= &__RO_START__) {
