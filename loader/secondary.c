@@ -264,26 +264,45 @@ void try_boot_cd() {
 		debug_write("Open error %d", GetLastError());
 		return;
 	}
+	file_control_block_t * exe_fcb = *BIOS_FCBS + exe_fd;
 
 	read = FileRead(exe_fd, data_buffer, 2048);
-
 	if (read != 2048) {
-		debug_write("Read error %d", GetLastError());
+		debug_write("Missing header. Read %d, error %d.", read, exe_fcb->last_error);
 		return;
 	}
 
-	exe_header_t * exe_header = (exe_header_t *) (data_buffer + 0x10);
+	exe_header_t * exe_header = (exe_header_t *) data_buffer;
+	if (strncmp(exe_header->signature, "PS-X EXE", 8)) {
+		debug_write("Header has invalid signature");
+		return;
+	}
 
 	/*
 	 * Patch executable header like stock does. Fixes issue #153 with King's Field (J) (SLPS-00017).
 	 * https://github.com/grumpycoders/pcsx-redux/blob/a072e38d78c12a4ce1dadf951d9cdfd7ea59220b/src/mips/openbios/main/main.c#L380-L381
 	 */
-	exe_header->initial_sp_base = stacktop;
-	exe_header->initial_sp_offset = 0;
+	exe_header->offsets.initial_sp_base = stacktop;
+	exe_header->offsets.initial_sp_offset = 0;
+
+	/*
+	 * Patch executable load size, capping it to the file size.
+	 *
+	 * According to https://github.com/socram8888/tonyhax/issues/161,
+	 * Kileak, The Blood (J) (SLPS-00027) specifies in its header a an invalid load size, larger
+	 * than the actual executable.
+	 *
+	 * While the BIOS does not validate this, we do to ensure the file could be read in its
+	 * entirety and detect possible CD read errors.
+	 */
+	uint32_t actual_exe_size = exe_fcb->size - 2048;
+	if (actual_exe_size < exe_header->offsets.load_size) {
+		exe_header->offsets.load_size = actual_exe_size;
+	}
 
 	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
 	// since that's all we can do.
-	if (exe_header->load_addr + exe_header->load_size >= &__RO_START__) {
+	if (exe_header->offsets.load_addr + exe_header->offsets.load_size >= &__RO_START__) {
 		debug_write("Executable won't fit. Using buggy BIOS call.");
 
 		if (game_is_pal != gpu_is_pal()) {
@@ -294,14 +313,23 @@ void try_boot_cd() {
 		// Restore original error handler
 		bios_restore_disc_error();
 
-		LoadAndExecute(bootfile, exe_header->initial_sp_base, exe_header->initial_sp_offset);
+		LoadAndExecute(
+			bootfile,
+			exe_header->offsets.initial_sp_base,
+			exe_header->offsets.initial_sp_offset
+		);
 		return;
 	}
 
-	debug_write("Loading executable (%d bytes @ %x)", exe_header->load_size, exe_header->load_addr);
+	debug_write(
+		"Loading executable (%d bytes @ %x)",
+		exe_header->offsets.load_size,
+		exe_header->offsets.load_addr
+	);
 
-	if (FileRead(exe_fd, exe_header->load_addr, exe_header->load_size) != (int32_t) exe_header->load_size) {
-		debug_write("Read error %d", GetLastError());
+	read = FileRead(exe_fd, exe_header->offsets.load_addr, exe_header->offsets.load_size);
+	if (read != (int32_t) exe_header->offsets.load_size) {
+		debug_write("Failed to load body. Read %d, error %d.", read, exe_fcb->last_error);
 		return;
 	}
 
@@ -325,7 +353,7 @@ void try_boot_cd() {
 	// FlushCache needs to be called with interrupts disabled
 	FlushCache();
 
-	DoExecute(exe_header, 0, 0);
+	DoExecute(&exe_header->offsets, 0, 0);
 }
 
 void main() {

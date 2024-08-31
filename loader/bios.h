@@ -4,19 +4,26 @@
 #include <stdint.h>
 
 typedef struct exe_header exe_header_t;
+typedef struct exe_offsets exe_offsets_t;
 typedef struct handler_info handler_info_t;
+typedef struct file_control_block file_control_block_t;
+
+struct exe_offsets {
+	uint32_t initial_pc;        // 0x00
+	uint32_t initial_gp;        // 0x04
+	uint8_t * load_addr;        // 0x08
+	uint32_t load_size;         // 0x0C
+	uint32_t _reserved0[2];     // 0x10
+	uint32_t memfill_start;     // 0x18
+	uint32_t memfill_size;      // 0x1C
+	uint32_t initial_sp_base;   // 0x20
+	uint32_t initial_sp_offset; // 0x24
+};
 
 struct exe_header {
-	uint32_t initial_pc; // 0x00
-	uint32_t initial_gp; // 0x04
-	uint8_t * load_addr; // 0x08
-	uint32_t load_size; // 0x0C
-	uint32_t _reserved0[2]; // 0x10
-	uint32_t memfill_start; // 0x18
-	uint32_t memfill_size; // 0x1C
-	uint32_t initial_sp_base; // 0x20
-	uint32_t initial_sp_offset; // 0x24
-	uint8_t _reserved1[20];
+	char signature[8];          // 0x00
+	uint8_t _reserved0[8];      // 0x08
+	exe_offsets_t offsets;      // 0x10
 };
 
 struct handler_info {
@@ -24,6 +31,20 @@ struct handler_info {
 	void (*handler)(int);
 	int (*verifier)(void);
 	uint32_t dummy;
+};
+
+struct file_control_block {
+	uint32_t status;
+	uint32_t media_id;
+	uint32_t transfer_addr;
+	uint32_t transfer_length;
+	uint32_t cur_pos;
+	uint32_t dev_flags;
+	uint32_t last_error;
+	void * dcb;
+	uint32_t size;
+	uint32_t start_lba;
+	uint32_t fcb_id;
 };
 
 #define BIOS_DEFAULT_EVCB 0x10
@@ -45,6 +66,11 @@ static const char * const BIOS_VERSION = (const char *) 0xBFC7FF32;
  * A0-table location.
  */
 static void ** const BIOS_A0_TABLE = (void **) 0x200;
+
+/**
+ * FCB location.
+ */
+static file_control_block_t ** const BIOS_FCBS = (file_control_block_t **) 0x140;
 
 /**
  * Executes a full reset of the console's BIOS, as if a WarmBoot was issued.
@@ -229,13 +255,13 @@ void std_out_puts(const char * text);
 /**
  * Starts a previously loaded executable.
  *
- * @param headerbuf header buffer
+ * @param headerbuf executable offsets in header
  * @param param1 first argument sent to the executable
  * @param param2 second argument sent to the executable
  *
  * Table A, call 0x43.
  */
-void __attribute__((noreturn)) DoExecute(const exe_header_t * header, uint32_t param1, uint32_t param2);
+void __attribute__((noreturn)) DoExecute(const exe_offsets_t * offsets, uint32_t param1, uint32_t param2);
 
 /**
  * Flushes the CPU cache. Should be called after modifying code in software.
