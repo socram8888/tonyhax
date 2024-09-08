@@ -139,6 +139,44 @@ void wait_lid_status(bool open) {
 	} while ((cd_reply[0] & 0x10) != expected);
 }
 
+bool exe_file_okay(const exe_header_t * exe_header) {
+	/*
+	 * Cannot assume this will be present. The first revision of
+	 * Jikkyou Powerful Pro Yakyuu '95 (J) (SLPS-00016) does not have this present in the PSX.EXE.
+	 *
+	 * Just warn about it.
+	 */
+	if (strncmp(exe_header->signature, "PS-X EXE", 8)) {
+		debug_write("Warning: header has invalid signature");
+	}
+
+	// Check that the address is within RAM
+	uint32_t masked_load = (uint32_t) exe_header->offsets.load_addr & 0xFF800000;
+	if (
+		masked_load != 0x00000000 &&
+		masked_load != 0x80000000 &&
+		masked_load != 0xA0000000
+	) {
+		debug_write("Error: header has an invalid load address");
+		return false;
+	}
+
+	// Check that the PC is within RAM *and* aligned to a word
+	uint32_t masked_pc = (uint32_t) exe_header->offsets.initial_pc & 0xFF800003;
+	if (
+		masked_pc != 0x00000000 &&
+		masked_pc != 0x80000000 &&
+		masked_pc != 0xA0000000
+	) {
+		debug_write("Error: header has an invalid start address");
+		return false;
+	}
+
+	// Maybe we could check if the load+size overlaps with the kernel-reserved area? Dunno.
+
+	return true;
+}
+
 void try_boot_cd() {
 	int32_t read;
 
@@ -199,28 +237,28 @@ void try_boot_cd() {
 	// Defaults if no SYSTEM.CNF file exists
 	uint32_t tcb = BIOS_DEFAULT_TCB;
 	uint32_t event = BIOS_DEFAULT_EVCB;
-	uint32_t stacktop = BIOS_DEFAULT_STACKTOP;
+	void * stacktop = BIOS_DEFAULT_STACKTOP;
 	const char * bootfile = "cdrom:PSX.EXE;1";
 
 	char bootfilebuf[32];
 	debug_write("Loading SYSTEM.CNF");
 
 	int32_t cnf_fd = FileOpen("cdrom:SYSTEM.CNF;1", FILE_READ);
-	if (cnf_fd > 0) {
+	if (cnf_fd >= 0) {
 		read = FileRead(cnf_fd, data_buffer, 2048);
-		FileClose(cnf_fd);
-
-		if (read == -1) {
-			debug_write("Read error %d", GetLastError());
+		if (read < 0) {
+			debug_write("Failed to read. Error %d.", read, BIOS_FCBS[cnf_fd]->last_error);
+			FileClose(cnf_fd);
 			return;
 		}
+		FileClose(cnf_fd);
 
 		// Null terminate
 		data_buffer[read] = '\0';
 
 		config_get_hex((char *) data_buffer, "TCB", &tcb);
 		config_get_hex((char *) data_buffer, "EVENT", &event);
-		config_get_hex((char *) data_buffer, "STACK", &stacktop);
+		config_get_hex((char *) data_buffer, "STACK", (uint32_t *) &stacktop);
 		if (config_get_string((char *) data_buffer, "BOOT", bootfilebuf)) {
 			bootfile = bootfilebuf;
 		}
@@ -260,21 +298,16 @@ void try_boot_cd() {
 
 	debug_write("Reading executable header");
 	int32_t exe_fd = FileOpen(bootfile, FILE_READ);
-	if (exe_fd <= 0) {
+	if (exe_fd < 0) {
 		debug_write("Open error %d", GetLastError());
 		return;
 	}
 	file_control_block_t * exe_fcb = *BIOS_FCBS + exe_fd;
 
 	read = FileRead(exe_fd, data_buffer, 2048);
-	if (read != 2048) {
-		debug_write("Missing header. Read %d, error %d.", read, exe_fcb->last_error);
-		return;
-	}
-
-	exe_header_t * exe_header = (exe_header_t *) data_buffer;
-	if (strncmp(exe_header->signature, "PS-X EXE", 8)) {
-		debug_write("Header has invalid signature");
+	if (read < 0) {
+		debug_write("Failed to read. Error %d.", read, exe_fcb->last_error);
+		FileClose(exe_fd);
 		return;
 	}
 
@@ -282,6 +315,7 @@ void try_boot_cd() {
 	 * Patch executable header like stock does. Fixes issue #153 with King's Field (J) (SLPS-00017).
 	 * https://github.com/grumpycoders/pcsx-redux/blob/a072e38d78c12a4ce1dadf951d9cdfd7ea59220b/src/mips/openbios/main/main.c#L380-L381
 	 */
+	exe_header_t * exe_header = (exe_header_t *) data_buffer;
 	exe_header->offsets.initial_sp_base = stacktop;
 	exe_header->offsets.initial_sp_offset = 0;
 
@@ -300,9 +334,14 @@ void try_boot_cd() {
 		exe_header->offsets.load_size = actual_exe_size;
 	}
 
+	if (!exe_file_okay(exe_header)) {
+		FileClose(exe_fd);
+		return;
+	}
+
 	// If the file overlaps tonyhax, we will use the unstable LoadAndExecute function
 	// since that's all we can do.
-	if (exe_header->offsets.load_addr + exe_header->offsets.load_size >= &__RO_START__) {
+	if ((uint8_t *) exe_header->offsets.load_addr + exe_header->offsets.load_size >= &__RO_START__) {
 		debug_write("Executable won't fit. Using buggy BIOS call.");
 
 		if (game_is_pal != gpu_is_pal()) {
@@ -328,8 +367,8 @@ void try_boot_cd() {
 	);
 
 	read = FileRead(exe_fd, exe_header->offsets.load_addr, exe_header->offsets.load_size);
-	if (read != (int32_t) exe_header->offsets.load_size) {
-		debug_write("Failed to load body. Read %d, error %d.", read, exe_fcb->last_error);
+	if (read < 0) {
+		debug_write("Failed to read. Error %d.", read, exe_fcb->last_error);
 		return;
 	}
 
