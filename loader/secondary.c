@@ -306,7 +306,7 @@ void try_boot_cd() {
 
 	read = FileRead(exe_fd, data_buffer, 2048);
 	if (read < 0) {
-		debug_write("Failed to read. Error %d.", read, exe_fcb->last_error);
+		debug_write("Failed to read. Error %d.", exe_fcb->last_error);
 		FileClose(exe_fd);
 		return;
 	}
@@ -368,7 +368,7 @@ void try_boot_cd() {
 
 	read = FileRead(exe_fd, exe_header->offsets.load_addr, exe_header->offsets.load_size);
 	if (read < 0) {
-		debug_write("Failed to read. Error %d.", read, exe_fcb->last_error);
+		debug_write("Failed to read. Error %d.", exe_fcb->last_error);
 		return;
 	}
 
