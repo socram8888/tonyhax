@@ -98,6 +98,11 @@ crash3-eu.mcs: crash3-eu-tpl.mcs entry.bin
 	dd conv=notrunc if=entry.bin of=crash3-eu.mcs bs=1 seek=432
 	bash fix-crash-checksum.sh crash3-eu.mcs eu3
 
+# No Fear Downhill Mountain Bike Racing NTSC-US target
+mountainbikeracing-us.mcs: mountainbikeracing-us-tpl.mcs entry.bin
+	cp mountainbikeracing-us-tpl.mcs mountainbikeracing-us.mcs
+	dd conv=notrunc if=entry.bin of=mountainbikeracing-us.mcs bs=1 seek=1136
+
 # Sports Superbike PAL-EU target
 superbike1-eu.mcs: superbike1-eu-tpl.mcs entry.bin
 	cp superbike1-eu-tpl.mcs superbike1-eu.mcs
